@@ -6,30 +6,30 @@ module FIFO #(
     parameter ALMOST_EMPTY_THRESH = 4   // Almost empty threshold
 ) (
     // Port definitions
-    input               clk,            // Clock signal
-    input               rst_n,          // Synchronous active-low reset
+    input logic                     clk,            // Clock signal
+    input logic                     rst_n,          // Synchronous active-low reset
     
-    input               wr_en,          // Write enable
-    input  [DATA_WIDTH-1:0] data_in,    // Input data bus
-    input               rd_en,          // Read enable
-    output [DATA_WIDTH-1:0] data_out,   // Output data bus
+    input logic                     wr_en,          // Write enable
+    input logic [DATA_WIDTH-1:0]    data_in,    // Input data bus
+    input logic                     rd_en,          // Read enable
     
-    output              full,           // FIFO full flag
-    output              empty,          // FIFO empty flag
-    output              almost_full,    // FIFO almost full flag
-    output              almost_empty,   // FIFO almost empty flag
-    output              overflow,       // Overflow error flag
-    output              underflow       // Underflow error flag
+    output logic [DATA_WIDTH-1:0]   data_out,   // Output data bus
+    output logic                    full,           // FIFO full flag
+    output logic                    empty,          // FIFO empty flag
+    output logic                    almost_full,    // FIFO almost full flag
+    output logic                    almost_empty,   // FIFO almost empty flag
+    output logic                    overflow,       // Overflow error flag
+    output logic                    underflow       // Underflow error flag
 );
 
     // Local parameters
     localparam ADDR_WIDTH = $clog2(FIFO_DEPTH);
     
     // Internal signals
-    reg [ADDR_WIDTH-1:0] wr_ptr;        // Write pointer
-    reg [ADDR_WIDTH-1:0] rd_ptr;        // Read pointer
-    reg [ADDR_WIDTH:0]   count;         // FIFO count
-    reg [DATA_WIDTH-1:0] mem [0:FIFO_DEPTH-1]; // Memory array
+    logic [ADDR_WIDTH-1:0] wr_ptr;        // Write pointer
+    logic [ADDR_WIDTH-1:0] rd_ptr;        // Read pointer
+    logic [ADDR_WIDTH:0]   count;         // FIFO count
+    logic [DATA_WIDTH-1:0] mem [0:FIFO_DEPTH-1]; // Memory array
     
     // Status flags
     assign full = (count == FIFO_DEPTH);
@@ -38,8 +38,8 @@ module FIFO #(
     assign almost_empty = (count <= ALMOST_EMPTY_THRESH);
     
     // Error flags
-    reg overflow_reg;
-    reg underflow_reg;
+    logic overflow_reg;
+    logic underflow_reg;
     assign overflow = overflow_reg;
     assign underflow = underflow_reg;
     
@@ -47,7 +47,7 @@ module FIFO #(
     assign data_out = mem[rd_ptr];
     
     // Pointer and count update logic
-    always @(posedge clk) begin
+    always_ff @(posedge clk) begin
         if (!rst_n) begin
             // Reset logic
             wr_ptr <= 0;

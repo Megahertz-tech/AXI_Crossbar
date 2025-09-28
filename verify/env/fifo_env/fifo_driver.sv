@@ -25,9 +25,9 @@ class fifo_driver extends uvm_driver #(fifo_transaction);
             seq_item_port.get_next_item(tx);
             
             @(posedge vif.clk);
-            vif.wr_en <= tx.wr_en;
-            vif.rd_en <= tx.rd_en;
-            vif.data_in <= tx.data;
+            vif.wr_en = tx.wr_en;
+            vif.rd_en = tx.rd_en;
+            vif.data_in = tx.data;
             
             seq_item_port.item_done();
         end

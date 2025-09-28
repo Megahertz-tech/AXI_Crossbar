@@ -7,14 +7,14 @@ import argparse
 
 XRUN_UVM_HOME = "/home/summer/Cadence/XCELIUMMAIN22.09/tools/methodology/UVM/CDNS-1.2/sv/"
 sim_dir = os.getcwd()
-print(sim_dir)
+#print(sim_dir)
 
-xrun_base_str = 'xrun -ALLOWREDEFINITION -64bit -sv -timescale 1ns/1ps -uvm -clean' 
+xrun_base_str = 'xrun -ALLOWREDEFINITION -64bit -nowarn W,DSEMEL -nowarn NOMTDGUI -nowarn DSEM2009 -sv -timescale 1ns/1ps -uvm -clean' 
 xrun_base_str += ' -uvmhome '+ XRUN_UVM_HOME
 xrun_gui_args = {
-        'gui': ' -gui -access +rwc -input '+sim_dir+'/wave_cfg/vsim_crossbar.do ', 
-        'cw': ' -acess +rwc -input vsim_crossbar.do ',
-        'c': ' -access +rwc -input vsim_noprobe.do '
+        'gui': ' -gui -access +rwc -input '+sim_dir+'/wave_cfg/vsim_fifo.do', 
+        'cw': ' -acess +rwc -input vsim_crossbar.do',
+        'c': ' -access +rwc -input vsim_noprobe.do'
         }
 def parse_args():
     parser = argparse.ArgumentParser(description="run script help",formatter_class=argparse.RawTextHelpFormatter)
@@ -26,17 +26,16 @@ def parse_args():
     parser.add_argument('-cov', dest='cov', help='set coverage enable', choices=('0','1'), default='0')
     parser.add_argument('-comp', dest='comp', help='compile option: 1-compile enable, 0-do not compile', choices=('0','1'), default='1')
     parser.add_argument('-sim', dest='sim', help='simulation option: co: compile only; ro: simulate only; cr: compile and simulate ', default='cr')
-    #parser.add_argument('-run_dir', dest='', help='', default=)
     #parser.add_argument('-', dest='', help='', default=)
     args = parser.parse_args()   
     return args
 
 def gen_compile_param(args):
     os.environ['XRUN_UVM_HOME'] = XRUN_UVM_HOME
-    #compile_param = ' +nspecify + notimingcheck'
-    compile_param = ' -sem2009'
-    compile_param += ' +incdir+'+XRUN_UVM_HOME+'src'
+    compile_param = ' +incdir+'+XRUN_UVM_HOME+'src'
     compile_param += ' -f %s/../flist/tb.f'%sim_dir
+    compile_param += ' -top tb_fifo_top'
+    #compile_param += ' -top tb_fifo_top %s/../tb_fifo_top.sv'%sim_dir
     compile_param += xrun_gui_args[args.gui]
     return(compile_param+' ')
 

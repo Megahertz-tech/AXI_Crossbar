@@ -15,13 +15,14 @@ class fifo_sequence extends uvm_sequence #(fifo_transaction);
     endfunction
     
     task body();
+        #30ns;
         // First fill the FIFO
         for (int i = 0; i < 16; i++) begin
             fifo_transaction tx;
             `uvm_create(tx)
+            assert(tx.randomize());
             tx.wr_en = 1;
             tx.rd_en = 0;
-            assert(tx.randomize());
             transactions.push_back(tx);
             `uvm_send(tx)
         end

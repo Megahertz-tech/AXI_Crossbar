@@ -4,11 +4,11 @@ import sys
 import argparse 
 
 WORK_HOME = os.getcwd() 
-print(WORK_HOME)
+#print(WORK_HOME)
 sys.path.append(WORK_HOME)
 from run import *
 
-
+# now only for sim=rc
 def run(args):
     compile_param = gen_compile_param(args)
     run_param = gen_run_param(args)
@@ -31,9 +31,9 @@ def run(args):
 
 
 if __name__ == "__main__":   
-        os.system('source ../../boot_env.csh')
+        #os.system('source ../../boot_env.csh')
         args = parse_args()   
-        print(args)
+        #print(args)
         run(args)
 
 
