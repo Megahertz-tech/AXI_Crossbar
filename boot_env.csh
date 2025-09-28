@@ -1,0 +1,2 @@
+export CURRENT_DIR=$PWD
+export CB_PRJ_ROOT=$CURRENT_DIR
