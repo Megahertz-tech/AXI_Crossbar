@@ -2,7 +2,7 @@
 `include "uvm_macros.svh"
 
 // Top Module
-module top;
+module tb_top;
     import uvm_pkg::*;
     
     bit clk;
