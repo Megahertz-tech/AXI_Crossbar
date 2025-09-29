@@ -34,8 +34,8 @@ def gen_compile_param(args):
     os.environ['XRUN_UVM_HOME'] = XRUN_UVM_HOME
     compile_param = ' +incdir+'+XRUN_UVM_HOME+'src'
     compile_param += ' -f %s/../flist/tb.f'%sim_dir
-    compile_param += ' -top tb_fifo_top'
-    #compile_param += ' -top tb_fifo_top %s/../tb_fifo_top.sv'%sim_dir
+    #compile_param += ' -top tb_fifo_top'
+    compile_param += ' -top tb_fifo_top %s/../tb_fifo_top.sv'%sim_dir
     compile_param += xrun_gui_args[args.gui]
     return(compile_param+' ')
 
