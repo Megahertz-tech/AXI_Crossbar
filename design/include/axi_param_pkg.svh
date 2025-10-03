@@ -1,6 +1,12 @@
-// AXI Package
-// Contains all necessary type definitions, constants, and generally useful functions.
-package axi_pkg;
+/* ***********************************************************
+    document:       axi_param_pkg.svh
+    author:         Celine (He Zhao) 
+    Date:           09/29/2025
+    Description:    encapsulate common parameters  
+**************************************************************/
+`ifndef __AXI_PARAM_PKG_SVH___
+`define __AXI_PARAM_PKG_SVH___
+package axi_param_pkg;
   /// AXI Transaction Burst Width.
   parameter int unsigned BurstWidth  = 32'd2;
   /// AXI Transaction Response Width.
@@ -24,6 +30,9 @@ package axi_pkg;
   /// AXI5 Non-Secure Address Identifier.
   parameter int unsigned NsaidWidth  = 32'd4;
 
-  
-
 endpackage
+
+// import package into $unit
+import axi_param_pkg::* 
+
+`endif

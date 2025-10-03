@@ -9,7 +9,7 @@ XRUN_UVM_HOME = "/home/summer/Cadence/XCELIUMMAIN22.09/tools/methodology/UVM/CDN
 sim_dir = os.getcwd()
 #print(sim_dir)
 
-xrun_base_str = 'xrun -ALLOWREDEFINITION -64bit -nowarn W,DSEMEL -nowarn NOMTDGUI -nowarn DSEM2009 -sv -timescale 1ns/1ps -uvm -clean' 
+xrun_base_str = 'xrun -ALLOWREDEFINITION -64bit -nowarn DSEMEL -nowarn NOMTDGUI -nowarn DSEM2009 -sv -timescale 1ns/1ps -uvm -date -clean' 
 xrun_base_str += ' -uvmhome '+ XRUN_UVM_HOME
 xrun_gui_args = {
         'gui': ' -gui -access +rwc -input '+sim_dir+'/wave_cfg/vsim_fifo.do', 
@@ -35,7 +35,7 @@ def gen_compile_param(args):
     compile_param = ' +incdir+'+XRUN_UVM_HOME+'src'
     compile_param += ' -f %s/../flist/tb.f'%sim_dir
     #compile_param += ' -top tb_fifo_top'
-    compile_param += ' -top tb_fifo_top %s/../tb_fifo_top.sv'%sim_dir
+    compile_param += ' -top tb_axi_xbar_top %s/../tb_axi_xbar_top.sv'%sim_dir
     compile_param += xrun_gui_args[args.gui]
     return(compile_param+' ')
 

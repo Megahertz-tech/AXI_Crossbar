@@ -14,3 +14,4 @@
         
         $CB_PRJ_ROOT/verify/test/fifo_test/basic_test.sv \
         $CB_PRJ_ROOT/verify/tb_fifo_top.sv \
+        $CB_PRJ_ROOT/verify/tb_axi_xbar_top.sv \
