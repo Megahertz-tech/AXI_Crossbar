@@ -48,17 +48,20 @@ module tb_axi_xbar_top;
 
     // Reset generation
     initial begin
+      #3ns;
       rst_n = 1'b0;
-      repeat ($urandom_range(5,20)) @(posedge clk);
+      repeat ($urandom_range(5,20)) @(posedge clk); //deassertion can only be synchronous with a rising edge of ACLK.
       rst_n = 1'b1;
     end
     //}}}
+  localparam int MstPortsIdxWidth = axi_math_pkg::idx_width(TbNumMasters);
+  localparam int MstIdWidth = TbSlvIdWidth + MstPortsIdxWidth;
     //{{{ Interfaces 
     // interfaces for DUT
     axi_inf # (
         .AXI_ADDR_WIDTH ( TbAxiAddrWidth      ),
         .AXI_DATA_WIDTH ( TbAxiDataWidth      ),
-        .AXI_ID_WIDTH   ( TbSlvIdWidth        ),
+        .AXI_ID_WIDTH   ( MstIdWidth          ),
         .AXI_USER_WIDTH ( TbAxiUserWidth      )
     ) master_infs [TbNumMasters-1:0] ()
     axi_inf # (
@@ -71,12 +74,12 @@ module tb_axi_xbar_top;
     v_axi_inf # (
         .AXI_ADDR_WIDTH ( TbAxiAddrWidth      ),
         .AXI_DATA_WIDTH ( TbAxiDataWidth      ),
-        .AXI_ID_WIDTH   ( TbSlvIdWidth        ),
+        .AXI_ID_WIDTH   ( MstIdWidth          ),
         .AXI_USER_WIDTH ( TbAxiUserWidth      )
     ) master_vifs [TbNumMasters-1:0] (
         .clk (clk),
         .rst_n (rst_n)
-    )
+    ) master_vifs [TbNumMasters-1:0] ()
     v_axi_inf # (
         .AXI_ADDR_WIDTH ( TbAxiAddrWidth      ),
         .AXI_DATA_WIDTH ( TbAxiDataWidth      ),
@@ -85,109 +88,104 @@ module tb_axi_xbar_top;
     ) slave_vifs [TbNumSlaves-1:0] (
         .clk (clk),
         .rst_n (rst_n)
-    )
-    //{{{ assign 
-    for(genvar i=0; i<TbNumMasters; i++)begin : assign_masters
-        master_infs[i].aw_id    =  master_vifs[i].aw_id    ;       
-        master_infs[i].aw_addr  =  master_vifs[i].aw_addr  ;       
-        master_infs[i].aw_lock  =  master_vifs[i].aw_lock  ;       
-        master_infs[i].aw_valid =  master_vifs[i].aw_valid ;       
-        master_infs[i].aw_ready =  master_vifs[i].aw_ready ;       
-        master_infs[i].aw_user  =  master_vifs[i].aw_user  ;       
-        master_infs[i].aw_len    =  master_vifs[i].aw_len    ;       
-        master_infs[i].aw_size   =  master_vifs[i].aw_size   ;       
-        master_infs[i].aw_burst  =  master_vifs[i].aw_burst  ;       
-        master_infs[i].aw_cache  =  master_vifs[i].aw_cache  ;       
-        master_infs[i].aw_prot   =  master_vifs[i].aw_prot   ;       
-        master_infs[i].aw_qos    =  master_vifs[i].aw_qos    ;       
-        master_infs[i].aw_region =  master_vifs[i].aw_region ;       
-        master_infs[i].aw_atop   =  master_vifs[i].aw_atop   ;       
-
-        master_infs[i].w_data  =  master_vifs[i].w_data  ;       
-        master_infs[i].w_strb  =  master_vifs[i].w_strb  ;       
-        master_infs[i].w_last  =  master_vifs[i].w_last  ;       
-        master_infs[i].w_user  =  master_vifs[i].w_user  ;       
-        master_infs[i].w_valid =  master_vifs[i].w_valid ;       
-        master_infs[i].w_ready =  master_vifs[i].w_ready ;  
-
-        master_infs[i].b_id    =  master_vifs[i].b_id    ;       
-        master_infs[i].b_user  =  master_vifs[i].b_user  ;       
-        master_infs[i].b_valid =  master_vifs[i].b_valid ;       
-        master_infs[i].b_ready =  master_vifs[i].b_ready ;       
-        master_infs[i].b_resp  =  master_vifs[i].b_resp  ; 
-
-        master_infs[i].ar_id    =  master_vifs[i].ar_id    ;       
-        master_infs[i].ar_addr  =  master_vifs[i].ar_addr  ;       
-        master_infs[i].ar_lock  =  master_vifs[i].ar_lock  ;       
-        master_infs[i].ar_user  =  master_vifs[i].ar_user  ;       
-        master_infs[i].ar_valid =  master_vifs[i].ar_valid ;       
-        master_infs[i].ar_ready =  master_vifs[i].ar_ready ;       
-        master_infs[i].ar_len    =  master_vifs[i].ar_len    ;       
-        master_infs[i].ar_size   =  master_vifs[i].ar_size   ;       
-        master_infs[i].ar_burst  =  master_vifs[i].ar_burst  ;       
-        master_infs[i].ar_cache  =  master_vifs[i].ar_cache  ;       
-        master_infs[i].ar_prot   =  master_vifs[i].ar_prot   ;       
-        master_infs[i].ar_qos    =  master_vifs[i].ar_qos    ;       
-        master_infs[i].ar_region =  master_vifs[i].ar_region ;       
-
-        master_infs[i].r_id    =  master_vifs[i].r_id    ;       
-        master_infs[i].r_data  =  master_vifs[i].r_data  ;       
-        master_infs[i].r_last  =  master_vifs[i].r_last  ;       
-        master_infs[i].r_user  =  master_vifs[i].r_user  ;       
-        master_infs[i].r_valid =  master_vifs[i].r_valid ;       
-        master_infs[i].r_ready =  master_vifs[i].r_ready ;       
-        master_infs[i].r_resp  =  master_vifs[i].r_resp  ;       
-    end
-    for(genvar i=0; i<TbNumSlaves; i++)begin : assign_slaves
-        slave_infs[i].aw_id     =  master_vifs[i].aw_id    ;       
-        slave_infs[i].aw_addr   =  master_vifs[i].aw_addr  ;       
-        slave_infs[i].aw_lock   =  master_vifs[i].aw_lock  ;       
-        slave_infs[i].aw_valid  =  master_vifs[i].aw_valid ;       
-        slave_infs[i].aw_ready  =  master_vifs[i].aw_ready ;       
-        slave_infs[i].aw_user   =  master_vifs[i].aw_user  ;       
-        slave_infs[i].aw_len    =  master_vifs[i].aw_len    ;       
-        slave_infs[i].aw_size   =  master_vifs[i].aw_size   ;       
-        slave_infs[i].aw_burst  =  master_vifs[i].aw_burst  ;       
-        slave_infs[i].aw_cache  =  master_vifs[i].aw_cache  ;       
-        slave_infs[i].aw_prot   =  master_vifs[i].aw_prot   ;       
-        slave_infs[i].aw_qos    =  master_vifs[i].aw_qos    ;       
-        slave_infs[i].aw_region =  master_vifs[i].aw_region ;       
-        slave_infs[i].aw_atop   =  master_vifs[i].aw_atop   ;       
-        slave_infs[i].w_data    =  master_vifs[i].w_data  ;       
-        slave_infs[i].w_strb    =  master_vifs[i].w_strb  ;       
-        slave_infs[i].w_last    =  master_vifs[i].w_last  ;       
-        slave_infs[i].w_user    =  master_vifs[i].w_user  ;       
-        slave_infs[i].w_valid   =  master_vifs[i].w_valid ;       
-        slave_infs[i].w_ready   =  master_vifs[i].w_ready ;  
-        slave_infs[i].b_id      =  master_vifs[i].b_id    ;       
-        slave_infs[i].b_user    =  master_vifs[i].b_user  ;       
-        slave_infs[i].b_valid   =  master_vifs[i].b_valid ;       
-        slave_infs[i].b_ready   =  master_vifs[i].b_ready ;       
-        slave_infs[i].b_resp    =  master_vifs[i].b_resp  ; 
-        slave_infs[i].ar_id     =  master_vifs[i].ar_id    ;       
-        slave_infs[i].ar_addr   =  master_vifs[i].ar_addr  ;       
-        slave_infs[i].ar_lock   =  master_vifs[i].ar_lock  ;       
-        slave_infs[i].ar_user   =  master_vifs[i].ar_user  ;       
-        slave_infs[i].ar_valid  =  master_vifs[i].ar_valid ;       
-        slave_infs[i].ar_ready  =  master_vifs[i].ar_ready ;       
-        slave_infs[i].ar_len    =  master_vifs[i].ar_len    ;       
-        slave_infs[i].ar_size   =  master_vifs[i].ar_size   ;       
-        slave_infs[i].ar_burst  =  master_vifs[i].ar_burst  ;       
-        slave_infs[i].ar_cache  =  master_vifs[i].ar_cache  ;       
-        slave_infs[i].ar_prot   =  master_vifs[i].ar_prot   ;       
-        slave_infs[i].ar_qos    =  master_vifs[i].ar_qos    ;       
-        slave_infs[i].ar_region =  master_vifs[i].ar_region ;       
-        slave_infs[i].r_id      =  master_vifs[i].r_id    ;       
-        slave_infs[i].r_data    =  master_vifs[i].r_data  ;       
-        slave_infs[i].r_last    =  master_vifs[i].r_last  ;       
-        slave_infs[i].r_user    =  master_vifs[i].r_user  ;       
-        slave_infs[i].r_valid   =  master_vifs[i].r_valid ;       
-        slave_infs[i].r_ready   =  master_vifs[i].r_ready ;       
-        slave_infs[i].r_resp    =  master_vifs[i].r_resp  ;       
-    end
-
-    //}}}        
+    ) slave_vifs [TbNumSlaves-1:0] ()
     //}}}
+    //{{{ assign 
+    for(genvar i=0; i<TbNumMasters; i++)begin : assign_masters 
+        master_infs[i].aw_id     <= master_vifs[i].aw_id      ;        
+        master_infs[i].aw_addr   <= master_vifs[i].aw_addr    ;        
+        master_infs[i].aw_lock   <= master_vifs[i].aw_lock    ;        
+        master_infs[i].aw_valid  <= master_vifs[i].aw_valid   ;        
+        master_infs[i].aw_ready  <= master_vifs[i].aw_ready   ;        
+        master_infs[i].aw_user   <= master_vifs[i].aw_user    ;        
+        master_infs[i].aw_len    <= master_vifs[i].aw_len     ;        
+        master_infs[i].aw_size   <= master_vifs[i].aw_size    ;        
+        master_infs[i].aw_burst  <= master_vifs[i].aw_burst   ;        
+        master_infs[i].aw_cache  <= master_vifs[i].aw_cache   ;        
+        master_infs[i].aw_prot   <= master_vifs[i].aw_prot    ;        
+        master_infs[i].aw_qos    <= master_vifs[i].aw_qos     ;        
+        master_infs[i].aw_region <= master_vifs[i].aw_region  ;        
+        master_infs[i].aw_atop   <= master_vifs[i].aw_atop    ;        
+        master_infs[i].w_data    <= master_vifs[i].w_data   ;         
+        master_infs[i].w_strb    <= master_vifs[i].w_strb   ;         
+        master_infs[i].w_last    <= master_vifs[i].w_last   ;         
+        master_infs[i].w_user    <= master_vifs[i].w_user   ;         
+        master_infs[i].w_valid   <= master_vifs[i].w_valid  ;         
+        master_infs[i].w_ready   <= master_vifs[i].w_ready  ;         
+        master_infs[i].b_id      <= master_vifs[i].b_id     ;         
+        master_infs[i].b_user    <= master_vifs[i].b_user   ;         
+        master_infs[i].b_valid   <= master_vifs[i].b_valid  ;         
+        master_infs[i].b_ready   <= master_vifs[i].b_ready  ;         
+        master_infs[i].b_resp    <= master_vifs[i].b_resp  ;        
+        master_infs[i].ar_id     <= master_vifs[i].ar_id     ;        
+        master_infs[i].ar_addr   <= master_vifs[i].ar_addr   ;        
+        master_infs[i].ar_lock   <= master_vifs[i].ar_lock   ;        
+        master_infs[i].ar_user   <= master_vifs[i].ar_user   ;        
+        master_infs[i].ar_valid  <= master_vifs[i].ar_valid  ;        
+        master_infs[i].ar_ready  <= master_vifs[i].ar_ready  ;        
+        master_infs[i].ar_len    <= master_vifs[i].ar_len     ;        
+        master_infs[i].ar_size   <= master_vifs[i].ar_size    ;        
+        master_infs[i].ar_burst  <= master_vifs[i].ar_burst   ;        
+        master_infs[i].ar_cache  <= master_vifs[i].ar_cache   ;        
+        master_infs[i].ar_prot   <= master_vifs[i].ar_prot    ;        
+        master_infs[i].ar_qos    <= master_vifs[i].ar_qos     ;        
+        master_infs[i].ar_region <= master_vifs[i].ar_region  ;        
+        master_infs[i].r_id      <= master_vifs[i].r_id     ;        
+        master_infs[i].r_data    <= master_vifs[i].r_data   ;        
+        master_infs[i].r_last    <= master_vifs[i].r_last   ;        
+        master_infs[i].r_user    <= master_vifs[i].r_user   ;        
+        master_infs[i].r_valid   <= master_vifs[i].r_valid  ;        
+        master_infs[i].r_ready   <= master_vifs[i].r_ready  ;        
+        master_infs[i].r_resp    <= master_vifs[i].r_resp  ;        
+    end
+    for(genvar i=0; i<TbNumSlaves; i++)begin : assign_slaves 
+        slave_infs[i].aw_id     <= slave_vifs[i].aw_id      ;        
+        slave_infs[i].aw_addr   <= slave_vifs[i].aw_addr    ;        
+        slave_infs[i].aw_lock   <= slave_vifs[i].aw_lock    ;        
+        slave_infs[i].aw_valid  <= slave_vifs[i].aw_valid   ;        
+        slave_infs[i].aw_ready  <= slave_vifs[i].aw_ready   ;        
+        slave_infs[i].aw_user   <= slave_vifs[i].aw_user    ;        
+        slave_infs[i].aw_len    <= slave_vifs[i].aw_len     ;        
+        slave_infs[i].aw_size   <= slave_vifs[i].aw_size    ;        
+        slave_infs[i].aw_burst  <= slave_vifs[i].aw_burst   ;        
+        slave_infs[i].aw_cache  <= slave_vifs[i].aw_cache   ;        
+        slave_infs[i].aw_prot   <= slave_vifs[i].aw_prot    ;        
+        slave_infs[i].aw_qos    <= slave_vifs[i].aw_qos     ;        
+        slave_infs[i].aw_region <= slave_vifs[i].aw_region  ;        
+        slave_infs[i].aw_atop   <= slave_vifs[i].aw_atop    ;        
+        slave_infs[i].w_data    <= slave_vifs[i].w_data   ;         
+        slave_infs[i].w_strb    <= slave_vifs[i].w_strb   ;         
+        slave_infs[i].w_last    <= slave_vifs[i].w_last   ;         
+        slave_infs[i].w_user    <= slave_vifs[i].w_user   ;         
+        slave_infs[i].w_valid   <= slave_vifs[i].w_valid  ;         
+        slave_infs[i].w_ready   <= slave_vifs[i].w_ready  ;         
+        slave_infs[i].b_id      <= slave_vifs[i].b_id     ;         
+        slave_infs[i].b_user    <= slave_vifs[i].b_user   ;         
+        slave_infs[i].b_valid   <= slave_vifs[i].b_valid  ;         
+        slave_infs[i].b_ready   <= slave_vifs[i].b_ready  ;         
+        slave_infs[i].b_resp    <= slave_vifs[i].b_resp  ;        
+        slave_infs[i].ar_id     <= slave_vifs[i].ar_id     ;        
+        slave_infs[i].ar_addr   <= slave_vifs[i].ar_addr   ;        
+        slave_infs[i].ar_lock   <= slave_vifs[i].ar_lock   ;        
+        slave_infs[i].ar_user   <= slave_vifs[i].ar_user   ;        
+        slave_infs[i].ar_valid  <= slave_vifs[i].ar_valid  ;        
+        slave_infs[i].ar_ready  <= slave_vifs[i].ar_ready  ;        
+        slave_infs[i].ar_len    <= slave_vifs[i].ar_len     ;        
+        slave_infs[i].ar_size   <= slave_vifs[i].ar_size    ;        
+        slave_infs[i].ar_burst  <= slave_vifs[i].ar_burst   ;        
+        slave_infs[i].ar_cache  <= slave_vifs[i].ar_cache   ;        
+        slave_infs[i].ar_prot   <= slave_vifs[i].ar_prot    ;        
+        slave_infs[i].ar_qos    <= slave_vifs[i].ar_qos     ;        
+        slave_infs[i].ar_region <= slave_vifs[i].ar_region  ;        
+        slave_infs[i].r_id      <= slave_vifs[i].r_id     ;        
+        slave_infs[i].r_data    <= slave_vifs[i].r_data   ;        
+        slave_infs[i].r_last    <= slave_vifs[i].r_last   ;        
+        slave_infs[i].r_user    <= slave_vifs[i].r_user   ;        
+        slave_infs[i].r_valid   <= slave_vifs[i].r_valid  ;        
+        slave_infs[i].r_ready   <= slave_vifs[i].r_ready  ;        
+        slave_infs[i].r_resp    <= slave_vifs[i].r_resp  ;        
+    end
+    //}}}        
     //{{{ Cfg to DUT
     xbar_cfg_t XbarCfg = '{
     NoSlvPorts:         TbNumSlaves,
@@ -211,7 +209,6 @@ module tb_axi_xbar_top;
 
   // Type definitions
   //{{{
-  localparam int MstPortsIdxWidth = axi_math_pkg::idx_width(TbNumMasters);
 
   // Slave port types 
   `AXI_TYPEDEF_AW_CHAN_T(aw_chan_t, logic [TbAxiAddrWidth-1:0], logic [TbSlvIdWidth-1:0], logic)
@@ -222,8 +219,7 @@ module tb_axi_xbar_top;
   `AXI_TYPEDEF_REQ_T(slv_req_t, aw_chan_t, w_chan_t, ar_chan_t)
   `AXI_TYPEDEF_RESP_T(slv_resp_t, b_chan_t, r_chan_t)
 
-  // Master port types (different ID width)
-  localparam int MstIdWidth = TbSlvIdWidth + MstPortsIdxWidth;
+  // Master port types (different ID width) MstIdWidth
   `AXI_TYPEDEF_AW_CHAN_T(mst_aw_chan_t, logic [TbAxiAddrWidth-1:0], logic [MstIdWidth-1:0], logic)
   `AXI_TYPEDEF_B_CHAN_T(mst_b_chan_t, logic [MstIdWidth-1:0], logic)
   `AXI_TYPEDEF_AR_CHAN_T(mst_ar_chan_t, logic [TbAxiAddrWidth-1:0], logic [MstIdWidth-1:0], logic)
