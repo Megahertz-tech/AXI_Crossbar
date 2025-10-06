@@ -6,6 +6,7 @@
 **************************************************************/
 `ifndef __AXI_INF_SV__
 `define __AXI_INF_SV__
+
 `include "axi_typedef_pkg.svh"
 
 interface axi_inf #(
@@ -23,7 +24,7 @@ interface axi_inf #(
   typedef logic [AXI_STRB_WIDTH-1:0] strb_t;
   typedef logic [AXI_USER_WIDTH-1:0] user_t;
 
-    //{{{ AW channel 
+//{{{ AW channel 
     id_t              aw_id         ;
     addr_t            aw_addr       ;
     logic             aw_lock       ;
@@ -39,24 +40,24 @@ interface axi_inf #(
     qos_t             aw_qos        ;
     region_t          aw_region     ;
     atop_t            aw_atop       ;
-    //}}}
-    //{{{ W channel 
+//}}}
+//{{{ W channel 
     data_t            w_data ;
     strb_t            w_strb ;
     logic             w_last ;
     user_t            w_user ;
     logic             w_valid;
     logic             w_ready;
-    //}}}
-   //{{{ B channel 
+//}}}
+//{{{ B channel 
     id_t              b_id      ;
     user_t            b_user    ;
     logic             b_valid   ;
     logic             b_ready   ;
     //typedef from pkg
     resp_t            b_resp    ;
-    //}}}
-    //{{{ AR channel 
+//}}}
+//{{{ AR channel 
     id_t              ar_id     ;
     addr_t            ar_addr   ;
     logic             ar_lock   ;
@@ -71,8 +72,8 @@ interface axi_inf #(
     prot_t          ar_prot     ;
     qos_t           ar_qos      ;
     region_t        ar_region   ;
-    //}}}
-    //{{{ R channel 
+//}}}
+//{{{ R channel 
     id_t              r_id      ;
     data_t            r_data    ;
     logic             r_last    ;
@@ -81,7 +82,7 @@ interface axi_inf #(
     logic             r_ready   ;
     //typedef from pkg
     resp_t            r_resp    ;
-    //}}}
+//}}}
 
 
   modport Master (
