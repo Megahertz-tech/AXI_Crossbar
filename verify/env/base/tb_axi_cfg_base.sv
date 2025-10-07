@@ -8,6 +8,7 @@
 `define __TB_AXI_CFG_BASE_SV__
 `include "tb_axi_macro_define_pkg.svh"
 class tb_axi_cfg_base extends uvm_object;
+
     `uvm_object_utils(tb_axi_cfg_base)
     
     ob_construct(tb_axi_cfg_base)
