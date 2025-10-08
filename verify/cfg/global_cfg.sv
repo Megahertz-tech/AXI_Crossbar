@@ -11,6 +11,7 @@
 `define __GLOBAL_CFG_SV__
 
 `include "axi_typedef_pkg.svh"
+`include "axi_math_pkg.svh"
 
 class global_cfg;
     protected static global_cfg me = get();
@@ -30,6 +31,7 @@ class global_cfg;
     const time TbApplTime = 0.2 * TbClkPeriod;
     const time TbTestTime = 0.8 * TbClkPeriod;                            
 
+    int MstIdWidth = cf_math_pkg::idx_width(TbNumMasters);
 
 endclass 
 `endif

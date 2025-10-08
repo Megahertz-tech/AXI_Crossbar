@@ -7,16 +7,16 @@
 `ifndef __TB_AXI_MACRO_PARAM_SVH__
 `define __TB_AXI_MACRO_PARAM_SVH__
 
-`ifndef TVIP_AXI_MAX_ID_WIDTH
-  `define TVIP_AXI_MAX_ID_WIDTH 32
+`ifndef AXI_MAX_ID_WIDTH
+  `define AXI_MAX_ID_WIDTH 32
 `endif
 
-`ifndef TVIP_AXI_MAX_ADDRESS_WIDTH
-  `define TVIP_AXI_MAX_ADDRESS_WIDTH  64
+`ifndef AXI_MAX_ADDRESS_WIDTH
+  `define AXI_MAX_ADDRESS_WIDTH  64
 `endif
 
-`ifndef TVIP_AXI_MAX_DATA_WIDTH
-  `define TVIP_AXI_MAX_DATA_WIDTH 1024
+`ifndef AXI_MAX_DATA_WIDTH
+  `define AXI_MAX_DATA_WIDTH 1024
 `endif
 
 `endif 

@@ -11,7 +11,7 @@ class tb_axi_cfg_base extends uvm_object;
 
     `uvm_object_utils(tb_axi_cfg_base)
     
-    ob_construct(tb_axi_cfg_base)
+    `ob_construct(tb_axi_cfg_base)
 
     
 endclass 
