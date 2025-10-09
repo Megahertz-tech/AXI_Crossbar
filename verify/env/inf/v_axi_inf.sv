@@ -28,8 +28,8 @@ interface v_axi_inf #(
     typedef logic [AXI_USER_WIDTH-1:0] user_t;
 
     //{{{ AW channel 
-    id_t              aw_id;
-    addr_t            aw_addr;
+    id_t              aw_id     ;
+    addr_t            aw_addr   ;
     logic             aw_lock;
     logic             aw_valid;
     logic             aw_ready;
@@ -87,6 +87,158 @@ interface v_axi_inf #(
     resp_t            r_resp;
     //}}}
     
+    //{{{ Master_cb
+    clocking Master_cb @(posedge clk, negedge rst_n);
+         output  aw_id      ;
+         output  aw_addr    ;
+         output  aw_lock    ;
+         output  aw_valid   ;
+         input   aw_ready   ;
+         output  aw_user    ;
+         output  aw_len     ;
+         output  aw_size    ;
+         output  aw_burst   ;
+         output  aw_cache   ;
+         output  aw_prot    ;
+         output  aw_qos     ;
+         output  aw_region  ;
+         output  aw_atop    ;
+         output  w_data   ;  
+         output  w_strb   ;  
+         output  w_last   ;  
+         output  w_user   ;  
+         output  w_valid  ;  
+         input   w_ready  ;  
+         input   b_id     ;  
+         input   b_user   ;  
+         input   b_valid  ;  
+         output  b_ready  ;  
+         input   b_resp  ;   
+         output  ar_id     ; 
+         output  ar_addr   ; 
+         output  ar_lock   ; 
+         output  ar_user   ; 
+         output  ar_valid  ; 
+         input   ar_ready  ; 
+         output  ar_len     ;
+         output  ar_size    ;
+         output  ar_burst   ;
+         output  ar_cache   ;
+         output  ar_prot    ;
+         output  ar_qos     ;
+         output  ar_region  ;
+         input   r_id     ;  
+         input   r_data   ;  
+         input   r_last   ;  
+         input   r_user   ;  
+         input   r_valid  ;  
+         output  r_ready  ;  
+         input   r_resp  ;   
+    endclocking
+    //}}}
+    //{{{ Slave cb
+    clocking Slave_cb @(posedge clk, negedge rst_n);
+         input  aw_id      ;
+         input  aw_addr    ;
+         input  aw_lock    ;
+         input  aw_valid   ;
+         output  aw_ready   ;
+         input  aw_user    ;
+         input  aw_len     ;
+         input  aw_size    ;
+         input  aw_burst   ;
+         input  aw_cache   ;
+         input  aw_prot    ;
+         input  aw_qos     ;
+         input  aw_region  ;
+         input  aw_atop    ;
+         input  w_data   ;  
+         input  w_strb   ;  
+         input  w_last   ;  
+         input  w_user   ;  
+         input  w_valid  ;  
+         output  w_ready  ;  
+         output  b_id     ;  
+         output  b_user   ;  
+         output  b_valid  ;  
+         input  b_ready  ;  
+         output  b_resp  ;   
+         input  ar_id     ; 
+         input  ar_addr   ; 
+         input  ar_lock   ; 
+         input  ar_user   ; 
+         input  ar_valid  ; 
+         output  ar_ready  ; 
+         input  ar_len     ;
+         input  ar_size    ;
+         input  ar_burst   ;
+         input  ar_cache   ;
+         input  ar_prot    ;
+         input  ar_qos     ;
+         input  ar_region  ;
+         output  r_id     ;  
+         output  r_data   ;  
+         output  r_last   ;  
+         output  r_user   ;  
+         output  r_valid  ;  
+         input  r_ready  ;  
+         output  r_resp  ;   
+    endclocking
+
+    //}}}
+    //{{{ Monitor cb
+    clocking Monitor_cb @(posedge clk, negedge rst_n);
+         input  aw_id      ;
+         input  aw_addr    ;
+         input  aw_lock    ;
+         input  aw_valid   ;
+         input  aw_ready   ;
+         input  aw_user    ;
+         input  aw_len     ;
+         input  aw_size    ;
+         input  aw_burst   ;
+         input  aw_cache   ;
+         input  aw_prot    ;
+         input  aw_qos     ;
+         input  aw_region  ;
+         input  aw_atop    ;
+         input  w_data   ;  
+         input  w_strb   ;  
+         input  w_last   ;  
+         input  w_user   ;  
+         input  w_valid  ;  
+         input  w_ready  ;  
+         input  b_id     ;  
+         input  b_user   ;  
+         input  b_valid  ;  
+         input  b_ready  ;  
+         input  b_resp  ;   
+         input  ar_id     ; 
+         input  ar_addr   ; 
+         input  ar_lock   ; 
+         input  ar_user   ; 
+         input  ar_valid  ; 
+         input  ar_ready  ; 
+         input  ar_len     ;
+         input  ar_size    ;
+         input  ar_burst   ;
+         input  ar_cache   ;
+         input  ar_prot    ;
+         input  ar_qos     ;
+         input  ar_region  ;
+         input  r_id     ;  
+         input  r_data   ;  
+         input  r_last   ;  
+         input  r_user   ;  
+         input  r_valid  ;  
+         input  r_ready  ;  
+         input  r_resp  ;   
+    endclocking
+    //}}}
+    
+    
+
+
     modport Master (
       output aw_id, aw_addr, aw_len, aw_size, aw_burst, aw_lock, aw_cache, aw_prot, aw_qos, aw_region, aw_atop, aw_user, aw_valid, input aw_ready,
       output w_data, w_strb, w_last, w_user, w_valid, input w_ready,

@@ -19,6 +19,10 @@ package tb_axi_macro_define_pkg;
         super.new(name, parent); \
     endfunction
 
+    `define wait_sig_high (sig, cb) \
+    if (cb.sig !== 1'b1) @ (cb iff (cb.sig === 1'b1));
+
+
 endpackage
 
 import tb_axi_macro_define_pkg::*

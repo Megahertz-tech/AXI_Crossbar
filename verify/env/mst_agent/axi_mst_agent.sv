@@ -12,6 +12,8 @@ class axi_mst_agent extends uvm_agent;
     axi_mst_driver      drv;
     //axi_mst_monitor     mon;
     virtual v_axi_inf   vif;
+    axi_mst_regular_cfg cfg;
+    shortint            mst_id;
     
    `uvm_component_utils(axi_mst_agent)
     function new (string name = "axi_mst_agent", uvm_component parent);
@@ -28,6 +30,11 @@ class axi_mst_agent extends uvm_agent;
         super.connect_phase(phase);
         drv.seq_item_port.connect(sqr.seq_item_export);
         drv.vif = this.vif;
+        drv.cfg = this.cfg;
+        drv.set_mst_id(this.mst_id);
+    endfunction
+    function void set_mst_id(shortint id);
+        this.mst_id = id;
     endfunction
 
 endclass 

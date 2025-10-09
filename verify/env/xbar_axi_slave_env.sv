@@ -17,9 +17,8 @@ class xbar_axi_slave_env #(
       parameter int unsigned AxiDataWidth       = 64       // Data width
 ) extends uvm_env;
     
-    virtual v_axi_inf slv_vifs[NoSlvPorts];
-
-    slv_agent slv_agt[NoSlvPorts];
+    virtual v_axi_inf   slv_vif[NoSlvPorts];
+    axi_slv_agent       slv_agt[NoSlvPorts];
 
     `uvm_component_utils(xbar_axi_slave_env)
     function new (string name = "xbar_axi_slave_env", uvm_component parent);
@@ -29,14 +28,14 @@ class xbar_axi_slave_env #(
     function void build_phase (uvm_phase phase);
         super.build_phase(phase);
         for(i=0;i<NoSlvPorts;i++) begin
-            slv_agt[i] = slv_agent::type_id::creat($psprintf("slv_agt_%s",i), this);
+            slv_agt[i] = axi_slv_agent::type_id::creat($psprintf("slv_agt_%s",i), this);
         end
     endfunction 
 
     function void connect_phase (uvm_phase phase);
         super.connect_phase(phase);
         for(i=0;i<NoSlvPorts;i++) begin
-            slv_agt.vif = slv_vifs[i];
+            slv_agt.vif = slv_vif[i];
         end
     endfunction
 

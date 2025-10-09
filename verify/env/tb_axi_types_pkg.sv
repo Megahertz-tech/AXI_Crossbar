@@ -8,24 +8,18 @@
 `ifndef __TB_AXI_TYPES_PKG_SVH__ 
 `define __TB_AXI_TYPES_PKG_SVH__
 package tb_axi_types_pkg;
-    `include "tb_axi_macro_define.svh"
 
-    typedef logic [`AXI_MAX_ID_WIDTH-1:0]      axi_id;
-    typedef logic [`AXI_MAX_ADDRESS_WIDTH-1:0] axi_address;
     typedef logic [7:0]                             axi_burst_length; // the number of read/write transfers 
     typedef logic [3:0]                             axi_cache;
-    typedef logic [3:0]                             axi_qos;
-    typedef logic [`AXI_MAX_DATA_WIDTH-1:0]    axi_data;
-    typedef logic [`AXI_MAX_DATA_WIDTH/8-1:0]  axi_strobe;
     typedef enum logic [2:0] { // the maximum number of bytes to transfer in each data transfer, or beat, in a burst.
-        AXI_BURST_SIZE_1_BYTE    = 'b0000,
-        AXI_BURST_SIZE_2_BYTES   = 'b0001,
-        AXI_BURST_SIZE_4_BYTES   = 'b0010,
-        AXI_BURST_SIZE_8_BYTES   = 'b0011,
-        AXI_BURST_SIZE_16_BYTES  = 'b0100,
-        AXI_BURST_SIZE_32_BYTES  = 'b0101,
-        AXI_BURST_SIZE_64_BYTES  = 'b0110,
-        AXI_BURST_SIZE_128_BYTES = 'b0111
+        AXI_BURST_SIZE_1_BYTE    = 'b000,
+        AXI_BURST_SIZE_2_BYTES   = 'b001,
+        AXI_BURST_SIZE_4_BYTES   = 'b010,
+        AXI_BURST_SIZE_8_BYTES   = 'b011,
+        AXI_BURST_SIZE_16_BYTES  = 'b100,
+        AXI_BURST_SIZE_32_BYTES  = 'b101,
+        AXI_BURST_SIZE_64_BYTES  = 'b110,
+        AXI_BURST_SIZE_128_BYTES = 'b111
     } axi_burst_size;  
 
     typedef enum logic [1:0] { // The AXI protocol defines three burst types
