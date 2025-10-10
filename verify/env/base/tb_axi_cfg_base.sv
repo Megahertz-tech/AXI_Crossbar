@@ -23,7 +23,9 @@ class tb_axi_cfg_base extends uvm_object;
         `uvm_field_enum(axi_burst_size, burst_size, UVM_DEFAULT)
         `uvm_field_enum(axi_burst_type, burst_type, UVM_DEFAULT)
     `uvm_object_utils_end
-
+    function new (string name = "tb_axi_cfg_base");
+        super.new();
+    endfunction
 
     
 endclass 

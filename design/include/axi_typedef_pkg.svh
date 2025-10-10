@@ -48,9 +48,9 @@ package axi_typedef_pkg;
 
     typedef struct packed {
         int unsigned idx;
-        logic [63:0] start_addr;
-        logic [63:0] end_addr;
-    } xbar_rule_64_t;
+        logic [31:0] start_addr;
+        logic [31:0] end_addr;
+    } xbar_rule_32_t;
 
     //}}}
 endpackage 

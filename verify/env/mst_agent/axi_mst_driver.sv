@@ -35,7 +35,7 @@ class axi_mst_driver extends uvm_driver #(axi_mst_seq_item);
     //{{{ run_phase
     task run_phase(uvm_phase phase);
         super.run_phase(phase);
-        seq_item_port.disable_auto_item_recording(); //For pipelined and out-of-order transaction execution, the driver must turn off this automatic recording 
+        //seq_item_port.disable_auto_item_recording(); //For pipelined and out-of-order transaction execution, the driver must turn off this automatic recording 
         forever begin 
             reset_if();
             fork
@@ -87,12 +87,12 @@ class axi_mst_driver extends uvm_driver #(axi_mst_seq_item);
     //}}}
     //{{{ main
     task main();
-        fork 
-            get_item();
+        //fork 
+            //get_item();
             execute_item();
             //get_read_transaction();
             //get_write_response();
-        join
+        //join
     endtask
     //}}}
     //{{{ get_item
@@ -110,14 +110,16 @@ class axi_mst_driver extends uvm_driver #(axi_mst_seq_item);
     virtual task execute_item();
         forever begin
             axi_mst_seq_item tx;
-            wait(TXs_q.size() !=0 );
-            tx = TXs_q.pop_front();
+            seq_item_port.get_next_item(tx);
+            //wait(TXs_q.size() !=0 );
+            //tx = TXs_q.pop_front();
             if(tx.access_type == AXI_WRITE_ACCESS) begin
                 drive_aw_address(tx);
                 drive_write_transaction(tx);
             end else begin
                 drive_ar_address(tx);
             end
+            seq_item_port.item_done();
         end
     endtask
     //}}}

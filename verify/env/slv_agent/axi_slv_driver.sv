@@ -13,6 +13,7 @@ class axi_slv_driver extends uvm_driver #(axi_slv_seq_item);
     uvm_event           b_ready_e,    b_ready_done_e;
     uvm_event           ar_valid_e,   ar_valid_done_e;
     uvm_event           r_ready_e,    r_ready_done_e;
+    int                 mem[int];
 
    `uvm_component_utils(axi_slv_driver)
     function new (string name = "axi_slv_driver", uvm_component parent);
@@ -113,11 +114,43 @@ class axi_slv_driver extends uvm_driver #(axi_slv_seq_item);
         disable setup_block;
     endtask
     //}}}
-    virtual task do_setup_aw(xi_slv_seq_item item);
+    //{{{ do_setup_aw
+    virtual task do_setup_aw(axi_slv_seq_item item);
         aw_valid_e.wait_trigger();
-
+        vif.Slave_cb.aw_ready <= 1'b1;
+        @ (vif.Slave_cb);
+        if(vif.Slave_cb.aw_valid) begin
+            item.aw_id      = vif.aw_id      ;                   
+            item.aw_addr    = vif.aw_addr    ;                    
+            item.aw_lock    = vif.aw_lock    ;                    
+            item.aw_valid   = vif.aw_valid   ;                    
+            item.aw_user    = vif.aw_user    ;                    
+            item.aw_len     = vif.aw_len     ;                    
+            item.aw_size    = vif.aw_size    ;                    
+            item.aw_burst   = vif.aw_burst   ;                    
+            item.aw_cache   = vif.aw_cache   ;                    
+            item.aw_prot    = vif.aw_prot    ;                    
+            item.aw_qos     = vif.aw_qos     ;                    
+            item.aw_region  = vif.aw_region  ;                    
+            item.aw_atop    = vif.aw_atop    ;                    
+        end
+        @(negedge vif.Slave_cb.aw_valid);
+        aw_valid_e.reset();
+        #1ps;
+        aw_valid_done_e.trigger()
     endtask
-
+    //}}}
+    //{{{ do_setup_w
+    virtual task do_setup_w(axi_slv_seq_item item);
+        w_valid_e.wait_trigger();
+        vif.Slave_cb.w_ready <= 1'b1;
+        @ (vif.Slave_cb);
+        for(i=0;i<item.aw_burst+1;i++) begin
+            if(vif.Slave_cb.w_valid) begin
+                mem[item.aw_addr+i] = vif.Slave_cb.w_data; 
+            end
+        end
+    endtask
     //{{{ wait_for_nclocks
     task automatic wait_for_nclocks (int n = 1);
         repeat(n) @ (posedge vif.clk);
@@ -129,38 +162,48 @@ class axi_slv_driver extends uvm_driver #(axi_slv_seq_item);
         @(posedge vif.aw_valid);
         aw_valid_e.trigger();
         aw_valid_done_e.wait_trigger();
+        #1ps;
+        aw_valid_done_e.reset();
     endtask
     //}}}
     //{{{ wait_for_w_valid
     task automatic wait_for_w_valid();
-        `wait_sig_high(vif.Slave_cb, w_valid)
-        //@(posedge vif.w_valid);
-        -> w_valid_e;
-        @ w_valid_done_e;
+        //`wait_sig_high(vif.Slave_cb, w_valid)
+        @(posedge vif.w_valid);
+        w_valid_e.trigger();
+        w_valid_done_e.wait_trigger();
+        #1ps;
+        w_valid_done_e.reset();
     endtask
     //}}}
     //{{{ wait_for_b_ready 
     task automatic wait_for_b_ready();
         `wait_sig_high(vif.Slave_cb, b_ready)
         //@(posedge vif.b_ready);
-        -> b_ready_e;
-        @ b_ready_done_e;
+        b_ready_e.trigger();
+        b_ready_done_e.wait_trigger();
+        #1ps;
+        b_ready_done_e.reset();
     endtask
     //}}}
     //{{{ wait_for_ar_valid
     task automatic wait_for_ar_valid();
         `wait_sig_high(vif.Slave_cb, ar_valid)
         //@(posedge vif.ar_valid);
-        -> ar_valid_e;
-        @ ar_valid_done_e;
+        ar_valid_e.trigger();
+        ar_valid_done_e.wait_trigger();
+        #1ps;
+        ar_valid_done_e.reset();
     endtask
     //}}}
     //{{{ wait_for_r_ready
     task automatic wait_for_r_ready();
         `wait_sig_high(vif.Slave_cb, r_ready)
         //@(posedge vif.r_ready);
-        -> r_ready_e;
-        @ r_ready_done_e;
+        r_ready_e.trigger();
+        r_ready_done_e.wait_trigger();
+        #1ps;
+        r_ready_done_e.reset();
     endtask
     //}}}
     //{{{ wait_all_activities

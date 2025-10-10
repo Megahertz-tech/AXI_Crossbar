@@ -10,11 +10,7 @@
 
 class xbar_axi_master_env #(
 //      parameter int unsigned NoSlvPorts         = 4,        // Number of slave ports (master connections)
-      parameter int unsigned NoMstPorts         = 3,        // Number of master ports (slave connections)
-      parameter int unsigned AxiIdWidthSlvPorts = 6,        // Slave port ID width       
-      parameter int unsigned AxiIdUsedSlvPorts  = 6,        // Used ID bits for ordering decisions      
-      parameter int unsigned AxiAddrWidth       = 32,       // Address width
-      parameter int unsigned AxiDataWidth       = 64       // Data width
+      parameter int unsigned NoMstPorts         = 3        // Number of master ports (slave connections)
 ) extends uvm_env;
     
     virtual v_axi_inf           mst_vif[NoMstPorts];

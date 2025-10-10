@@ -89,6 +89,7 @@ interface v_axi_inf #(
     
     //{{{ Master_cb
     clocking Master_cb @(posedge clk, negedge rst_n);
+        default input #2ps output 2ps;
          output  aw_id      ;
          output  aw_addr    ;
          output  aw_lock    ;
@@ -138,6 +139,7 @@ interface v_axi_inf #(
     //}}}
     //{{{ Slave cb
     clocking Slave_cb @(posedge clk, negedge rst_n);
+        default input #2ps output 2ps;
          input  aw_id      ;
          input  aw_addr    ;
          input  aw_lock    ;
@@ -188,6 +190,7 @@ interface v_axi_inf #(
     //}}}
     //{{{ Monitor cb
     clocking Monitor_cb @(posedge clk, negedge rst_n);
+        default input #2ps output 2ps;
          input  aw_id      ;
          input  aw_addr    ;
          input  aw_lock    ;

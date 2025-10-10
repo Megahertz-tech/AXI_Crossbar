@@ -9,7 +9,7 @@
 `define __TB_AXI_TYPES_PKG_SVH__
 package tb_axi_types_pkg;
 
-    typedef logic [7:0]                             axi_burst_length; // the number of read/write transfers 
+    //typedef logic [7:0]                             axi_burst_length; // the number of read/write transfers 
     typedef logic [3:0]                             axi_cache;
     typedef enum logic [2:0] { // the maximum number of bytes to transfer in each data transfer, or beat, in a burst.
         AXI_BURST_SIZE_1_BYTE    = 'b000,

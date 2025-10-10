@@ -13,6 +13,8 @@ package tb_xbar_param_pkg;
     parameter int unsigned  AXI_DATA_WIDTH_IN_USE = 64 ; 
     parameter int unsigned  AXI_ID_WIDTH_IN_USE   = 6  ; 
     parameter int unsigned  AXI_USER_WIDTH_IN_USE = 8  ; 
+    parameter int unsigned  AXI_MASTER_NUMBER_IN_USE = 3; 
+    parameter int unsigned  AXI_SLAVE_NUMBER_IN_USE = 4; 
     //parameter int unsigned  ; 
 
 endpackage 
