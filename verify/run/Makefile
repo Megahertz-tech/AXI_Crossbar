@@ -10,7 +10,7 @@ DUT_DIR := ${PRJ_ROOT}/design
 DV_DIR := ${PRJ_ROOT}/verify
 
 
-TESTNAME ?= basic_test
+TESTNAME ?= xbar_simple_test_case
 TOOL_VAL ?= xrun 
 TOOL_OPTION = -tool xrun 
 SIM_VAL ?= cr

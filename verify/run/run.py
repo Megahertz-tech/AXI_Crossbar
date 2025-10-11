@@ -20,7 +20,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="run script help",formatter_class=argparse.RawTextHelpFormatter)
     parser.add_argument('-tool', dest='tool', choices=('xrun', 'vcs'), help='select tools (xrun, vcs)', default='xrun')
     parser.add_argument('-gui', dest='gui', help=''' Use gui or command line. \ngui: gui with waveform; \ncw: command line with waveform; \nc: command line without waveform''', choices = xrun_gui_args.keys(), default='gui')
-    parser.add_argument('-test', dest='testcase', help='define the UVM_TESTCASE', default='basic_test')
+    parser.add_argument('-test', dest='testcase', help='define the UVM_TESTCASE', default='xbar_simple_test_case')
     #parser.add_argument('-run_dir', dest='run_dir', help='set run directory', default=os.getenv('CB_PRJ_ROOT')+"/verify/out")
     parser.add_argument('-log', dest='log', help='set log file', default='xrun.log')
     parser.add_argument('-cov', dest='cov', help='set coverage enable', choices=('0','1'), default='0')

@@ -7,7 +7,7 @@
 `ifndef __XBAR_VIRTUAL_SEQUENCE_BASE_SV__
 `define __XBAR_VIRTUAL_SEQUENCE_BASE_SV__
 
-`include "tb_xbar_param_pkg.sv"
+`include "tb_xbar_param_pkg.svh"
 class xbar_virtual_sequence_base extends uvm_sequence;
     axi_mst_sequencer mst_sqr[tb_xbar_param_pkg::AXI_MASTER_NUMBER_IN_USE];
     axi_slv_sequencer slv_sqr[tb_xbar_param_pkg::AXI_SLAVE_NUMBER_IN_USE];

@@ -8,4 +8,3 @@
     $CB_PRJ_ROOT/design/include/axi_math_pkg.svh \
     $CB_PRJ_ROOT/design/include/axi_macro_typedef.svh \
     $CB_PRJ_ROOT/design/src/inf/axi_inf.sv \
-    $CB_PRJ_ROOT/design/src/FIFO.sv \

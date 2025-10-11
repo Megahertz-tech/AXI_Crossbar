@@ -7,7 +7,7 @@
 **************************************************************/
 `ifndef __AXI_MST_REGULAR_CFG_SV__
 `define __AXI_MST_REGULAR_CFG_SV__
-
+`include "tb_axi_macro_define_pkg.svh"
 class axi_mst_regular_cfg extends tb_axi_cfg_base;
     `uvm_object_utils(axi_mst_regular_cfg)    
     `ob_construct(axi_mst_regular_cfg)

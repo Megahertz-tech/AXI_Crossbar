@@ -1,17 +1,41 @@
-        +incdir+$CB_PRJ_ROOT/verify/env/fifo_env/inf \
-        +incdir+$CB_PRJ_ROOT/verify/env/fifo_env \
+        +incdir+$CB_PRJ_ROOT/verify/env/fifo_env/inf    \
+        +incdir+$CB_PRJ_ROOT/verify/env/fifo_env        \
+        +incdir+$CB_PRJ_ROOT/verify/cfg                 \
+        +incdir+$CB_PRJ_ROOT/verify/env                 \
+        +incdir+$CB_PRJ_ROOT/verify/env/base            \
+        +incdir+$CB_PRJ_ROOT/verify/env/inf             \
+        +incdir+$CB_PRJ_ROOT/verify/env/mst_agent       \
+        +incdir+$CB_PRJ_ROOT/verify/env/mst_agent/sequences       \
+        +incdir+$CB_PRJ_ROOT/verify/env/slv_agent       \
+        +incdir+$CB_PRJ_ROOT/verify/env/xbar_sequence   \
         +incdir+$CB_PRJ_ROOT/verify/test \
         
-        $CB_PRJ_ROOT/verify/env/fifo_env/inf/fifo_if.sv \
-        $CB_PRJ_ROOT/verify/env/fifo_env/fifo_transaction.sv \
-        $CB_PRJ_ROOT/verify/env/fifo_env/fifo_sequence.sv \
-        $CB_PRJ_ROOT/verify/env/fifo_env/fifo_driver.sv \
-        $CB_PRJ_ROOT/verify/env/fifo_env/fifo_monitor.sv \
-        $CB_PRJ_ROOT/verify/env/fifo_env/fifo_scoreboard.sv \
-        $CB_PRJ_ROOT/verify/env/fifo_env/fifo_agent.sv \
-        $CB_PRJ_ROOT/verify/env/fifo_env/fifo_env.sv \
-        $CB_PRJ_ROOT/verify/env/fifo_env/base_test.sv \
-        
-        $CB_PRJ_ROOT/verify/test/fifo_test/basic_test.sv \
-        $CB_PRJ_ROOT/verify/tb_fifo_top.sv \
+        $CB_PRJ_ROOT/verify/env/inf/v_axi_inf.sv        \  
+        $CB_PRJ_ROOT/verify/env/tb_xbar_param_pkg.svh   \
+        $CB_PRJ_ROOT/verify/env/tb_axi_types_pkg.sv     \
+        $CB_PRJ_ROOT/verify/cfg/global_cfg.sv           \
+        $CB_PRJ_ROOT/verify/env/tb_xbar_param_pkg.svh   \
+        $CB_PRJ_ROOT/verify/env/tb_axi_macro_define_pkg.svh \
+        $CB_PRJ_ROOT/verify/env/base/tb_axi_cfg_base.sv  \
+        $CB_PRJ_ROOT/verify/cfg/axi_mst_regular_cfg.sv  \
+        $CB_PRJ_ROOT/verify/env/base/axi_mst_seq_item_base.sv  \
+        $CB_PRJ_ROOT/verify/env/base/axi_slv_seq_item_base.sv  \
+        $CB_PRJ_ROOT/verify/env/mst_agent/axi_mst_seq_item.sv  \
+        $CB_PRJ_ROOT/verify/env/mst_agent/axi_mst_sequencer.sv  \
+        $CB_PRJ_ROOT/verify/env/mst_agent/axi_mst_driver.sv  \
+        $CB_PRJ_ROOT/verify/env/mst_agent/axi_mst_agent.sv  \
+        $CB_PRJ_ROOT/verify/env/mst_agent/sequences/axi_mst_regular_sequence.sv  \
+        $CB_PRJ_ROOT/verify/env/slv_agent/axi_slv_seq_item.sv  \
+        $CB_PRJ_ROOT/verify/env/slv_agent/axi_slv_sequencer.sv  \
+        $CB_PRJ_ROOT/verify/env/slv_agent/axi_slv_driver.sv  \
+        $CB_PRJ_ROOT/verify/env/slv_agent/axi_slv_agent.sv  \
+        $CB_PRJ_ROOT/verify/env/base/xbar_virtual_sequence_base.sv  \
+        $CB_PRJ_ROOT/verify/env/slv_agent/sequences/axi_slv_default_sequence.sv  \
+        $CB_PRJ_ROOT/verify/env/xbar_sequence/xbar_simple_sequence.sv   \
+        $CB_PRJ_ROOT/verify/env/xbar_axi_master_env.sv                 \
+        //$CB_PRJ_ROOT/verify/env/xbar_axi_slave_env.sv                 \
+        $CB_PRJ_ROOT/verify/env/base/xbar_test_base.sv \
+
+        $CB_PRJ_ROOT/verify/test/xbar_simple_test_case.sv \
+
         $CB_PRJ_ROOT/verify/tb_axi_xbar_top.sv \

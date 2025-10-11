@@ -6,6 +6,7 @@
 **************************************************************/
 `ifndef __AXI_PARAM_PKG_SVH___
 `define __AXI_PARAM_PKG_SVH___
+
 package axi_param_pkg;
   /// AXI Transaction Burst Width.
   parameter int unsigned BurstWidth  = 32'd2;
@@ -33,6 +34,6 @@ package axi_param_pkg;
 endpackage
 
 // import package into $unit
-import axi_param_pkg::* 
+import axi_param_pkg::*;
 
 `endif

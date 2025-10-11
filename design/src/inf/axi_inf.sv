@@ -9,7 +9,7 @@
 
 `include "axi_typedef_pkg.svh"
 
-interface axi_inf #(
+interface axi_inf_for_design #(
   parameter int unsigned AXI_ADDR_WIDTH = 0,
   parameter int unsigned AXI_DATA_WIDTH = 0,
   parameter int unsigned AXI_ID_WIDTH   = 0,
@@ -23,7 +23,8 @@ interface axi_inf #(
   typedef logic [AXI_DATA_WIDTH-1:0] data_t;
   typedef logic [AXI_STRB_WIDTH-1:0] strb_t;
   typedef logic [AXI_USER_WIDTH-1:0] user_t;
-
+   //bit     clk;
+   //logic   rst_n; 
 //{{{ AW channel 
     id_t              aw_id         ;
     addr_t            aw_addr       ;
@@ -84,7 +85,6 @@ interface axi_inf #(
     resp_t            r_resp    ;
 //}}}
 
-
   modport Master (
     output aw_id, aw_addr, aw_len, aw_size, aw_burst, aw_lock, aw_cache, aw_prot, aw_qos, aw_region, aw_atop, aw_user, aw_valid, input aw_ready,
     output w_data, w_strb, w_last, w_user, w_valid, input w_ready,
@@ -110,5 +110,6 @@ interface axi_inf #(
   );
 
 endinterface
+
 
 `endif

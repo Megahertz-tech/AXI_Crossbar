@@ -6,7 +6,7 @@
 **************************************************************/
 `ifndef __AXI_MST_SEQ_ITEM_SV__
 `define __AXI_MST_SEQ_ITEM_SV__
-class axi_mst_seq_item extends axi_seq_item_base;
+class axi_mst_seq_item extends axi_mst_seq_item_base;
     rand axi_access_type    access_type;
 
     //{{{ AW channel 
@@ -70,13 +70,19 @@ class axi_mst_seq_item extends axi_seq_item_base;
         `uvm_field_int(aw_qos,UVM_DEFAULT | UVM_HEX);
         `uvm_field_int(aw_region,UVM_DEFAULT | UVM_HEX);
         `uvm_field_int(aw_atop,UVM_DEFAULT | UVM_HEX);
-        `uvm_field_array_int(data, UVM_DEFAULT | UVM_HEX)
-        `uvm_field_array_int(strobe, UVM_DEFAULT | UVM_BIN)
+        `uvm_field_array_int(w_data, UVM_DEFAULT | UVM_HEX)
+        `uvm_field_array_int(w_strb, UVM_DEFAULT | UVM_BIN)
         `uvm_field_array_int(w_last, UVM_DEFAULT | UVM_BIN)
         `uvm_field_int(w_user,UVM_DEFAULT | UVM_HEX);
         `uvm_field_int(w_valid,UVM_DEFAULT | UVM_HEX);
         `uvm_field_int(ar_id,UVM_DEFAULT | UVM_HEX);
-        `uvm_field_int(ar_size,UVM_DEFAULT | UVM_HEX);
+        `uvm_field_int(ar_addr,UVM_DEFAULT | UVM_HEX);
+        `uvm_field_int(ar_lock,UVM_DEFAULT | UVM_HEX);
+        `uvm_field_int(ar_user,UVM_DEFAULT | UVM_HEX);
+        `uvm_field_int(ar_valid,UVM_DEFAULT | UVM_HEX);
+        `uvm_field_int(ar_len, UVM_DEFAULT | UVM_DEC);
+        `uvm_field_enum(axi_burst_size, ar_size,UVM_DEFAULT);
+        `uvm_field_enum(axi_burst_type, ar_burst,UVM_DEFAULT);
         `uvm_field_int(ar_cache,UVM_DEFAULT | UVM_HEX);
         `uvm_field_int(ar_prot,UVM_DEFAULT | UVM_HEX);
         `uvm_field_int(ar_qos,UVM_DEFAULT | UVM_HEX);
@@ -86,14 +92,16 @@ class axi_mst_seq_item extends axi_seq_item_base;
     function new (string name = "axi_mst_seq_item");
         super.new(name);
     endfunction
-
+    //{{{ set_one_transfer_transaction_w
     function void set_one_transfer_transaction_w();
+        int data;
         if(access_type == AXI_WRITE_ACCESS) begin 
-            w_data = new(aw_len+1);
-            w_strb = new(aw_len+1);
-            w_last = new(aw_len+1);
+            w_data = new[aw_len+1];
+            w_strb = new[aw_len+1];
+            w_last = new[aw_len+1];
             foreach(w_data[i]) begin
-                assert(std::randomize(w_date[i]));
+                assert(std::randomize(data));
+                w_data[i] = data;
             end
             foreach(w_strb[i]) begin
                 w_strb[i] = 'b1;
@@ -104,7 +112,8 @@ class axi_mst_seq_item extends axi_seq_item_base;
             w_strb[aw_len+1] = 1;
         end
     endfunction
-
+    //}}}
+    //{{{ set_one_transfer_transaction_awr
     function void set_one_transfer_transaction_awr();
         if(access_type == AXI_WRITE_ACCESS) begin
             aw_valid = 1;  
@@ -132,9 +141,9 @@ class axi_mst_seq_item extends axi_seq_item_base;
             ar_region =  0;      // no additional address regions
         end
     endfunction
-
+    //}}}
     constraint c_aw_id{
-        aw_id < 4'hFF;
+        aw_id < 8'hFF;
     }
 
 endclass

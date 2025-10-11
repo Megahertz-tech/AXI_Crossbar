@@ -6,7 +6,9 @@
 **************************************************************/
 `ifndef __TB_AXI_CFG_BASE_SV__
 `define __TB_AXI_CFG_BASE_SV__
-`include "tb_axi_macro_define_pkg.svh"
+import uvm_pkg::*;
+`include "uvm_macros.svh"
+`include "tb_axi_types_pkg.sv"
 class tb_axi_cfg_base extends uvm_object;
     rand int                axi_data_width;
     rand int                axi_addr_width;

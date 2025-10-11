@@ -83,6 +83,6 @@ package axi_math_pkg;
 endpackage 
 
 // import package into $unit
-import axi_math_pkg::*
+import axi_math_pkg::*;
 
 `endif 

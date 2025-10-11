@@ -6,6 +6,7 @@
 **************************************************************/
 `ifndef __AXI_TYPEDEF_PKG_SVH__
 `define __AXI_TYPEDEF_PKG_SVH__
+
 package axi_typedef_pkg;
 
     /// AXI Transaction Burst Width.
@@ -56,6 +57,6 @@ package axi_typedef_pkg;
 endpackage 
 
 // import package into $unit
-import axi_typedef_pkg::*
+import axi_typedef_pkg::*;
 
 `endif

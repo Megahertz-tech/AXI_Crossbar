@@ -7,7 +7,7 @@
 `ifndef __AXI_MST_SEQUENCER_SV__
 `define __AXI_MST_SEQUENCER_SV__
 
-class axi_mst_sequencer extends uvm_sequencer #(uvm_sequence_item);
+class axi_mst_sequencer extends uvm_sequencer #(axi_mst_seq_item);
     
    `uvm_component_utils(axi_mst_sequencer)
     function new (string name = "axi_mst_sequencer", uvm_component parent);

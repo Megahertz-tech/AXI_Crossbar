@@ -8,33 +8,37 @@
 `ifndef __XBAR_AXI_MASTER_ENV_SV__
 `define __XBAR_AXI_MASTER_ENV_SV__
 
-class xbar_axi_slave_env #(
-      parameter int unsigned NoSlvPorts         = 4        // Number of slave ports (master connections)
-//      parameter int unsigned NoMstPorts         = 3,        // Number of master ports (slave connections)
-) extends uvm_env;
+`include "uvm_macros.svh"
+import uvm_pkg::*;
+                                // Number of slave ports (master connections)
+class xbar_axi_slave_env #( parameter int unsigned NoSlvPorts = 4) extends uvm_component;
+    `uvm_component_utils(xbar_axi_slave_env)
     
     virtual v_axi_inf   slv_vif[NoSlvPorts];
     axi_slv_agent       slv_agt[NoSlvPorts];
 
-    `uvm_component_utils(xbar_axi_slave_env)
     function new (string name = "xbar_axi_slave_env", uvm_component parent);
         super.new(name, parent);
     endfunction
 
     function void build_phase (uvm_phase phase);
         super.build_phase(phase);
-        for(i=0;i<NoSlvPorts;i++) begin
-            slv_agt[i] = axi_slv_agent::type_id::creat($psprintf("slv_agt_%s",i), this);
+        for(int i=0;i<NoSlvPorts;i++) begin
+            slv_agt[i] = axi_slv_agent::type_id::create($sformatf("slv_agt_%d",i), this);
+            //slv_agt[i] = axi_slv_agent::type_id::creat($sformatf("slv_agt_%s",i), this);
+        end
+        if(!uvm_config_db#(virtual v_axi_inf)::get(this, "", "svif", slv_vif)) begin
+            `uvm_error("Get_Slv_Vif", "no virtual interface is assigned")
         end
     endfunction 
 
     function void connect_phase (uvm_phase phase);
         super.connect_phase(phase);
-        for(i=0;i<NoSlvPorts;i++) begin
-            slv_agt.vif = slv_vif[i];
+        for(int i=0;i<NoSlvPorts;i++) begin
+            slv_agt[i].vif = slv_vif[i];
         end
     endfunction
 
+endclass: xbar_axi_slave_env 
 
-endclass 
 `endif 

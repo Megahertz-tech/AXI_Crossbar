@@ -31,7 +31,7 @@ class global_cfg;
     const time TbApplTime = 0.2 * TbClkPeriod;
     const time TbTestTime = 0.8 * TbClkPeriod;                            
 
-    int MstIdWidth = cf_math_pkg::idx_width(TbNumMasters);
+    int MstIdWidth = axi_math_pkg::idx_width(TbNumMasters);
 
 endclass 
 `endif
