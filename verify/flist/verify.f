@@ -33,8 +33,7 @@
         $CB_PRJ_ROOT/verify/env/base/xbar_virtual_sequence_base.sv  \
         $CB_PRJ_ROOT/verify/env/slv_agent/sequences/axi_slv_default_sequence.sv  \
         $CB_PRJ_ROOT/verify/env/xbar_sequence/xbar_simple_sequence.sv   \
-        $CB_PRJ_ROOT/verify/env/xbar_axi_master_env.sv                 \
-        //$CB_PRJ_ROOT/verify/env/xbar_axi_slave_env.sv                 \
+        $CB_PRJ_ROOT/verify/env/xbar_env.sv                 \
         $CB_PRJ_ROOT/verify/env/base/xbar_test_base.sv \
 
         $CB_PRJ_ROOT/verify/test/xbar_simple_test_case.sv \

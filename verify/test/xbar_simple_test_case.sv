@@ -34,21 +34,39 @@ class xbar_simple_test_case extends xbar_test_base;
             mst_regular_seq[i] = axi_mst_regular_sequence::type_id::create($sformatf("mst_regular_seq_%0d", i));
                 `uvm_info("mst_regular_seq",$sformatf("mst_regular_seq_%0d create",i),UVM_LOW)
         end
-
+        
         fork
-            fork
+            mst_regular_seq[0].start(env.virt_sqr.mst_sqr[0]);    
+            mst_regular_seq[1].start(env.virt_sqr.mst_sqr[1]);    
+            mst_regular_seq[2].start(env.virt_sqr.mst_sqr[2]);    
+            slv_default_seq[0].start(env.virt_sqr.slv_sqr[0]);
+            slv_default_seq[1].start(env.virt_sqr.slv_sqr[1]);
+            slv_default_seq[2].start(env.virt_sqr.slv_sqr[2]);
+            slv_default_seq[3].start(env.virt_sqr.slv_sqr[3]);
+
+        join
+        /*
+        fork
+            begin
                 foreach(slv_default_seq[i]) begin
-                    slv_default_seq[i].start(env.virt_sqr.slv_sqr[i]);
+                    fork
+                        slv_default_seq[i].start(env.virt_sqr.slv_sqr[i]);
+                    join_none
                 end
-            join
-            fork
+            end
+            begin
                 foreach(mst_regular_seq[j]) begin
-                    mst_regular_seq[j].start(env.virt_sqr.mst_sqr[j]);
+                    fork
+                        mst_regular_seq[j].start(env.virt_sqr.mst_sqr[j]);
+                    join_none
                 end
-            join
+            end
+            begin
+                #100ns;
+            end
         join
         wait fork;
-
+        */
 
 
             /*

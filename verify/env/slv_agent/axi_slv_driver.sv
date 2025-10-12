@@ -8,14 +8,14 @@
 `define __AXI_SLV_DRIVER_SV__
 `include "tb_axi_types_pkg.sv"
 class axi_slv_driver extends uvm_driver #(axi_slv_seq_item);
-typedef virtual axi_inf #(
+typedef virtual v_axi_inf #(
         .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
         .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
         .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE),
         .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
     ) virt_axi_slv_inf;
     //virtual v_axi_inf   vif;
-    virtual axi_inf #(
+    virtual v_axi_inf #(
         .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
         .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
         .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE),

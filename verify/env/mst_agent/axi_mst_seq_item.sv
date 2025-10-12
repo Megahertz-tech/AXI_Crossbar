@@ -35,6 +35,13 @@ class axi_mst_seq_item extends axi_mst_seq_item_base;
     rand logic             w_valid;
                 //rand logic             w_ready;
     //}}}
+    //{{{ B channel 
+    id_t              b_id;
+    user_t            b_user;
+    logic             b_valid;
+    //logic             b_ready;
+    axi_response      b_resp;
+    //}}}
     //{{{ AR channel 
     rand id_t              ar_id;
     rand addr_t            ar_addr;
@@ -53,6 +60,11 @@ class axi_mst_seq_item extends axi_mst_seq_item_base;
     rand axi_burst_size    ar_size;
     rand axi_burst_type    ar_burst;
     //}}}    
+
+    // drv delay
+    rand bit[2:0] aw2w_delay;
+
+
     //{{{ uvm_object_utils_begin
     `uvm_object_utils_begin(axi_mst_seq_item)
         `uvm_field_enum(axi_access_type, access_type, UVM_DEFAULT) 

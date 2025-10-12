@@ -11,14 +11,12 @@
 class axi_mst_regular_sequence extends uvm_sequence #(axi_mst_seq_item);
     
    `uvm_object_utils(axi_mst_regular_sequence)
-   //`uvm_declare_p_sequencer(axi_mst_sequencer)
     function new (string name = "axi_mst_regular_sequence");
         super.new(name);
     endfunction
 
     task body();
         axi_mst_seq_item req;
-        //uvm_sequence_item tmp;
         int rand_delay;
         `uvm_info("MST_SEQ","enter body()",UVM_LOW)
         #50ns;

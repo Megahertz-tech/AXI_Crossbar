@@ -16,7 +16,7 @@ module axi_xbar_wrapper
   parameter axi_typedef_pkg::xbar_cfg_t                     Cfg                 = '0,
   parameter bit                                             ATOPS               = 1'b1,
   parameter bit [Cfg.NoSlvPorts-1:0][Cfg.NoMstPorts-1:0]    CONNECTIVITY        = '1,
-  parameter type                                            rule_t              = axi_pkg::xbar_rule_64_t,
+  parameter type                                            rule_t              = axi_pkg::xbar_rule_32_t,
   localparam int unsigned                                   MstPortsIdxWidth    =
         (Cfg.NoMstPorts == 32'd1) ? 32'd1 : unsigned'($clog2(Cfg.NoMstPorts))
 ) (
@@ -25,9 +25,9 @@ module axi_xbar_wrapper
   input  logic                                                      test_i,
   input  rule_t [Cfg.NoAddrRules-1:0]                               addr_map_i,
   input  logic  [Cfg.NoSlvPorts-1:0]                                en_default_mst_port_i,
-  input  logic  [Cfg.NoSlvPorts-1:0][MstPortsIdxWidth-1:0]          default_mst_port_i
+  input  logic  [Cfg.NoSlvPorts-1:0][MstPortsIdxWidth-1:0]          default_mst_port_i,
   axi_inf.Slave                                                     slv_ports [Cfg.NoSlvPorts-1:0],
-  axi_inf.Master                                                    mst_ports [Cfg.NoMstPorts-1:0],
+  axi_inf.Master                                                    mst_ports [Cfg.NoMstPorts-1:0]
 );
 
   // TODO: Implement type definitions for interface-based connections
@@ -73,7 +73,6 @@ module axi_xbar_wrapper
   end
 
   // TODO: Instantiate the main crossbar
-  /*
   //{{{ 
   axi_xbar #(
     .Cfg  (Cfg),
@@ -106,7 +105,6 @@ module axi_xbar_wrapper
     .default_mst_port_i
   );
   //}}}
-    */
 
 endmodule 
 

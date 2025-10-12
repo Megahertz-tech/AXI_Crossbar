@@ -1,10 +1,33 @@
-    +incdir+$CB_PRJ_ROOT/design/include/            \
+    +incdir+$CB_PRJ_ROOT/design/include/                \
+    +incdir+$CB_PRJ_ROOT/design/include/axi/            \
+    +incdir+$CB_PRJ_ROOT/design/include/common_cells/   \  
     +incdir+$CB_PRJ_ROOT/design/src/                \
-    +incdir+$CB_PRJ_ROOT/design/src/common_cells    \
-    +incdir+$CB_PRJ_ROOT/design/src/inf             \
+    +incdir+$CB_PRJ_ROOT/design/src/common_cells/    \
+    +incdir+$CB_PRJ_ROOT/design/src/inf/             \
     
     $CB_PRJ_ROOT/design/include/axi_param_pkg.svh \
     $CB_PRJ_ROOT/design/include/axi_typedef_pkg.svh \
     $CB_PRJ_ROOT/design/include/axi_math_pkg.svh \
     $CB_PRJ_ROOT/design/include/axi_macro_typedef.svh \
+    $CB_PRJ_ROOT/design/src/axi_pkg.sv  \ 
     $CB_PRJ_ROOT/design/src/inf/axi_inf.sv \
+    $CB_PRJ_ROOT/design/include/axi/assign.svh  \
+    $CB_PRJ_ROOT/design/include/axi/typedef.svh  \
+    $CB_PRJ_ROOT/design/include/common_cells/assertions.svh  \
+    $CB_PRJ_ROOT/design/include/common_cells/registers.svh  \
+    $CB_PRJ_ROOT/design/src/common_cells/addr_decode.sv  \ 
+    $CB_PRJ_ROOT/design/src/common_cells/axi_atop_filter.sv  \ 
+    $CB_PRJ_ROOT/design/src/common_cells/axi_multicut.sv  \ 
+    $CB_PRJ_ROOT/design/src/common_cells/cf_math_pkg.sv  \ 
+    $CB_PRJ_ROOT/design/src/common_cells/counter.sv  \ 
+    $CB_PRJ_ROOT/design/src/common_cells/fifo_v3.sv  \ 
+    $CB_PRJ_ROOT/design/src/common_cells/rr_arb_tree.sv  \ 
+    $CB_PRJ_ROOT/design/src/common_cells/spill_register.sv  \ 
+    $CB_PRJ_ROOT/design/src/axi_demux.sv  \ 
+    $CB_PRJ_ROOT/design/src/axi_err_slv.sv  \ 
+    $CB_PRJ_ROOT/design/src/axi_id_prepend.sv  \ 
+    $CB_PRJ_ROOT/design/src/axi_mux.sv  \ 
+    $CB_PRJ_ROOT/design/src/axi_xbar.sv  \ 
+    $CB_PRJ_ROOT/design/src/axi_xbar_unmuxed.sv  \ 
+    $CB_PRJ_ROOT/design/src/axi_xbar_wrapper.sv  \ 
+

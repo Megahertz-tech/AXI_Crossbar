@@ -9,7 +9,7 @@
 
 `include "axi_typedef_pkg.svh"
 
-interface axi_inf_for_design #(
+interface axi_inf #(
   parameter int unsigned AXI_ADDR_WIDTH = 0,
   parameter int unsigned AXI_DATA_WIDTH = 0,
   parameter int unsigned AXI_ID_WIDTH   = 0,
@@ -23,8 +23,7 @@ interface axi_inf_for_design #(
   typedef logic [AXI_DATA_WIDTH-1:0] data_t;
   typedef logic [AXI_STRB_WIDTH-1:0] strb_t;
   typedef logic [AXI_USER_WIDTH-1:0] user_t;
-   //bit     clk;
-   //logic   rst_n; 
+
 //{{{ AW channel 
     id_t              aw_id         ;
     addr_t            aw_addr       ;

@@ -8,7 +8,8 @@
 `define __AXI_MST_DRIVER_SV__
 `include "tb_axi_types_pkg.sv"
 class axi_mst_driver extends uvm_driver #(axi_mst_seq_item);    
-typedef virtual axi_inf #(
+    //{{{ vif
+    typedef virtual v_axi_inf #(
         .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
         .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
         .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_MASTER_ID_WIDTH_IN_USE),
@@ -16,18 +17,22 @@ typedef virtual axi_inf #(
     ) virt_axi_mst_inf;
     typedef logic [AXI_MASTER_ID_WIDTH_IN_USE-1:0]   axi_id_t;
     //virtual v_axi_inf       vif;
-    virtual axi_inf #(
+    virtual v_axi_inf #(
         .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
         .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
         .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_MASTER_ID_WIDTH_IN_USE),
         .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
     )       vif;
+    //}}}
+    axi_mst_seq_item        tx;
     shortint                mst_id;
     axi_mst_seq_item        TXs_q[$];
     axi_id_t                AWID_q[$];
     axi_id_t                ARID_q[$];
+    bit                     rsp_in_flight_en;
 
    `uvm_component_utils(axi_mst_driver)
+   //{{{ basic tb function
     function new (string name = "axi_mst_driver", uvm_component parent);
         super.new(name, parent);
     endfunction
@@ -49,6 +54,7 @@ typedef virtual axi_inf #(
     function void set_mst_id(shortint id);
         this.mst_id = id;
     endfunction
+    //}}}
     
     //{{{ run_phase
     task run_phase(uvm_phase phase);
@@ -69,7 +75,7 @@ typedef virtual axi_inf #(
     //{{{ reset_if
     task reset_if();
        axi_burst_type default_burst_type = AXI_INCREMENTING_BURST;
-       `uvm_info(get_full_name(), "master reset inf", UVM_LOW)
+       `uvm_info(get_full_name(), $sformatf("master No.%0d reset inf", mst_id), UVM_LOW)
        vif.Master_cb.aw_id     <= '0;
        vif.Master_cb.aw_addr   <= '0;
        vif.Master_cb.aw_len    <= '0;
@@ -103,7 +109,7 @@ typedef virtual axi_inf #(
        vif.Master_cb.ar_valid  <= '0;
        vif.Master_cb.r_ready   <= '0;
        @(posedge vif.rst_n);
-       `uvm_info(get_full_name(), "master reset inf done", UVM_LOW)
+       `uvm_info(get_full_name(), $sformatf("master No.%0d reset inf done", mst_id), UVM_LOW)
     endtask
     //}}}
     //{{{ main
@@ -131,7 +137,6 @@ typedef virtual axi_inf #(
     //{{{ execute_item
     virtual task execute_item();
         forever begin
-            axi_mst_seq_item tx;
             seq_item_port.get_next_item(tx);
             `uvm_info("mst drv","get item", UVM_LOW)
             //wait(TXs_q.size() !=0 );
@@ -139,11 +144,28 @@ typedef virtual axi_inf #(
             if(tx.access_type == AXI_WRITE_ACCESS) begin
                 drive_aw_address(tx);
                 drive_write_transaction(tx);
+                if(!rsp_in_flight_en) begin
+                    //wait_write_response(tx);
+                end
             end else begin
                 drive_ar_address(tx);
             end
             seq_item_port.item_done();
         end
+    endtask
+    //}}}
+    //{{{ wait_write_response
+    virtual task wait_write_response(axi_mst_seq_item item);
+        @(vif.b_valid);
+        @ (vif.Master_cb);
+        item.b_id = vif.b_id;
+        item.b_user = vif.b_user;
+        item.b_valid = vif.b_valid;
+        item.b_resp = vif.b_resp;
+        @ (vif.Master_cb);
+        vif.Master_cb.b_ready <= 1'b1;
+        @ (vif.Master_cb);
+        vif.Master_cb.b_ready <= 1'b0;
     endtask
     //}}}
     //{{{ drive_aw_address
@@ -182,6 +204,7 @@ typedef virtual axi_inf #(
     //}}} 
     //{{{ drive_write_transaction
     virtual task drive_write_transaction(axi_mst_seq_item item);
+        repeat(item.aw2w_delay) @ (vif.Master_cb);
         for(int unsigned i=0; i<item.aw_len+1; i++) begin
             @ (vif.Master_cb);
             vif.Master_cb.w_valid  <=  item.w_valid ;           

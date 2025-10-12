@@ -104,6 +104,10 @@ class axi_slv_seq_item extends axi_slv_seq_item_base;
         `uvm_field_array_int(w_last, UVM_DEFAULT | UVM_BIN)
         `uvm_field_int(w_user,UVM_DEFAULT | UVM_HEX);
         `uvm_field_int(w_valid,UVM_DEFAULT | UVM_HEX);
+        `uvm_field_int(b_id,UVM_DEFAULT | UVM_HEX);
+        `uvm_field_int(b_user,UVM_DEFAULT | UVM_HEX);
+        `uvm_field_int(b_valid,UVM_DEFAULT | UVM_BIN);
+        `uvm_field_enum(axi_response, b_resp, UVM_DEFAULT);
         `uvm_field_int(ar_id,UVM_DEFAULT | UVM_HEX);
         `uvm_field_int(ar_addr,UVM_DEFAULT | UVM_HEX);
         `uvm_field_int(ar_lock,UVM_DEFAULT | UVM_HEX);

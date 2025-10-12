@@ -8,7 +8,7 @@
 `define __V_AXI_INF_SV__
 
 `include "axi_typedef_pkg.svh"
-interface axi_inf #(
+interface v_axi_inf #(
   parameter int unsigned AXI_ADDR_WIDTH = 0,
   parameter int unsigned AXI_DATA_WIDTH = 0,
   parameter int unsigned AXI_ID_WIDTH   = 0,
