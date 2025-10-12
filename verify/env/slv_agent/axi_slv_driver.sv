@@ -73,13 +73,13 @@ typedef virtual v_axi_inf #(
     //{{{ reset_if
     virtual task reset_if();
         `uvm_info("SLV driver"," reset inf", UVM_LOW)
-        vif.Slave_cb.aw_ready  <= '0;
+        vif.Slave_cb.aw_ready  <= '1;
         vif.Slave_cb.w_ready   <= '0;
         vif.Slave_cb.b_id      <= '0;
         vif.Slave_cb.b_resp    <= '0;
         vif.Slave_cb.b_user    <= '0;
         vif.Slave_cb.b_valid   <= '0;
-        vif.Slave_cb.ar_ready  <= '0;
+        vif.Slave_cb.ar_ready  <= '1;
         vif.Slave_cb.r_id      <= '0;
         vif.Slave_cb.r_data    <= '0;
         vif.Slave_cb.r_resp    <= '0;
@@ -114,11 +114,11 @@ typedef virtual v_axi_inf #(
                 //Setup Phase 
                 seq_item_port.get_next_item(req);
                 do_setup(req);
-                seq_item_port.item_done();
+                seq_item_port.item_done(req);
                 // Access Phase 
                 seq_item_port.get_next_item(rsp);
-                do_access(req, rsp);
-                seq_item_port.item_done();
+                do_access(rsp);
+                seq_item_port.item_done(rsp);
             end
         join
     endtask
@@ -273,7 +273,7 @@ typedef virtual v_axi_inf #(
     endtask
     //}}}
     //{{{ do_access 
-    virtual task do_access(axi_slv_seq_item req, axi_slv_seq_item rsp);
+    virtual task do_access(axi_slv_seq_item rsp);
         #1ns;
     endtask
 endclass: axi_slv_driver

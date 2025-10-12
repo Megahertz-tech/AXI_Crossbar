@@ -42,7 +42,7 @@ module tb_axi_xbar_top;
     initial begin
       clk <= 1'b0;
       forever begin
-        #(2ns) clk <= !clk;
+        #(TbClkPeriod) clk <= !clk;
       end   
     end
 
@@ -101,11 +101,16 @@ module tb_axi_xbar_top;
     end
     for(genvar i=0; i<TbNumMasters; i++) begin : assign_masters 
     always @(*) begin
+        master_vifs[i].aw_ready  <= master_infs[i].aw_ready   ;        
+        master_vifs[i].w_ready   <= master_infs[i].w_ready  ;         
+        master_vifs[i].b_valid   <= master_infs[i].b_valid  ;         
+        master_vifs[i].ar_valid  <= master_infs[i].ar_valid  ;        
+        master_vifs[i].r_valid   <= master_infs[i].r_valid  ;        
+
         master_infs[i].aw_id     <= master_vifs[i].aw_id      ;        
         master_infs[i].aw_addr   <= master_vifs[i].aw_addr    ;        
         master_infs[i].aw_lock   <= master_vifs[i].aw_lock    ;        
         master_infs[i].aw_valid  <= master_vifs[i].aw_valid   ;        
-        master_infs[i].aw_ready  <= master_vifs[i].aw_ready   ;        
         master_infs[i].aw_user   <= master_vifs[i].aw_user    ;        
         master_infs[i].aw_len    <= master_vifs[i].aw_len     ;        
         master_infs[i].aw_size   <= master_vifs[i].aw_size    ;        
@@ -116,21 +121,18 @@ module tb_axi_xbar_top;
         master_infs[i].aw_region <= master_vifs[i].aw_region  ;        
         master_infs[i].aw_atop   <= master_vifs[i].aw_atop    ;        
         master_infs[i].w_data    <= master_vifs[i].w_data   ;         
+        master_infs[i].w_valid   <= master_vifs[i].w_valid  ;         
         master_infs[i].w_strb    <= master_vifs[i].w_strb   ;         
         master_infs[i].w_last    <= master_vifs[i].w_last   ;         
         master_infs[i].w_user    <= master_vifs[i].w_user   ;         
-        master_infs[i].w_valid   <= master_vifs[i].w_valid  ;         
-        master_infs[i].w_ready   <= master_vifs[i].w_ready  ;         
         master_infs[i].b_id      <= master_vifs[i].b_id     ;         
         master_infs[i].b_user    <= master_vifs[i].b_user   ;         
-        master_infs[i].b_valid   <= master_vifs[i].b_valid  ;         
         master_infs[i].b_ready   <= master_vifs[i].b_ready  ;         
         master_infs[i].b_resp    <= master_vifs[i].b_resp  ;        
         master_infs[i].ar_id     <= master_vifs[i].ar_id     ;        
         master_infs[i].ar_addr   <= master_vifs[i].ar_addr   ;        
         master_infs[i].ar_lock   <= master_vifs[i].ar_lock   ;        
         master_infs[i].ar_user   <= master_vifs[i].ar_user   ;        
-        master_infs[i].ar_valid  <= master_vifs[i].ar_valid  ;        
         master_infs[i].ar_ready  <= master_vifs[i].ar_ready  ;        
         master_infs[i].ar_len    <= master_vifs[i].ar_len     ;        
         master_infs[i].ar_size   <= master_vifs[i].ar_size    ;        
@@ -143,58 +145,58 @@ module tb_axi_xbar_top;
         master_infs[i].r_data    <= master_vifs[i].r_data   ;        
         master_infs[i].r_last    <= master_vifs[i].r_last   ;        
         master_infs[i].r_user    <= master_vifs[i].r_user   ;        
-        master_infs[i].r_valid   <= master_vifs[i].r_valid  ;        
         master_infs[i].r_ready   <= master_vifs[i].r_ready  ;        
         master_infs[i].r_resp    <= master_vifs[i].r_resp  ;  
     end
     end
     for(genvar i=0; i<TbNumSlaves; i++)begin : assign_slaves 
     always @(*) begin
-        slave_infs[i].aw_id     <= slave_vifs[i].aw_id      ;        
-        slave_infs[i].aw_addr   <= slave_vifs[i].aw_addr    ;        
-        slave_infs[i].aw_lock   <= slave_vifs[i].aw_lock    ;        
-        slave_infs[i].aw_valid  <= slave_vifs[i].aw_valid   ;        
         slave_infs[i].aw_ready  <= slave_vifs[i].aw_ready   ;        
-        slave_infs[i].aw_user   <= slave_vifs[i].aw_user    ;        
-        slave_infs[i].aw_len    <= slave_vifs[i].aw_len     ;        
-        slave_infs[i].aw_size   <= slave_vifs[i].aw_size    ;        
-        slave_infs[i].aw_burst  <= slave_vifs[i].aw_burst   ;        
-        slave_infs[i].aw_cache  <= slave_vifs[i].aw_cache   ;        
-        slave_infs[i].aw_prot   <= slave_vifs[i].aw_prot    ;        
-        slave_infs[i].aw_qos    <= slave_vifs[i].aw_qos     ;        
-        slave_infs[i].aw_region <= slave_vifs[i].aw_region  ;        
-        slave_infs[i].aw_atop   <= slave_vifs[i].aw_atop    ;        
-        slave_infs[i].w_data    <= slave_vifs[i].w_data   ;         
-        slave_infs[i].w_strb    <= slave_vifs[i].w_strb   ;         
-        slave_infs[i].w_last    <= slave_vifs[i].w_last   ;         
-        slave_infs[i].w_user    <= slave_vifs[i].w_user   ;         
-        slave_infs[i].w_valid   <= slave_vifs[i].w_valid  ;         
         slave_infs[i].w_ready   <= slave_vifs[i].w_ready  ;         
-        slave_infs[i].b_id      <= slave_vifs[i].b_id     ;         
-        slave_infs[i].b_user    <= slave_vifs[i].b_user   ;         
         slave_infs[i].b_valid   <= slave_vifs[i].b_valid  ;         
-        slave_infs[i].b_ready   <= slave_vifs[i].b_ready  ;         
-        slave_infs[i].b_resp    <= slave_vifs[i].b_resp  ;        
-        slave_infs[i].ar_id     <= slave_vifs[i].ar_id     ;        
-        slave_infs[i].ar_addr   <= slave_vifs[i].ar_addr   ;        
-        slave_infs[i].ar_lock   <= slave_vifs[i].ar_lock   ;        
-        slave_infs[i].ar_user   <= slave_vifs[i].ar_user   ;        
         slave_infs[i].ar_valid  <= slave_vifs[i].ar_valid  ;        
-        slave_infs[i].ar_ready  <= slave_vifs[i].ar_ready  ;        
-        slave_infs[i].ar_len    <= slave_vifs[i].ar_len     ;        
-        slave_infs[i].ar_size   <= slave_vifs[i].ar_size    ;        
-        slave_infs[i].ar_burst  <= slave_vifs[i].ar_burst   ;        
-        slave_infs[i].ar_cache  <= slave_vifs[i].ar_cache   ;        
-        slave_infs[i].ar_prot   <= slave_vifs[i].ar_prot    ;        
-        slave_infs[i].ar_qos    <= slave_vifs[i].ar_qos     ;        
-        slave_infs[i].ar_region <= slave_vifs[i].ar_region  ;        
-        slave_infs[i].r_id      <= slave_vifs[i].r_id     ;        
-        slave_infs[i].r_data    <= slave_vifs[i].r_data   ;        
-        slave_infs[i].r_last    <= slave_vifs[i].r_last   ;        
-        slave_infs[i].r_user    <= slave_vifs[i].r_user   ;        
         slave_infs[i].r_valid   <= slave_vifs[i].r_valid  ;        
-        slave_infs[i].r_ready   <= slave_vifs[i].r_ready  ;        
-        slave_infs[i].r_resp    <= slave_vifs[i].r_resp  ;        
+
+        slave_vifs[i].aw_id     <= slave_infs[i].aw_id      ;        
+        slave_vifs[i].aw_addr   <= slave_infs[i].aw_addr    ;        
+        slave_vifs[i].aw_lock   <= slave_infs[i].aw_lock    ;        
+        slave_vifs[i].aw_valid  <= slave_infs[i].aw_valid   ;        
+        slave_vifs[i].aw_user   <= slave_infs[i].aw_user    ;        
+        slave_vifs[i].aw_len    <= slave_infs[i].aw_len     ;        
+        slave_vifs[i].aw_size   <= slave_infs[i].aw_size    ;        
+        slave_vifs[i].aw_burst  <= slave_infs[i].aw_burst   ;        
+        slave_vifs[i].aw_cache  <= slave_infs[i].aw_cache   ;        
+        slave_vifs[i].aw_prot   <= slave_infs[i].aw_prot    ;        
+        slave_vifs[i].aw_qos    <= slave_infs[i].aw_qos     ;        
+        slave_vifs[i].aw_region <= slave_infs[i].aw_region  ;        
+        slave_vifs[i].aw_atop   <= slave_infs[i].aw_atop    ;        
+        slave_vifs[i].w_data    <= slave_infs[i].w_data   ;         
+        slave_vifs[i].w_strb    <= slave_infs[i].w_strb   ;         
+        slave_vifs[i].w_last    <= slave_infs[i].w_last   ;         
+        slave_vifs[i].w_user    <= slave_infs[i].w_user   ;         
+        slave_vifs[i].w_valid   <= slave_infs[i].w_valid  ;         
+        slave_vifs[i].b_id      <= slave_infs[i].b_id     ;         
+        slave_vifs[i].b_user    <= slave_infs[i].b_user   ;         
+        slave_vifs[i].b_ready   <= slave_infs[i].b_ready  ;         
+        slave_vifs[i].b_resp    <= slave_infs[i].b_resp  ;        
+        slave_vifs[i].ar_id     <= slave_infs[i].ar_id     ;        
+        slave_vifs[i].ar_addr   <= slave_infs[i].ar_addr   ;        
+        slave_vifs[i].ar_lock   <= slave_infs[i].ar_lock   ;        
+        slave_vifs[i].ar_user   <= slave_infs[i].ar_user   ;        
+        slave_vifs[i].ar_ready  <= slave_infs[i].ar_ready  ;        
+        slave_vifs[i].ar_len    <= slave_infs[i].ar_len     ;        
+        slave_vifs[i].ar_size   <= slave_infs[i].ar_size    ;        
+        slave_vifs[i].ar_burst  <= slave_infs[i].ar_burst   ;        
+        slave_vifs[i].ar_cache  <= slave_infs[i].ar_cache   ;        
+        slave_vifs[i].ar_prot   <= slave_infs[i].ar_prot    ;        
+        slave_vifs[i].ar_qos    <= slave_infs[i].ar_qos     ;        
+        slave_vifs[i].ar_region <= slave_infs[i].ar_region  ;        
+        slave_vifs[i].r_id      <= slave_infs[i].r_id     ;        
+        slave_vifs[i].r_data    <= slave_infs[i].r_data   ;        
+        slave_vifs[i].r_last    <= slave_infs[i].r_last   ;        
+        slave_vifs[i].r_user    <= slave_infs[i].r_user   ;        
+        slave_vifs[i].r_ready   <= slave_infs[i].r_ready  ;        
+        slave_vifs[i].r_resp    <= slave_infs[i].r_resp  ;        
     end
     end
     //}}}        
@@ -249,17 +251,36 @@ module tb_axi_xbar_top;
 
 
   // DUT interfaces
-  /*
   slv_req_t  [TbNumSlaves-1:0]  slv_ports_req;
   slv_resp_t [TbNumSlaves-1:0]  slv_ports_resp;
   mst_req_t  [TbNumMasters-1:0] mst_ports_req;
   mst_resp_t [TbNumMasters-1:0] mst_ports_resp;
-  */
+  for (genvar i = 0; i < TbNumMasters; i++) begin 
+    `AXI_ASSIGN_TO_REQ(mst_ports_req[i], master_infs[i])
+    `AXI_ASSIGN_TO_RESP(mst_ports_resp[i], master_infs[i])
+  end
+  for (genvar i = 0; i < TbNumSlaves; i++) begin 
+    `AXI_ASSIGN_TO_REQ(slv_ports_req[i], slave_infs[i])
+    `AXI_ASSIGN_TO_RESP(slv_ports_resp[i], slave_infs[i])
+  end
 
   // Configuration inputs
   rule_t [TbNumAddrRules-1:0]                        addr_map;
   logic  [TbNumSlaves-1:0]                           en_default_mst_port;
   logic  [TbNumSlaves-1:0][MstPortsIdxWidth-1:0]     default_mst_port;
+  
+  initial begin
+    for(int i=0; i<TbNumAddrRules; i++) begin
+        addr_map = assign_addr_map(i);
+    end
+  end
+  function rule_t assign_addr_map(int No);
+    rule_t map;
+    map.idx = No;
+    map.start_addr = No * 32'h0000_0600;
+    map.end_addr = (No+1) * 32'h0000_0600;
+    return map;
+  endfunction
 
   logic test_en;
   

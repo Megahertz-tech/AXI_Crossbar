@@ -1,0 +1,92 @@
+
+#
+# Mnemonic Maps
+#
+mmap new  -reuse -name {Boolean as Logic} -radix %b -contents {{%c=FALSE -edgepriority 1 -shape low}
+{%c=TRUE -edgepriority 1 -shape high}}
+mmap new  -reuse -name {Example Map} -radix %x -contents {{%b=11???? -bgcolor orange -label REG:%x -linecolor yellow -shape bus}
+{%x=1F -bgcolor red -label ERROR -linecolor white -shape EVENT}
+{%x=2C -bgcolor red -label ERROR -linecolor white -shape EVENT}
+{%x=* -label %x -linecolor gray -shape bus}}
+
+array unset createdGroup
+array set createdGroup {}
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.clk}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.rst_n}]}
+	} ]]
+set id [waveform add -cdivider divider]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.master_vifs[0].aw_valid}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.master_vifs[0].aw_addr[31:0]}]}
+	} ]]
+waveform format $id -radix %x
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.master_vifs[0].aw_burst[1:0]}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.master_vifs[0].aw_len[7:0]}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.master_vifs[0].w_strb[7:0]}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.master_vifs[0].w_valid}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.master_vifs[0].w_last}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.master_vifs[0].w_data[63:0]}]}
+	} ]]
+set id [waveform add -cdivider divider]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.master_vifs[1].aw_valid}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.master_vifs[1].aw_addr[31:0]}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.master_vifs[1].w_valid}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.master_vifs[1].w_data[63:0]}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.master_vifs[1].w_strb[7:0]}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.master_vifs[1].w_last}]}
+	} ]]
+set id [waveform add -cdivider divider]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.master_vifs[2].aw_valid}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.master_vifs[2].aw_addr[31:0]}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.master_vifs[2].w_valid}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.master_vifs[2].w_data[63:0]}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.master_vifs[2].w_strb[7:0]}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.master_vifs[2].w_last}]}
+	} ]]
+set id [waveform add -cdivider divider]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.slave_vifs[0].aw_ready}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.slave_vifs[0].w_ready}]}
+	} ]]
+
+waveform xview limits 0 410531.013ps

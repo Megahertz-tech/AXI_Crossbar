@@ -20,18 +20,22 @@ class axi_slv_default_sequence extends uvm_sequence #(axi_slv_seq_item);
         this.slv_id = id;
     endfunction
     task body();
-        axi_slv_seq_item req, rsp;
+        axi_slv_seq_item req, tmp, rsp;
         int item_num = 0;
         `uvm_info("SLV_SEQ body", "enter body", UVM_LOW)
         #50ns;
         for(int i=0; i<10; i++) begin
             `uvm_create(req)
             `uvm_info("SLV_SEQ", "uvm_create req", UVM_LOW)
+            req.set_transaction_id(i);
             `uvm_send(req)
+            get_response(tmp);
+            assert(!(tmp.get_transaction_id()==req.get_transaction_id()))
+            else `uvm_error($sformatf("SLV_SEQ No.%0d", slv_id), $sformatf("get_response id: %0d is not equal to the req id: %0d !", tmp.get_transaction_id(), req.get_transaction_id()))
             `uvm_info("SLV_SEQ", "uvm_send req", UVM_LOW)
             `uvm_create(rsp)
             `uvm_info("SLV_SEQ", "uvm_create rsp", UVM_LOW)
-            rsp.copy(req);
+            rsp.copy(tmp);
             if(rsp.is_aw) begin
                 assert(rsp.aw_valid) 
                 else `uvm_error($sformatf("slave_%d AW-channel", slv_id), "aw_valid deasserted!")
@@ -75,6 +79,7 @@ class axi_slv_default_sequence extends uvm_sequence #(axi_slv_seq_item);
             end
             `uvm_send(rsp)
             `uvm_info("SLV_SEQ", "uvm_send rsp", UVM_LOW)
+            get_response(tmp);
         end
         //if(p_sequencer==null) `uvm_error("SLV_SEQ","p_sequencer is null !!!!!!")
         //else `uvm_info("SLV_SEQ",p_sequencer.get_full_name(),UVM_LOW)
