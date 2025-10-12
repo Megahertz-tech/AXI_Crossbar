@@ -7,13 +7,10 @@
 `ifndef __XBAR_VIRTUAL_SEQUENCER_SV__
 `define __XBAR_VIRTUAL_SEQUENCER_SV__
 
-class xbar_virtual_sequencer #(
-    parameter int unsigned number_mst = 3;
-    parameter int unsigned number_slv = 4;
-) extends uvm_sequencer; 
+class xbar_virtual_sequencer extends uvm_sequencer; 
     
-    xbar_sequencer mst_sqr[number_mst];
-    xbar_sequencer slv_sqr[number_slv];
+    axi_mst_sequencer   mst_sqr[tb_xbar_param_pkg::TB_MASTER_NUMBER_IN_USE];
+    axi_slv_sequencer   slv_sqr[tb_xbar_param_pkg::TB_SLAVE_NUMBER_IN_USE];
 
     `uvm_component_utils(xbar_virtual_sequencer)
     function new (string name = "xbar_virtual_sequencer", uvm_component parent);

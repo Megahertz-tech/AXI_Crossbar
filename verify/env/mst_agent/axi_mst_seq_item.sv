@@ -96,25 +96,28 @@ class axi_mst_seq_item extends axi_mst_seq_item_base;
     function void set_one_transfer_transaction_w();
         int data;
         if(access_type == AXI_WRITE_ACCESS) begin 
+            `uvm_info("TRANS",$sformatf("Set W data (len: %0d)", aw_len+1),UVM_LOW)
             w_data = new[aw_len+1];
             w_strb = new[aw_len+1];
             w_last = new[aw_len+1];
+            w_valid = 1'b1;
             foreach(w_data[i]) begin
                 assert(std::randomize(data));
                 w_data[i] = data;
             end
             foreach(w_strb[i]) begin
-                w_strb[i] = 'b1;
+                w_strb[i] = '1;
             end
             foreach(w_last[i]) begin
                 w_last[i] = 0;
             end
-            w_strb[aw_len+1] = 1;
+            w_last[aw_len] = 1;
         end
     endfunction
     //}}}
     //{{{ set_one_transfer_transaction_awr
     function void set_one_transfer_transaction_awr();
+        `uvm_info("TRANS",$sformatf("Set ARW (access_type: %s)", access_type.name()),UVM_LOW)
         if(access_type == AXI_WRITE_ACCESS) begin
             aw_valid = 1;  
             aw_size = AXI_BURST_SIZE_8_BYTES;

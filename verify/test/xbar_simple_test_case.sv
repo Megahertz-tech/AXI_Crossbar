@@ -8,6 +8,8 @@
 `define __XBAR_SIMPLE_TEST_CASE_SV__
 
 class xbar_simple_test_case extends xbar_test_base;
+        axi_slv_default_sequence        slv_default_seq[tb_xbar_param_pkg::AXI_SLAVE_NUMBER_IN_USE];
+        axi_mst_regular_sequence        mst_regular_seq[tb_xbar_param_pkg::AXI_MASTER_NUMBER_IN_USE];
     
     `uvm_component_utils(xbar_simple_test_case)
     function new (string name = "xbar_simple_test_case", uvm_component parent);
@@ -15,10 +17,50 @@ class xbar_simple_test_case extends xbar_test_base;
     endfunction
 
     task run_phase(uvm_phase phase);
-        xbar_simple_sequence    simple_seq = xbar_simple_sequence::type_id::create("simple_seq");
         phase.raise_objection(this);
+        `uvm_info("TEST_CASE", "Enter run_phase.", UVM_LOW)
+        foreach(env.virt_sqr.mst_sqr[i]) begin
+            if(env.virt_sqr.mst_sqr[i] == null) `uvm_error("TEST_CHECK","attach virtual sequencer mst handle wrong!")
+        end
+        foreach(env.virt_sqr.slv_sqr[i]) begin
+            if(env.virt_sqr.slv_sqr[i] == null) `uvm_error("TEST_CHECK","attach virtual sequencer slv handle wrong!")
+        end
+
+        foreach(slv_default_seq[i]) begin
+            slv_default_seq[i] = axi_slv_default_sequence::type_id::create($sformatf("slv_default_seq_%0d", i));
+                `uvm_info("slv_default_seq",$sformatf("slv_default_seq_%0d create",i),UVM_LOW)
+        end
+        foreach(mst_regular_seq[i]) begin
+            mst_regular_seq[i] = axi_mst_regular_sequence::type_id::create($sformatf("mst_regular_seq_%0d", i));
+                `uvm_info("mst_regular_seq",$sformatf("mst_regular_seq_%0d create",i),UVM_LOW)
+        end
+
+        fork
+            fork
+                foreach(slv_default_seq[i]) begin
+                    slv_default_seq[i].start(env.virt_sqr.slv_sqr[i]);
+                end
+            join
+            fork
+                foreach(mst_regular_seq[j]) begin
+                    mst_regular_seq[j].start(env.virt_sqr.mst_sqr[j]);
+                end
+            join
+        join
+        wait fork;
+
+
+
+            /*
             init_vseq(simple_seq);
-            simple_seq.start(null);
+            foreach(simple_seq.mst_sqr[i])begin
+                if(simple_seq.mst_sqr[i] == null) `uvm_error("test_case", $sformatf("simple_seq.mst_sqr[%0d] is null",i))
+            end
+            foreach(simple_seq.slv_sqr[i])begin
+                if(simple_seq.slv_sqr[i] == null) `uvm_error("test_case", $sformatf("simple_seq.slv_sqr[%0d] is null",i))
+            end
+            */
+            //simple_seq.start(env.virt_sqr);
         phase.drop_objection(this);
     endtask
 

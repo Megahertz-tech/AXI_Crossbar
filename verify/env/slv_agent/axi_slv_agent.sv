@@ -34,13 +34,13 @@ typedef virtual axi_inf #(
          `uvm_info(get_full_name(), "into build_phase", UVM_LOW)
          drv = axi_slv_driver::type_id::create("drv", this);
          sqr = axi_slv_sequencer::type_id::create("sqr", this);
+        drv.set_interface(vif);
     endfunction 
 
     function void connect_phase(uvm_phase phase);
         super.connect_phase(phase);
         `uvm_info(get_full_name(), "into connect_phase", UVM_LOW)
         drv.seq_item_port.connect(sqr.seq_item_export);
-        drv.set_interface(vif);
         //drv.vif = this.vif;
     endfunction
     function void set_interface(virt_axi_slv_inf inf);

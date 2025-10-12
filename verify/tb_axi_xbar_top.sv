@@ -40,16 +40,25 @@ module tb_axi_xbar_top;
     logic rst_n;
     // Clock generation
     initial begin
-      clk = 1'b0;
-      forever #(TbClkPeriod/2) clk = ~clk;
+      int clk_count = 0;
+      $display("@%t: clock_generation", $time);
+      clk <= 1'b0;
+      forever begin
+        #(2ns) clk <= !clk;
+        if(clk_count<10) begin
+            clk_count++;
+            $display("No.%0d clock_generation", clk_count);
+        end
+      end   
     end
 
     // Reset generation
     initial begin
       #3ns;
-      rst_n = 1'b0;
+      $display("@%t: reset_generation", $time);
+      rst_n <= 1'b0;
       repeat ($urandom_range(5,20)) @(posedge clk); //deassertion can only be synchronous with a rising edge of ACLK.
-      rst_n = 1'b1;
+      rst_n <= 1'b1;
     end
     //}}}
   localparam int MstPortsIdxWidth = axi_math_pkg::idx_width(TbNumMasters);
@@ -307,19 +316,19 @@ module tb_axi_xbar_top;
             .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
             .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_MASTER_ID_WIDTH_IN_USE),
             .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
-            ))::set(uvm_root::get(), "uvm_test_top.env*", "mvif_0", master_vifs[0]);
+            ))::set(uvm_root::get(), "uvm_test_top.env*", "mst_vif[0]", master_vifs[0]);
             uvm_config_db#(virtual axi_inf #(
             .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
             .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
             .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_MASTER_ID_WIDTH_IN_USE),
             .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
-            ))::set(uvm_root::get(), "uvm_test_top.env*", "mvif_1", master_vifs[1]);
+            ))::set(uvm_root::get(), "uvm_test_top.env*", "mst_vif[1]", master_vifs[1]);
             uvm_config_db#(virtual axi_inf #(
             .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
             .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
             .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_MASTER_ID_WIDTH_IN_USE),
             .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
-            ))::set(uvm_root::get(), "uvm_test_top.env*", "mvif_2", master_vifs[2]);
+            ))::set(uvm_root::get(), "uvm_test_top.env*", "mst_vif[2]", master_vifs[2]);
         //end
         //end
         //for(genvar i=0; i<TbNumSlaves; i++) begin
@@ -329,25 +338,25 @@ module tb_axi_xbar_top;
             .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
             .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE),
             .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
-            ))::set(uvm_root::get(), "uvm_test_top.env*", "svif_0", slave_vifs[0]);
+            ))::set(uvm_root::get(), "uvm_test_top.env*", "slv_vif[0]", slave_vifs[0]);
             uvm_config_db#(virtual axi_inf #(
             .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
             .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
             .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE),
             .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
-            ))::set(uvm_root::get(), "uvm_test_top.env*", "svif_1", slave_vifs[1]);
+            ))::set(uvm_root::get(), "uvm_test_top.env*", "slv_vif[1]", slave_vifs[1]);
             uvm_config_db#(virtual axi_inf #(
             .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
             .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
             .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE),
             .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
-            ))::set(uvm_root::get(), "uvm_test_top.env*", "svif_2", slave_vifs[2]);
+            ))::set(uvm_root::get(), "uvm_test_top.env*", "slv_vif[2]", slave_vifs[2]);
             uvm_config_db#(virtual axi_inf #(
             .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
             .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
             .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE),
             .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
-            ))::set(uvm_root::get(), "uvm_test_top.env*", "svif_3", slave_vifs[3]);
+            ))::set(uvm_root::get(), "uvm_test_top.env*", "slv_vif[3]", slave_vifs[3]);
         run_test("xbar_simple_test_case");
         end
         //end

@@ -62,19 +62,17 @@ typedef virtual axi_inf #(
         forever begin 
             reset_if();
             reset_events();
-            while(1) begin
-                #10ns;
-            end
-            //fork
-            //    main();
-            //    @(negedge vif.rst_n);
-            //join_any
-            //disable fork;
+            fork
+                main();
+                @(negedge vif.rst_n);
+            join_any
+            disable fork;
         end
     endtask
     //}}}
     //{{{ reset_if
     virtual task reset_if();
+        `uvm_info("SLV driver"," reset inf", UVM_LOW)
         vif.Slave_cb.aw_ready  <= '0;
         vif.Slave_cb.w_ready   <= '0;
         vif.Slave_cb.b_id      <= '0;
@@ -93,6 +91,7 @@ typedef virtual axi_inf #(
     //}}}
     //{{{ reset_events
     task reset_events();
+        `uvm_info("SLV driver", "reset events", UVM_LOW)
         aw_valid_e.reset();              
         w_valid_e.reset();       
         b_ready_e.reset();       

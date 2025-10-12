@@ -12,7 +12,7 @@ sim_dir = os.getcwd()
 xrun_base_str = 'xrun -ALLOWREDEFINITION -64bit -nowarn DSEMEL -nowarn NOMTDGUI -nowarn DSEM2009 -sv -timescale 1ns/1ps -uvm -date -clean' 
 xrun_base_str += ' -uvmhome '+ XRUN_UVM_HOME
 xrun_gui_args = {
-        'gui': ' -gui -access +rwc -input '+sim_dir+'/wave_cfg/vsim_fifo.do', 
+        'gui': ' -gui -access +rwc -input '+sim_dir+'/wave_cfg/vsim_axi_xbar.do', 
         'cw': ' -acess +rwc -input vsim_crossbar.do',
         'c': ' -access +rwc -input vsim_noprobe.do'
         }

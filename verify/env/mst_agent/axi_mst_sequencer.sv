@@ -6,7 +6,7 @@
 **************************************************************/
 `ifndef __AXI_MST_SEQUENCER_SV__
 `define __AXI_MST_SEQUENCER_SV__
-
+import uvm_pkg::*;
 class axi_mst_sequencer extends uvm_sequencer #(axi_mst_seq_item);
     
    `uvm_component_utils(axi_mst_sequencer)

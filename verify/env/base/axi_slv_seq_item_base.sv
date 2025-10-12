@@ -7,6 +7,9 @@
 `ifndef __AXI_SLV_SEQ_ITEM_BASE_SV__
 `define __AXI_SLV_SEQ_ITEM_BASE_SV__
 `include "axi_typedef_pkg.svh"
+`include "tb_xbar_param_pkg.svh"
+`include "uvm_macros.svh"
+import uvm_pkg::*;
 class axi_slv_seq_item_base #(
     parameter int unsigned AXI_ADDR_WIDTH = tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE,
     parameter int unsigned AXI_DATA_WIDTH = tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE,

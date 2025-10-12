@@ -16,17 +16,18 @@
         $CB_PRJ_ROOT/verify/cfg/global_cfg.sv           \
         $CB_PRJ_ROOT/verify/env/tb_xbar_param_pkg.svh   \
         $CB_PRJ_ROOT/verify/env/tb_axi_macro_define_pkg.svh \
-        $CB_PRJ_ROOT/verify/env/base/tb_axi_cfg_base.sv  \
-        $CB_PRJ_ROOT/verify/cfg/axi_mst_regular_cfg.sv  \
         $CB_PRJ_ROOT/verify/env/base/axi_mst_seq_item_base.sv  \
         $CB_PRJ_ROOT/verify/env/base/axi_slv_seq_item_base.sv  \
         $CB_PRJ_ROOT/verify/env/mst_agent/axi_mst_seq_item.sv  \
         $CB_PRJ_ROOT/verify/env/mst_agent/axi_mst_sequencer.sv  \
+        $CB_PRJ_ROOT/verify/env/slv_agent/axi_slv_seq_item.sv  \
+        $CB_PRJ_ROOT/verify/env/slv_agent/axi_slv_sequencer.sv  \
+        $CB_PRJ_ROOT/verify/env/xbar_virtual_sequencer.sv \
+        $CB_PRJ_ROOT/verify/env/base/tb_axi_cfg_base.sv  \
+        $CB_PRJ_ROOT/verify/cfg/axi_mst_regular_cfg.sv  \
         $CB_PRJ_ROOT/verify/env/mst_agent/axi_mst_driver.sv  \
         $CB_PRJ_ROOT/verify/env/mst_agent/axi_mst_agent.sv  \
         $CB_PRJ_ROOT/verify/env/mst_agent/sequences/axi_mst_regular_sequence.sv  \
-        $CB_PRJ_ROOT/verify/env/slv_agent/axi_slv_seq_item.sv  \
-        $CB_PRJ_ROOT/verify/env/slv_agent/axi_slv_sequencer.sv  \
         $CB_PRJ_ROOT/verify/env/slv_agent/axi_slv_driver.sv  \
         $CB_PRJ_ROOT/verify/env/slv_agent/axi_slv_agent.sv  \
         $CB_PRJ_ROOT/verify/env/base/xbar_virtual_sequence_base.sv  \

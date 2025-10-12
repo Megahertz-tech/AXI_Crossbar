@@ -108,6 +108,7 @@ typedef virtual axi_inf #(
     //}}}
     //{{{ main
     task main();
+        `uvm_info("mst drv", "enter main()", UVM_LOW)
         //fork 
             //get_item();
             execute_item();
@@ -132,6 +133,7 @@ typedef virtual axi_inf #(
         forever begin
             axi_mst_seq_item tx;
             seq_item_port.get_next_item(tx);
+            `uvm_info("mst drv","get item", UVM_LOW)
             //wait(TXs_q.size() !=0 );
             //tx = TXs_q.pop_front();
             if(tx.access_type == AXI_WRITE_ACCESS) begin
