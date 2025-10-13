@@ -108,6 +108,7 @@
       logic     w_ready;                                  \
       logic     b_valid;                                  \
       b_chan_t  b;                                        \
+      //logic     b_ready;    \
       logic     r_valid;                                  \
       r_chan_t  r;                                        \
     } resp_t;

@@ -26,8 +26,8 @@ module axi_xbar_wrapper
   input  rule_t [Cfg.NoAddrRules-1:0]                               addr_map_i,
   input  logic  [Cfg.NoSlvPorts-1:0]                                en_default_mst_port_i,
   input  logic  [Cfg.NoSlvPorts-1:0][MstPortsIdxWidth-1:0]          default_mst_port_i,
-  axi_inf.Slave                                                     slv_ports [Cfg.NoSlvPorts-1:0],
-  axi_inf.Master                                                    mst_ports [Cfg.NoMstPorts-1:0]
+  axi_inf                                                           slv_ports [Cfg.NoSlvPorts-1:0],
+  axi_inf                                                           mst_ports [Cfg.NoMstPorts-1:0]
 );
 
   // TODO: Implement type definitions for interface-based connections
@@ -59,17 +59,24 @@ module axi_xbar_wrapper
   mst_req_t   [Cfg.NoMstPorts-1:0]  mst_reqs;
   mst_resp_t  [Cfg.NoMstPorts-1:0]  mst_resps;
   slv_req_t   [Cfg.NoSlvPorts-1:0]  slv_reqs;
-  slv_resp_t  [Cfg.NoSlvPorts-1:0]  slv_resps;
+  slv_resp_t  [Cfg.NoSlvPorts-1:0]  slv_resps; 
+    /*
+  slv_req_t   [Cfg.NoMstPorts-1:0]  mst_reqs;
+  slv_resp_t  [Cfg.NoMstPorts-1:0]  mst_resps;
+  mst_req_t   [Cfg.NoSlvPorts-1:0]  slv_reqs;
+  mst_resp_t  [Cfg.NoSlvPorts-1:0]  slv_resps;
+  */
 
   // Convert from struct-based to interface-based connections
+
   for (genvar i = 0; i < Cfg.NoMstPorts; i++) begin : gen_assign_mst
     `AXI_ASSIGN_FROM_REQ(mst_ports[i], mst_reqs[i])
     `AXI_ASSIGN_TO_RESP(mst_resps[i], mst_ports[i])
   end
-
   for (genvar i = 0; i < Cfg.NoSlvPorts; i++) begin : gen_assign_slv
     `AXI_ASSIGN_TO_REQ(slv_reqs[i], slv_ports[i])
-    `AXI_ASSIGN_FROM_RESP(slv_ports[i], slv_resps[i])
+    //`AXI_ASSIGN_FROM_RESP(slv_ports[i], slv_resps[i])
+    `AXI_ASSIGN_TO_RESP(slv_resps[i], slv_ports[i])
   end
 
   // TODO: Instantiate the main crossbar

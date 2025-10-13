@@ -73,6 +73,7 @@
   assign axi.w_ready  = resp.w_ready;                      \
   assign axi.b_valid  = resp.b_valid;                      \
   `__AXI_TO_B(assign, axi.b_, , resp.b, .)                \
+  //assign resp.b_ready = axi.b_ready;        \
   assign axi.r_valid  = resp.r_valid;                      \
   `__AXI_TO_R(assign, axi.r_, , resp.r, .)
 
@@ -94,6 +95,7 @@
   assign resp.w_ready  = axi.w_ready;                      \
   assign resp.b_valid  = axi.b_valid;                      \
   `__AXI_TO_B(assign, resp.b, ., axi.b_, )                \
+  //assign axi.b_ready   = resp.b_ready;     \
   assign resp.r_valid  = axi.r_valid;                      \
   `__AXI_TO_R(assign, resp.r, ., axi.r_, )
 ////////////////////////////////////////////////////////////////////////////////////////////////////

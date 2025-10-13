@@ -95,7 +95,9 @@ class axi_mst_driver extends uvm_driver #(axi_mst_seq_item);
        vif.Master_cb.w_user    <= '0;
        vif.Master_cb.w_valid   <= '0;
        vif.Master_cb.b_ready   <= '1;
+       vif.Master_cb.r_ready   <= '1;
        vif.Master_cb.ar_id     <= '0;
+       vif.Master_cb.ar_valid  <= 1'b0;
        vif.Master_cb.ar_addr   <= '0;
        vif.Master_cb.ar_len    <= '0;
        vif.Master_cb.ar_size   <= '0;
@@ -106,8 +108,6 @@ class axi_mst_driver extends uvm_driver #(axi_mst_seq_item);
        vif.Master_cb.ar_qos    <= '0;
        vif.Master_cb.ar_region <= '0;
        vif.Master_cb.ar_user   <= '0;
-       vif.Master_cb.ar_valid  <= '0;
-       vif.Master_cb.r_ready   <= '1;
        @(posedge vif.rst_n);
        `uvm_info(get_full_name(), $sformatf("master No.%0d reset inf done", mst_id), UVM_LOW)
     endtask

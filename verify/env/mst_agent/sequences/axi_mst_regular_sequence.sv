@@ -18,13 +18,15 @@ class axi_mst_regular_sequence extends uvm_sequence #(axi_mst_seq_item);
     task body();
         axi_mst_seq_item req;
         int rand_delay;
+        int addr_off;
         `uvm_info("MST_SEQ","enter body()",UVM_LOW)
         #50ns;
+        addr_off = $urandom_range('h400,0);
         for(int i=0; i<10; i++) begin
             `uvm_create(req)
             if(!req.randomize() with {
                 access_type == AXI_WRITE_ACCESS;
-                aw_addr == 8 * i;
+                aw_addr == 8 * i + addr_off;
             }) `uvm_error(get_type_name(), "randomization failure for req.")
             req.set_one_transfer_transaction_awr();
             req.set_one_transfer_transaction_w();

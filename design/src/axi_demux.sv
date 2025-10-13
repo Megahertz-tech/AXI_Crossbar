@@ -113,6 +113,7 @@ module axi_demux #(
   );
 
   // TODO: Implement spill registers for B channel
+  logic b_ready;
   spill_register #(
     .T       ( b_chan_t  ),
     .Bypass  ( ~SpillB   )
@@ -120,7 +121,8 @@ module axi_demux #(
     .clk_i,
     .rst_ni,
     .valid_i ( slv_resp_cut.b_valid ),
-    .ready_o ( slv_resp_cut.b_ready ),
+    //.ready_o ( slv_resp_cut.b_ready ),
+    .ready_o ( b_ready ),
     .data_i  ( slv_resp_cut.b       ),
     .valid_o ( slv_resp_o.b_valid   ),
     .ready_i ( slv_req_i.b_ready    ),
@@ -128,6 +130,7 @@ module axi_demux #(
   );
 
   // TODO: Implement spill registers for R channel
+  logic r_ready;
   spill_register #(
     .T       ( r_chan_t  ),
     .Bypass  ( ~SpillR   )
@@ -135,7 +138,8 @@ module axi_demux #(
     .clk_i,
     .rst_ni,
     .valid_i ( slv_resp_cut.r_valid ),
-    .ready_o ( slv_resp_cut.r_ready ),
+    .ready_o ( r_ready ),
+    //.ready_o ( slv_resp_cut.r_ready ),
     .data_i  ( slv_resp_cut.r       ),
     .valid_o ( slv_resp_o.r_valid   ),
     .ready_i ( slv_req_i.r_ready    ),

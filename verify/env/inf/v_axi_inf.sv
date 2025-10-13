@@ -236,8 +236,10 @@ interface v_axi_inf #(
          input  r_resp  ;   
     endclocking
     //}}}
+    /*
     modport Master_mp(clocking Master_cb);
     modport Slave_mp (clocking Slave_cb);   
+    */
 
   
 

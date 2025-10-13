@@ -24,7 +24,6 @@
 module tb_axi_xbar_top;
     import uvm_pkg::*;
 
-    //global_cfg axi_cfg = global_cfg::get();
     //{{{ tb cfg 
     parameter int   TbNumSlaves     = tb_xbar_param_pkg::TB_SLAVE_NUMBER_IN_USE;        // Number of slave ports to test
     parameter int   TbNumMasters    = tb_xbar_param_pkg::TB_MASTER_NUMBER_IN_USE;       // Number of master ports to test
@@ -104,7 +103,7 @@ module tb_axi_xbar_top;
         master_vifs[i].aw_ready  <= master_infs[i].aw_ready   ;        
         master_vifs[i].w_ready   <= master_infs[i].w_ready  ;         
         master_vifs[i].b_valid   <= master_infs[i].b_valid  ;         
-        master_vifs[i].ar_valid  <= master_infs[i].ar_valid  ;        
+        master_vifs[i].ar_ready  <= master_infs[i].ar_ready  ;        
         master_vifs[i].r_valid   <= master_infs[i].r_valid  ;        
 
         master_infs[i].aw_id     <= master_vifs[i].aw_id      ;        
@@ -133,7 +132,7 @@ module tb_axi_xbar_top;
         master_infs[i].ar_addr   <= master_vifs[i].ar_addr   ;        
         master_infs[i].ar_lock   <= master_vifs[i].ar_lock   ;        
         master_infs[i].ar_user   <= master_vifs[i].ar_user   ;        
-        master_infs[i].ar_ready  <= master_vifs[i].ar_ready  ;        
+        master_infs[i].ar_valid  <= master_vifs[i].ar_valid  ;        
         master_infs[i].ar_len    <= master_vifs[i].ar_len     ;        
         master_infs[i].ar_size   <= master_vifs[i].ar_size    ;        
         master_infs[i].ar_burst  <= master_vifs[i].ar_burst   ;        
@@ -154,7 +153,7 @@ module tb_axi_xbar_top;
         slave_infs[i].aw_ready  <= slave_vifs[i].aw_ready   ;        
         slave_infs[i].w_ready   <= slave_vifs[i].w_ready  ;         
         slave_infs[i].b_valid   <= slave_vifs[i].b_valid  ;         
-        slave_infs[i].ar_valid  <= slave_vifs[i].ar_valid  ;        
+        slave_infs[i].ar_ready  <= slave_vifs[i].ar_ready  ;        
         slave_infs[i].r_valid   <= slave_vifs[i].r_valid  ;        
 
         slave_vifs[i].aw_id     <= slave_infs[i].aw_id      ;        
@@ -183,7 +182,7 @@ module tb_axi_xbar_top;
         slave_vifs[i].ar_addr   <= slave_infs[i].ar_addr   ;        
         slave_vifs[i].ar_lock   <= slave_infs[i].ar_lock   ;        
         slave_vifs[i].ar_user   <= slave_infs[i].ar_user   ;        
-        slave_vifs[i].ar_ready  <= slave_infs[i].ar_ready  ;        
+        slave_vifs[i].ar_valid  <= slave_infs[i].ar_valid  ;        
         slave_vifs[i].ar_len    <= slave_infs[i].ar_len     ;        
         slave_vifs[i].ar_size   <= slave_infs[i].ar_size    ;        
         slave_vifs[i].ar_burst  <= slave_infs[i].ar_burst   ;        
@@ -201,9 +200,9 @@ module tb_axi_xbar_top;
     end
     //}}}        
     //{{{ Cfg to DUT
-    xbar_cfg_t XbarCfg = '{
-    NoSlvPorts:         TbNumSlaves,
-    NoMstPorts:         TbNumMasters,
+    parameter axi_typedef_pkg::xbar_cfg_t XbarCfg = '{
+    NoSlvPorts:         TbNumMasters,       // Number of slave ports (master connections)     
+    NoMstPorts:         TbNumSlaves,        // Number of master ports (slave connections)
     MaxMstTrans:        8,
     MaxSlvTrans:        4,
     FallThrough:        1'b0,
@@ -221,53 +220,12 @@ module tb_axi_xbar_top;
     // Connectivity matrix - students can modify for testing partial connectivity
   localparam bit [TbNumSlaves-1:0][TbNumMasters-1:0] Connectivity = '1;
 
-  // Type definitions
-  //{{{
-
-  // Slave port types 
-  `AXI_TYPEDEF_AW_CHAN_T(aw_chan_t, logic [TbAxiAddrWidth-1:0], logic [TbSlvIdWidth-1:0], logic)
-  `AXI_TYPEDEF_W_CHAN_T(w_chan_t, logic [TbAxiDataWidth-1:0], logic [TbAxiDataWidth/8-1:0], logic)
-  `AXI_TYPEDEF_B_CHAN_T(b_chan_t, logic [TbSlvIdWidth-1:0], logic)
-  `AXI_TYPEDEF_AR_CHAN_T(ar_chan_t, logic [TbAxiAddrWidth-1:0], logic [TbSlvIdWidth-1:0], logic)
-  `AXI_TYPEDEF_R_CHAN_T(r_chan_t, logic [TbAxiDataWidth-1:0], logic [TbSlvIdWidth-1:0], logic)
-  `AXI_TYPEDEF_REQ_T(slv_req_t, aw_chan_t, w_chan_t, ar_chan_t)
-  `AXI_TYPEDEF_RESP_T(slv_resp_t, b_chan_t, r_chan_t)
-
-  // Master port types (different ID width) MstIdWidth
-  `AXI_TYPEDEF_AW_CHAN_T(mst_aw_chan_t, logic [TbAxiAddrWidth-1:0], logic [MstIdWidth-1:0], logic)
-  `AXI_TYPEDEF_B_CHAN_T(mst_b_chan_t, logic [MstIdWidth-1:0], logic)
-  `AXI_TYPEDEF_AR_CHAN_T(mst_ar_chan_t, logic [TbAxiAddrWidth-1:0], logic [MstIdWidth-1:0], logic)
-  `AXI_TYPEDEF_R_CHAN_T(mst_r_chan_t, logic [TbAxiDataWidth-1:0], logic [MstIdWidth-1:0], logic)
-  `AXI_TYPEDEF_REQ_T(mst_req_t, mst_aw_chan_t, w_chan_t, mst_ar_chan_t)
-  `AXI_TYPEDEF_RESP_T(mst_resp_t, mst_b_chan_t, mst_r_chan_t)
-
-  // Address rule type
-  typedef struct packed {
-    int unsigned               idx;
-    logic [TbAxiAddrWidth-1:0] start_addr;
-    logic [TbAxiAddrWidth-1:0] end_addr;
-  } rule_t;
-//}}}
-
-
-  // DUT interfaces
-  slv_req_t  [TbNumSlaves-1:0]  slv_ports_req;
-  slv_resp_t [TbNumSlaves-1:0]  slv_ports_resp;
-  mst_req_t  [TbNumMasters-1:0] mst_ports_req;
-  mst_resp_t [TbNumMasters-1:0] mst_ports_resp;
-  for (genvar i = 0; i < TbNumMasters; i++) begin 
-    `AXI_ASSIGN_TO_REQ(mst_ports_req[i], master_infs[i])
-    `AXI_ASSIGN_TO_RESP(mst_ports_resp[i], master_infs[i])
-  end
-  for (genvar i = 0; i < TbNumSlaves; i++) begin 
-    `AXI_ASSIGN_TO_REQ(slv_ports_req[i], slave_infs[i])
-    `AXI_ASSIGN_TO_RESP(slv_ports_resp[i], slave_infs[i])
-  end
-
   // Configuration inputs
+  typedef axi_typedef_pkg::xbar_rule_32_t            rule_t;
   rule_t [TbNumAddrRules-1:0]                        addr_map;
   logic  [TbNumSlaves-1:0]                           en_default_mst_port;
   logic  [TbNumSlaves-1:0][MstPortsIdxWidth-1:0]     default_mst_port;
+  logic test_en = 1'b0;
   
   initial begin
     for(int i=0; i<TbNumAddrRules; i++) begin
@@ -281,45 +239,39 @@ module tb_axi_xbar_top;
     map.end_addr = (No+1) * 32'h0000_0600;
     return map;
   endfunction
-
-  logic test_en;
   
+  /*    -----------             --------------------------------------------------             -----------     */
+  /*    | mst_vif |             |         ------------------------------         |             | slv_vif |     */
+  /*    |         |             |...      |->slv_req          mst_rep->|      ...|             |         |     */
+  /*    |         |   mst_infs  |         |->...                  ...->|         |   slv_infs  |         |     */
+  /*    | mst_vif |<----------->|slv_port |           XBAR             | mst_port|<----------->| slv_vif |     */
+  /*    |         |             |         |<-slv_rsp          mst_rsp<-|         |             |         |     */
+  /*    |         |             |...      |<-...                  ...<-|      ...|             |         |     */
+  /*    | mst_vif |             |         ------------------------------         |             | svl_vif |     */
+  /*    |         |             |                                                |             |         |     */
+  /*    |  ...    |             |                   xbar_wrapper                 |             |  ...    |     */
+  /*    -----------             --------------------------------------------------             -----------     */
+  /*     Manageers                                                                             Subordinates    */
+
   // DUT instantiation
-  /*
-  axi_xbar #(
-    .Cfg          ( XbarCfg      ),
-    .ATOPs        ( 1'b1         ),
-    .Connectivity ( Connectivity ),
-    .slv_aw_chan_t( aw_chan_t    ),
-    .slv_w_chan_t ( w_chan_t     ),
-    .slv_b_chan_t ( b_chan_t     ),
-    .slv_ar_chan_t( ar_chan_t    ),
-    .slv_r_chan_t ( r_chan_t     ),
-    .slv_req_t    ( slv_req_t    ),
-    .slv_resp_t   ( slv_resp_t   ),
-    .mst_aw_chan_t( mst_aw_chan_t),
-    .mst_w_chan_t ( w_chan_t     ),
-    .mst_b_chan_t ( mst_b_chan_t ),
-    .mst_ar_chan_t( mst_ar_chan_t),
-    .mst_r_chan_t ( mst_r_chan_t ),
-    .mst_req_t    ( mst_req_t    ),
-    .mst_resp_t   ( mst_resp_t   ),
-    .rule_t       ( rule_t       )
-  ) i_axi_xbar_dut (
-    .clk_i                    ( clk                  ),
-    .rst_ni                   ( rst_n                ),
-    .test_i                   ( test_en              ),
-    .slv_ports_req_i          ( slv_ports_req        ),
-    .slv_ports_resp_o         ( slv_ports_resp       ),
-    .mst_ports_req_o          ( mst_ports_req        ),
-    .mst_ports_resp_i         ( mst_ports_resp       ),
-    .addr_map_i               ( addr_map             ),
-    .en_default_mst_port_i    ( en_default_mst_port  ),
-    .default_mst_port_i       ( default_mst_port     )
+  axi_xbar_wrapper #(
+  .AXI_USER_WIDTH   (TbAxiUserWidth),
+  .Cfg              (XbarCfg),
+  .ATOPS            (1'b1),
+  .CONNECTIVITY     (Connectivity),
+  .rule_t           (rule_t)
+  )
+  i_axi_dut_wrapper(
+  .clk_i                    (clk),
+  .rst_ni                   (rst_n),
+  .test_i                   (test_en),
+  .addr_map_i               (addr_map),
+  .en_default_mst_port_i    (en_default_mst_port),
+  .default_mst_port_i       (default_mst_port),
+  .slv_ports                (master_infs),
+  .mst_ports                (slave_infs)
   );
-  */
-
-
+  
     //{{{ UVM test setup  master_vifs
     //initial begin
         //uvm_config_db#(virtual fifo_if)::set(null, "uvm_test_top.env*", "vif", fif_if);

@@ -50,6 +50,8 @@ module axi_multicut #(
     assign cut_resp[NoCuts] = mst_resp_i;
 
     // TODO: Generate pipeline cuts
+      logic  b_ready[NoCuts];
+      logic r_ready[NoCuts];
     for (genvar i = 0; i < NoCuts; i++) begin : gen_cut
       // AW channel cut
       spill_register #(
@@ -89,7 +91,8 @@ module axi_multicut #(
         .clk_i,
         .rst_ni,
         .valid_i ( cut_resp[i+1].b_valid ),
-        .ready_o ( cut_resp[i+1].b_ready ),
+        .ready_o ( b_ready[i] ),
+        //.ready_o ( cut_resp[i+1].b_ready ),
         .data_i  ( cut_resp[i+1].b       ),
         .valid_o ( cut_resp[i].b_valid   ),
         .ready_i ( cut_req[i].b_ready    ),
@@ -119,7 +122,8 @@ module axi_multicut #(
         .clk_i,
         .rst_ni,
         .valid_i ( cut_resp[i+1].r_valid ),
-        .ready_o ( cut_resp[i+1].r_ready ),
+        .ready_o ( r_ready[i] ),
+        //.ready_o ( cut_resp[i+1].r_ready ),
         .data_i  ( cut_resp[i+1].r       ),
         .valid_o ( cut_resp[i].r_valid   ),
         .ready_i ( cut_req[i].r_ready    ),
