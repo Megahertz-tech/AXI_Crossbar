@@ -8,8 +8,8 @@
 `define __XBAR_SIMPLE_TEST_CASE_SV__
 
 class xbar_simple_test_case extends xbar_test_base;
-        axi_slv_default_sequence        slv_default_seq[tb_xbar_param_pkg::AXI_SLAVE_NUMBER_IN_USE];
-        axi_mst_regular_sequence        mst_regular_seq[tb_xbar_param_pkg::AXI_MASTER_NUMBER_IN_USE];
+        axi_slv_default_sequence        slv_default_seq[tb_xbar_param_pkg::TB_SLAVE_NUMBER_IN_USE];
+        axi_mst_regular_sequence        mst_regular_seq[tb_xbar_param_pkg::TB_MASTER_NUMBER_IN_USE];
     
     `uvm_component_utils(xbar_simple_test_case)
     function new (string name = "xbar_simple_test_case", uvm_component parent);

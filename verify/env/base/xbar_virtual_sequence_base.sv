@@ -10,8 +10,8 @@
 `include "tb_xbar_param_pkg.svh"
 typedef class xbar_virtual_sequencer;
 class xbar_virtual_sequence_base extends uvm_sequence;
-    axi_mst_sequencer mst_sqr[tb_xbar_param_pkg::AXI_MASTER_NUMBER_IN_USE];
-    axi_slv_sequencer slv_sqr[tb_xbar_param_pkg::AXI_SLAVE_NUMBER_IN_USE];
+    axi_mst_sequencer mst_sqr[tb_xbar_param_pkg::TB_MASTER_NUMBER_IN_USE];
+    axi_slv_sequencer slv_sqr[tb_xbar_param_pkg::TB_SLAVE_NUMBER_IN_USE];
 
     `uvm_object_utils(xbar_virtual_sequence_base)
     `uvm_declare_p_sequencer(xbar_virtual_sequencer)

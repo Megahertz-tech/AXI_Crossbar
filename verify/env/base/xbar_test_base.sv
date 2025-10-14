@@ -13,8 +13,8 @@ import uvm_pkg::*;
 class xbar_test_base extends uvm_test;
     `uvm_component_utils(xbar_test_base)
     xbar_env #(
-        .NoMstPorts(tb_xbar_param_pkg::AXI_MASTER_NUMBER_IN_USE),
-        .NoSlvPorts(tb_xbar_param_pkg::AXI_SLAVE_NUMBER_IN_USE)
+        .NoMstPorts(tb_xbar_param_pkg::TB_MASTER_NUMBER_IN_USE),
+        .NoSlvPorts(tb_xbar_param_pkg::TB_SLAVE_NUMBER_IN_USE)
     ) env;
     //xbar_axi_slave_env #(tb_xbar_param_pkg::AXI_SLAVE_NUMBER_IN_USE)   slv_env;
     function new (string name = "xbar_test_base", uvm_component parent);
@@ -24,8 +24,8 @@ class xbar_test_base extends uvm_test;
     function void build_phase(uvm_phase phase);
          super.build_phase(phase);
          env = xbar_env #(
-            .NoMstPorts(tb_xbar_param_pkg::AXI_MASTER_NUMBER_IN_USE),
-            .NoSlvPorts(tb_xbar_param_pkg::AXI_SLAVE_NUMBER_IN_USE)
+            .NoMstPorts(tb_xbar_param_pkg::TB_MASTER_NUMBER_IN_USE),
+            .NoSlvPorts(tb_xbar_param_pkg::TB_SLAVE_NUMBER_IN_USE)
          )::type_id::create("env", this);
          //slv_env = xbar_axi_slave_env #(tb_xbar_param_pkg::AXI_SLAVE_NUMBER_IN_USE)::type_id::create("slv_env", this);
     endfunction 

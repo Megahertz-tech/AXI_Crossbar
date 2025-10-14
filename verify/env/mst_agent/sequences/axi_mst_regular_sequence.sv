@@ -9,7 +9,7 @@
 `include "axi_mst_sequencer.sv"
 `include "uvm_macros.svh"
 class axi_mst_regular_sequence extends uvm_sequence #(axi_mst_seq_item);
-    
+    axi_mst_regular_cfg     cfg;
    `uvm_object_utils(axi_mst_regular_sequence)
     function new (string name = "axi_mst_regular_sequence");
         super.new(name);
@@ -18,15 +18,19 @@ class axi_mst_regular_sequence extends uvm_sequence #(axi_mst_seq_item);
     task body();
         axi_mst_seq_item req;
         int rand_delay;
-        int addr_off;
+        int addr_off, No_slice;
         `uvm_info("MST_SEQ","enter body()",UVM_LOW)
         #50ns;
-        addr_off = $urandom_range('h400,0);
+        cfg = axi_mst_regular_cfg::type_id::create("cfg");
+        if(!cfg.randomize()) `uvm_error(get_type_name(), "randomization failure for cfg.")
         for(int i=0; i<10; i++) begin
             `uvm_create(req)
+            No_slice = $urandom_range(cfg.ADDR_SLICES-1,0);
+            addr_off = cfg.ADDR_OFFSET * No_slice;
             if(!req.randomize() with {
                 access_type == AXI_WRITE_ACCESS;
                 aw_addr == 8 * i + addr_off;
+                aw_len  == cfg.burst_length - 1;
             }) `uvm_error(get_type_name(), "randomization failure for req.")
             req.set_one_transfer_transaction_awr();
             req.set_one_transfer_transaction_w();

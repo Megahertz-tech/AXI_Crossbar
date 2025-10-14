@@ -206,7 +206,7 @@ module tb_axi_xbar_top;
     MaxMstTrans:        8,
     MaxSlvTrans:        4,
     FallThrough:        1'b0,
-    LatencyMode:        10'b11_000_11_000,  // Pipeline AW/AR
+    LatencyMode:        10'b10_010_10_010,  // Pipeline AW/AR Demux: [AW, W, B, AR, R] Mux: [AW, W, B, AR, R]
     AxiIdWidthSlvPorts: TbSlvIdWidth,
     AxiIdUsedSlvPorts:  TbSlvIdWidth,
     UniqueIds:          1'b0,
@@ -223,20 +223,20 @@ module tb_axi_xbar_top;
   // Configuration inputs
   typedef axi_typedef_pkg::xbar_rule_32_t            rule_t;
   rule_t [TbNumAddrRules-1:0]                        addr_map;
-  logic  [TbNumSlaves-1:0]                           en_default_mst_port;
-  logic  [TbNumSlaves-1:0][MstPortsIdxWidth-1:0]     default_mst_port;
+  logic [XbarCfg.NoSlvPorts-1:0]                     en_default_mst_port = '0;
+  logic [TbNumSlaves-1:0][MstPortsIdxWidth-1:0]      default_mst_port;
   logic test_en = 1'b0;
   
   initial begin
     for(int i=0; i<TbNumAddrRules; i++) begin
-        addr_map = assign_addr_map(i);
+        addr_map[i] = assign_addr_map(i);
     end
   end
   function rule_t assign_addr_map(int No);
     rule_t map;
     map.idx = No;
-    map.start_addr = No * 32'h0000_0600;
-    map.end_addr = (No+1) * 32'h0000_0600;
+    map.start_addr = No * tb_xbar_param_pkg::BASE_ADDR_OFFSET;
+    map.end_addr = (No+1) * tb_xbar_param_pkg::BASE_ADDR_OFFSET;
     return map;
   endfunction
   
@@ -251,7 +251,7 @@ module tb_axi_xbar_top;
   /*    |         |             |                                                |             |         |     */
   /*    |  ...    |             |                   xbar_wrapper                 |             |  ...    |     */
   /*    -----------             --------------------------------------------------             -----------     */
-  /*     Manageers                                                                             Subordinates    */
+  /*     Manageers                                  Interconnect                               Subordinates    */
 
   // DUT instantiation
   axi_xbar_wrapper #(

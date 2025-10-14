@@ -134,7 +134,7 @@ class axi_mst_seq_item extends axi_mst_seq_item_base;
             aw_valid = 1;  
             aw_size = AXI_BURST_SIZE_8_BYTES;
             aw_burst = AXI_INCREMENTING_BURST;
-            aw_len = 0;
+            //aw_len = 0;
             aw_cache = 4'b0001; // Bufferable
             aw_prot = 3'b000;   // Unprivileged access
             aw_lock = 1'b0;     // Normal access
@@ -147,7 +147,7 @@ class axi_mst_seq_item extends axi_mst_seq_item_base;
             ar_valid = 1'b1; 
             ar_lock = 0; 
             ar_user = 0;
-            ar_len = 0;
+            //ar_len = 0;
             ar_size = AXI_BURST_SIZE_8_BYTES;
             ar_burst = AXI_INCREMENTING_BURST;
             ar_cache = 4'b0001; // Bufferable
@@ -157,9 +157,7 @@ class axi_mst_seq_item extends axi_mst_seq_item_base;
         end
     endfunction
     //}}}
-    constraint c_aw_id{
-        aw_id < 8'hFF;
-    }
+    
 
 endclass
 

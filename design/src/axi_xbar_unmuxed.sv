@@ -93,6 +93,20 @@ import cf_math_pkg::idx_width;
   // Workaround for some simulator issues
   localparam int unsigned cfg_NoMstPorts = Cfg.NoMstPorts;
 
+//{{{ topology diagram
+/*                                                                                      
+   --------  --------                                                                   
+   |addr_ |  |addr_ |                                                                       
+   |decode|  |decode|                                                                       
+   |      |  |      |                                                                       
+   |  aw  |  |  ar  |                                                                       
+   --------  --------                                                                      
+                                                                                        
+                                                                                        
+*/                                                                                      
+//}}} 
+
+
   // TODO: Generate demultiplexer instances for each slave port
   for (genvar i = 0; i < Cfg.NoSlvPorts; i++) begin : gen_slv_port_demux
     logic [MstPortsIdxWidth-1:0]          dec_aw,        dec_ar;
@@ -139,7 +153,7 @@ import cf_math_pkg::idx_width;
     assign slv_ar_select = (dec_ar_error) ?
         mst_port_idx_t'(Cfg.NoMstPorts) : mst_port_idx_t'(dec_ar);
 
-    // TODO: Add assertions for address map stability
+    //{{{TODO: Add assertions for address map stability
     // Ensure address map doesn't change during pending transactions
     // pragma translate_off
     `ifndef VERILATOR
@@ -167,6 +181,7 @@ import cf_math_pkg::idx_width;
     `endif
     `endif
     // pragma translate_on
+    //}}}
 
     // TODO: Instantiate AXI demultiplexer for this slave port
     axi_demux #(

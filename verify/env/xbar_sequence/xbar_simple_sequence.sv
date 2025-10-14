@@ -16,8 +16,8 @@ class xbar_simple_sequence extends xbar_virtual_sequence_base;
     endfunction
 
     task body();
-        axi_slv_default_sequence        slv_default_seq[tb_xbar_param_pkg::AXI_SLAVE_NUMBER_IN_USE];
-        axi_mst_regular_sequence        mst_regular_seq[tb_xbar_param_pkg::AXI_MASTER_NUMBER_IN_USE];
+        axi_slv_default_sequence        slv_default_seq[tb_xbar_param_pkg::TB_SLAVE_NUMBER_IN_USE];
+        axi_mst_regular_sequence        mst_regular_seq[tb_xbar_param_pkg::TB_MASTER_NUMBER_IN_USE];
         super.body();
         `uvm_info("Main_Seq", "enter body", UVM_LOW)
         foreach(slv_default_seq[i]) begin

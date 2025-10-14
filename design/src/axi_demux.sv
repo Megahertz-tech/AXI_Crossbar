@@ -55,9 +55,128 @@ module axi_demux #(
   input  axi_resp_t   [NoMstPorts-1:0]  mst_resps_i
 );
 
-  // TODO: Implement demultiplexer internal signals
-  axi_req_t slv_req_cut;
-  axi_resp_t slv_resp_cut;
+  //Celine : Implement demultiplexer internal signals
+  axi_req_t     slv_req_sp;   //Celine: the demux_core input 
+  axi_resp_t    slv_resp_cut;  //Cleine: the demux_core output
+ 
+  select_t      slv_aw_select_sp, slv_ar_select_sp;  
+
+//{{{ insert register slice 
+    logic slv_aw_ready_sel_sp;
+    spill_register #(
+        .T       ( select_t   ),
+        .Bypass  ( ~SpillAw   )
+    ) i_aw_sel_spill_reg (
+        .clk_i,
+        .rst_ni,
+        .valid_i ( slv_req_i.aw_valid   ),
+        .ready_o ( slv_aw_ready_sel_sp  ),
+        .data_i  ( slv_aw_select_i      ),
+        .valid_o ( /* unused */         ),
+        .ready_i ( slv_resp_cut.aw_ready),
+        .data_o  ( slv_aw_select_sp     )    
+    );
+    logic slv_aw_ready_sp, slv_aw_valid_sp;
+    spill_register #(
+        .T       ( aw_chan_t  ),
+        .Bypass  ( ~SpillAw   )
+    ) i_aw_spill_reg (
+        .clk_i,
+        .rst_ni,
+        .valid_i ( slv_req_i.aw_valid   ),
+        .ready_o ( slv_aw_ready_sp     ),
+        .data_i  ( slv_req_i.aw      ),
+        .valid_o ( slv_aw_valid_sp         ),
+        .ready_i ( slv_resp_cut.aw_ready),
+        .data_o  ( slv_req_sp.aw     )    
+    );
+    logic slv_ar_ready_sel_sp;
+    spill_register #(
+        .T       ( select_t   ),
+        .Bypass  ( ~SpillAr   )
+    ) i_ar_sel_spill_reg (
+        .clk_i,
+        .rst_ni,
+        .valid_i ( slv_req_i.ar_valid   ),
+        .ready_o ( slv_ar_ready_sel_sp  ),
+        .data_i  ( slv_ar_select_i      ),
+        .valid_o ( /* unused */         ),
+        .ready_i ( slv_resp_cut.ar_ready),
+        .data_o  ( slv_ar_select_sp     )    
+    );
+    logic slv_ar_ready_sp, slv_ar_valid_sp;
+    spill_register #(
+        .T       ( ar_chan_t  ),
+        .Bypass  ( ~SpillAr   )
+    ) i_ar_spill_reg (
+        .clk_i,
+        .rst_ni,
+        .valid_i ( slv_req_i.ar_valid   ),
+        .ready_o ( slv_ar_ready_sp     ),
+        .data_i  ( slv_req_i.ar      ),
+        .valid_o ( slv_ar_valid_sp         ),
+        .ready_i ( slv_resp_cut.ar_ready),
+        .data_o  ( slv_req_sp.ar     )    
+    );
+//}}}
+
+
+  logic aw_ready, aw_ready_q;
+  logic ar_ready, ar_ready_q;
+  assign slv_resp_cut.aw_ready = aw_ready;
+  assign slv_resp_o.aw_ready = aw_ready;
+  assign slv_resp_cut.ar_ready = ar_ready;
+  assign slv_resp_o.ar_ready = ar_ready;
+  always_ff @(posedge clk_i or negedge rst_ni) begin
+    if(!rst_ni) begin
+        aw_ready <= '0;
+        aw_ready_q <= '0;
+    end
+    else if(slv_req_i.aw_valid) begin
+        aw_ready <= 'b1;
+        aw_ready_q <= aw_ready;
+    end
+    else begin
+        aw_ready_q <= 'b0;
+        aw_ready <= aw_ready_q;
+    end
+  end
+  always_ff @(posedge clk_i or negedge rst_ni) begin
+    if(!rst_ni) begin
+        ar_ready <= '0;
+        ar_ready_q <= '0;
+    end
+    else if(slv_req_i.ar_valid) begin
+        ar_ready <= 'b1;
+        ar_ready_q <= ar_ready;
+    end
+    else begin
+        ar_ready_q <= 'b0;
+        ar_ready <= ar_ready_q;
+    end
+  end
+  
+  always_comb begin
+    if(!rst_ni) begin
+        mst_reqs_o = '0;
+    end 
+    else begin
+        mst_reqs_o[slv_aw_select_i].aw_valid =  slv_req_i.aw_valid;
+        mst_reqs_o[slv_aw_select_i].aw = slv_req_i.aw;
+        mst_reqs_o[slv_aw_select_i].w_valid = slv_req_i.w_valid;
+        mst_reqs_o[slv_aw_select_i].w = slv_req_i.w;
+        mst_reqs_o[slv_aw_select_i].b_ready = slv_req_i.b_ready;
+        mst_reqs_o[slv_aw_select_i].ar_valid = slv_req_i.ar_valid;
+        mst_reqs_o[slv_aw_select_i].ar = slv_req_i.ar;
+        mst_reqs_o[slv_aw_select_i].r_ready = slv_req_i.r_ready;
+        //slv_resp_cut.aw_ready = 'b1;        
+    end
+  end
+
+
+
+
+  /*
 
   logic slv_aw_ready_chan, slv_aw_ready_sel;
   logic slv_aw_valid_chan, slv_aw_valid_sel;
@@ -145,41 +264,44 @@ module axi_demux #(
     .ready_i ( slv_req_i.r_ready    ),
     .data_o  ( slv_resp_o.r         )
   );
+*/
 
   // TODO: Implement select signal handling
-  spill_register #(
-    .T       ( select_t   ),
-    .Bypass  ( ~SpillAw   )
-  ) i_aw_select_spill_reg (
-    .clk_i,
-    .rst_ni,
-    .valid_i ( slv_aw_valid_sel     ),
-    .ready_o ( slv_aw_ready_sel     ),
-    .data_i  ( slv_aw_select_i      ),
-    .valid_o ( /* unused */         ),
-    .ready_i ( slv_resp_cut.aw_ready && slv_aw_valid_chan ),
-    .data_o  ( slv_aw_select        )
-  );
-
-  spill_register #(
-    .T       ( select_t   ),
-    .Bypass  ( ~SpillAr   )
-  ) i_ar_select_spill_reg (
-    .clk_i,
-    .rst_ni,
-    .valid_i ( slv_ar_valid_sel     ),
-    .ready_o ( slv_ar_ready_sel     ),
-    .data_i  ( slv_ar_select_i      ),
-    .valid_o ( /* unused */         ),
-    .ready_i ( slv_resp_cut.ar_ready && slv_ar_valid_chan ),
-    .data_o  ( slv_ar_select        )
-  );
-
+//  spill_register #(
+//    .T       ( select_t   ),
+//    .Bypass  ( ~SpillAw   )
+//  ) i_aw_select_spill_reg (
+//    .clk_i,
+//    .rst_ni,
+//    .valid_i ( slv_aw_valid_sel     ),
+//    .ready_o ( slv_aw_ready_sel     ),
+//    .data_i  ( slv_aw_select_i      ),
+//    .valid_o ( /* unused */         ),
+//    .ready_i ( slv_resp_cut.aw_ready && slv_aw_valid_chan ),
+//    .data_o  ( slv_aw_select        )
+//  );
+//
+//  spill_register #(
+//    .T       ( select_t   ),
+//    .Bypass  ( ~SpillAr   )
+//  ) i_ar_select_spill_reg (
+//    .clk_i,
+//    .rst_ni,
+//    .valid_i ( slv_ar_valid_sel     ),
+//    .ready_o ( slv_ar_ready_sel     ),
+//    .data_i  ( slv_ar_select_i      ),
+//    .valid_o ( /* unused */         ),
+//    .ready_i ( slv_resp_cut.ar_ready && slv_ar_valid_chan ),
+//    .data_o  ( slv_ar_select        )
+//  );
+//
   // TODO: Implement ready/valid logic for select signals
-  assign slv_aw_valid_sel = slv_req_i.aw_valid && slv_aw_ready_chan;
-  assign slv_ar_valid_sel = slv_req_i.ar_valid && slv_ar_ready_chan;
-  assign slv_resp_o.aw_ready = slv_aw_ready_chan && slv_aw_ready_sel;
-  assign slv_resp_o.ar_ready = slv_ar_ready_chan && slv_ar_ready_sel;
+//  assign slv_aw_valid_sel = slv_req_i.aw_valid && slv_aw_ready_chan;
+//  assign slv_ar_valid_sel = slv_req_i.ar_valid && slv_ar_ready_chan;
+//  assign slv_resp_o.aw_ready = slv_aw_ready_chan && slv_aw_ready_sel;
+//  assign slv_resp_o.ar_ready = slv_ar_ready_chan && slv_ar_ready_sel;
+
+  
 
   // TODO: Complete the demultiplexer implementation
   // Students need to implement:
@@ -190,20 +312,20 @@ module axi_demux #(
   // 5. Atomic operation support
 
   // PLACEHOLDER: Basic pass-through (students must replace with full implementation)
-  always_comb begin
-    // Default assignments
-    for (int i = 0; i < NoMstPorts; i++) begin
-      mst_reqs_o[i] = '0;
-    end
-    slv_resp_cut = '0;
-
-    // TODO: Students must implement proper demultiplexing logic here
-    // This is just a placeholder to prevent compilation errors
-    if (NoMstPorts > 0) begin
-      mst_reqs_o[0] = slv_req_cut;
-      slv_resp_cut = mst_resps_i[0];
-    end
-  end
+//  always_comb begin
+//    // Default assignments
+//    for (int i = 0; i < NoMstPorts; i++) begin
+//      mst_reqs_o[i] = '0;
+//    end
+//    slv_resp_cut = '0;
+//
+//    // TODO: Students must implement proper demultiplexing logic here
+//    // This is just a placeholder to prevent compilation errors
+//    if (NoMstPorts > 0) begin
+//      mst_reqs_o[0] = slv_req_cut;
+//      slv_resp_cut = mst_resps_i[0];
+//    end
+//  end
 
   // TODO: Add parameter validation assertions
   // pragma translate_off
