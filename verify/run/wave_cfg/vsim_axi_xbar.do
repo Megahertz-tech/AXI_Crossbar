@@ -5,7 +5,7 @@ set assert_report_level NEVER
 database -open waves -into wave.shm -default
 probe -create -database waves tb_axi_xbar_top -depth all
 
-probe -create -all -dynamic -morories -unpacked 65536 -depth all
+probe -create -all -dynamic -morories -unpacked 65536 -packed 0 -depth all
 
 probe -create $uvm:{uvm_test_top.env.mst_agt_0.drv} -all
 probe -create $uvm:{uvm_test_top.env.mst_agt_1.drv} -all
