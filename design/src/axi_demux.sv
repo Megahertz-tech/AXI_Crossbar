@@ -45,7 +45,6 @@ module axi_demux #(
   input  logic                          clk_i,
   input  logic                          rst_ni,
   input  logic                          test_i,
-  input  logic valid,
   // Slave Port
   input  axi_req_t                      slv_req_i,
   input  select_t                       slv_aw_select_i,
@@ -120,62 +119,28 @@ module axi_demux #(
         .data_o  ( slv_req_sp.ar     )    
     );
 //}}}
-
-
-  logic aw_ready, aw_ready_q;
-  logic ar_ready, ar_ready_q;
-  assign slv_resp_cut.aw_ready = aw_ready;
-  assign slv_resp_o.aw_ready = aw_ready;
-  assign slv_resp_cut.ar_ready = ar_ready;
-  assign slv_resp_o.ar_ready = ar_ready;
-  always_ff @(posedge clk_i or negedge rst_ni) begin
-    if(!rst_ni) begin
-        aw_ready <= '0;
-        aw_ready_q <= '0;
-    end
-    else if(slv_req_i.aw_valid) begin
-        aw_ready <= 'b1;
-        aw_ready_q <= aw_ready;
-    end
-    else begin
-        aw_ready_q <= 'b0;
-        aw_ready <= aw_ready_q;
-    end
-  end
-  always_ff @(posedge clk_i or negedge rst_ni) begin
-    if(!rst_ni) begin
-        ar_ready <= '0;
-        ar_ready_q <= '0;
-    end
-    else if(slv_req_i.ar_valid) begin
-        ar_ready <= 'b1;
-        ar_ready_q <= ar_ready;
-    end
-    else begin
-        ar_ready_q <= 'b0;
-        ar_ready <= ar_ready_q;
-    end
-  end
-  
-  always_comb begin
-    if(!rst_ni) begin
-        mst_reqs_o = '0;
-    end 
-    else begin
-        mst_reqs_o[slv_aw_select_i].aw_valid =  slv_req_i.aw_valid;
-        mst_reqs_o[slv_aw_select_i].aw = slv_req_i.aw;
-        mst_reqs_o[slv_aw_select_i].w_valid = slv_req_i.w_valid;
-        mst_reqs_o[slv_aw_select_i].w = slv_req_i.w;
-        mst_reqs_o[slv_aw_select_i].b_ready = slv_req_i.b_ready;
-        mst_reqs_o[slv_aw_select_i].ar_valid = slv_req_i.ar_valid;
-        mst_reqs_o[slv_aw_select_i].ar = slv_req_i.ar;
-        mst_reqs_o[slv_aw_select_i].r_ready = slv_req_i.r_ready;
-        //slv_resp_cut.aw_ready = 'b1;        
-    end
-  end
-
-
-
+//{{{ axi_demux_core
+    axi_demux_core #(
+        .AxiIdWidth     (AxiIdWidth), 
+        .AtopSupport    (AtopSupport), 
+        .axi_req_t      (axi_req_t), 
+        .axi_resp_t     (axi_resp_t), 
+        .NoMstPorts     (NoMstPorts), 
+        .MaxTrans       (MaxTrans), 
+        .AxiLookBits    (AxiLookBits), 
+        .UniqueIds      (UniqueIds)     
+    ) i_axi_demux_core(
+        .clk_i,
+        .rst_ni,
+        .test_i,
+        .slv_req_i      (slv_req_i),
+        .slv_aw_select_i(slv_aw_select_i),
+        .slv_ar_select_i(slv_ar_select_i),
+        .slv_resp_o     (slv_resp_o),
+        .mst_reqs_o     (mst_reqs_o),
+        .mst_resps_i    (mst_resps_i)    
+    );
+//}}} 
 
   /*
 

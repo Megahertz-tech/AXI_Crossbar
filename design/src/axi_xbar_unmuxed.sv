@@ -87,13 +87,9 @@ import cf_math_pkg::idx_width;
 
   // TODO: Define internal signals
   // Signals from the axi_demuxes, one index more for decode error
-  //req_t  [Cfg.NoSlvPorts-1:0][Cfg.NoMstPorts:0]  slv_reqs;
-  //resp_t [Cfg.NoSlvPorts-1:0][Cfg.NoMstPorts:0]  slv_resps;
+  req_t  [Cfg.NoSlvPorts-1:0][Cfg.NoMstPorts:0]  slv_reqs;
+  resp_t [Cfg.NoSlvPorts-1:0][Cfg.NoMstPorts:0]  slv_resps;
     
-    //Celine for cross 
-    req_t  [Cfg.NoSlvPorts-1:0][Cfg.NoMstPorts-1:0] xbar_slv_to_mst_req;
-    resp_t [Cfg.NoSlvPorts-1:0][Cfg.NoMstPorts-1:0] xbar_mst_to_slv_resps;
-
   // Workaround for some simulator issues
   localparam int unsigned cfg_NoMstPorts = Cfg.NoMstPorts;
 
@@ -130,7 +126,7 @@ import cf_math_pkg::idx_width;
       .atop_t(axi_typedef_pkg::atop_t),
       .rule_t     ( rule_t          )
     ) i_axi_aw_decode (
-      .aw_atop (slv_ports_req_i[i].aw.aw_atop),
+      .aw_atop (slv_ports_req_i[i].aw.atop),
       .addr_i           ( slv_ports_req_i[i].aw.addr ),
       .addr_map_i       ( addr_map_i                 ),
       .idx_o            ( dec_aw                     ),
@@ -224,8 +220,8 @@ import cf_math_pkg::idx_width;
       .slv_aw_select_i ( slv_aw_select       ),
       .slv_ar_select_i ( slv_ar_select       ),
       .slv_resp_o      ( slv_ports_resp_o[i] ),
-      .mst_reqs_o      ( slv_reqs[i]         ),
-      .mst_resps_i     ( slv_resps[i]        )
+      .mst_reqs_o      ( slv_reqs         ),
+      .mst_resps_i     ( slv_resps        )
     );
 
     // TODO: Instantiate error slave for decode errors
@@ -321,4 +317,3 @@ import cf_math_pkg::idx_width;
     //}}}
 endmodule
 
-`endif

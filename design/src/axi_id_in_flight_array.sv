@@ -28,15 +28,15 @@ module axi_id_in_flight_array #(
     input  logic                          push_en_i,
     //pop
     input  logic                          pop_en_i,
-    input logic [AxiLookBits-1:0]         pop_axi_id_i
+    input logic [AxiLookBits-1:0]         pop_axi_id_i,
     //in_flight count
-    output logic [CntWidth-1:0]           in_fligh_cnt_o,
+    output logic [CntWidth-1:0]           in_fligh_cnt_o
 );
     localparam int unsigned NoLooks     = 2**AxiLookBits; 
 
-    select_t [AxiLookBits-1:0]                  sels;
-    logic [AxiLookBits-1:0]                     sel_taken;
-    logic [AxiLookBits-1:0] [CntWidth-1:0]      id_in_flight_cnts; 
+    select_t [NoLooks-1:0]                  sels;
+    logic [NoLooks-1:0]                     sel_taken;
+    logic [NoLooks-1:0] [CntWidth-1:0]      id_in_flight_cnts; 
     
     //look up 
     assign lookup_sel_o                 = sels[lookup_axi_id_i];
@@ -50,6 +50,7 @@ module axi_id_in_flight_array #(
 
     //in_flight count 
     always_comb begin
+        in_fligh_cnt_o = '0;
         for(int unsigned i=0; i<NoLooks; i++) begin
             in_fligh_cnt_o += id_in_flight_cnts[i];
         end
@@ -80,7 +81,7 @@ module axi_id_in_flight_array #(
         end
         counter #(
             .WIDTH           (CntWidth      ),
-            .STICKY_OVERFLOW ( 1'b0         )
+            .STICKY_EN       ( 1'b0         )
         ) i_in_flight_cnt (
             .clk_i      ( clk_i     ),
             .rst_ni     ( rst_ni    ),
@@ -89,10 +90,10 @@ module axi_id_in_flight_array #(
             .load_i     ( 1'b0      ),
             .down_i     ( count_down  ),
             .d_i        ( 0        ),
-            .q_o        ( in_flight_cnts[i] ),
+            .q_o        ( id_in_flight_cnts[i] ),
             .overflow_o ( /* not use */ )
         );
-        assign sel_taken[i] = |in_flight_cnts[i];
+        assign sel_taken[i] = |(id_in_flight_cnts[i]);
     end 
 
 endmodule

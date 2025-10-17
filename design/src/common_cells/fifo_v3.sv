@@ -12,12 +12,12 @@ module fifo_v3 #(
   input  logic  rst_ni,
   input  logic  flush_i,
   input  logic  testmode_i,
+  input  logic  push_i,
+  input  dtype  data_i,
+  input  logic  pop_i,
+  output dtype  data_o,
   output logic  full_o,
   output logic  empty_o,
-  input  dtype  data_i,
-  input  logic  push_i,
-  output dtype  data_o,
-  input  logic  pop_i,
   output logic[PONT_WIDTH-1:0]  usage_o
 );
 
@@ -39,9 +39,11 @@ module fifo_v3 #(
 
     always_ff @(posedge clk_i or negedge rst_ni) begin
       if (!rst_ni) begin
-        read_ptr  <= '0;
-        write_ptr <= '0;
+        //initiate
+        read_ptr   <= '0;
+        write_ptr  <= '0;
         status_cnt <= '0;
+        mem        <= '0;
       end else if (flush_i) begin
         read_ptr  <= '0;
         write_ptr <= '0;

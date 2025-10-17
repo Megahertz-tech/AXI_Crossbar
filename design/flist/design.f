@@ -26,6 +26,8 @@
     $CB_PRJ_ROOT/design/src/axi_demux.sv  \ 
     $CB_PRJ_ROOT/design/src/axi_err_slv.sv  \ 
     $CB_PRJ_ROOT/design/src/axi_id_prepend.sv  \ 
+    $CB_PRJ_ROOT/design/src/axi_id_in_flight_array.sv  \ 
+    $CB_PRJ_ROOT/design/src/axi_demux_core.sv  \ 
     $CB_PRJ_ROOT/design/src/axi_mux.sv  \ 
     $CB_PRJ_ROOT/design/src/axi_xbar.sv  \ 
     $CB_PRJ_ROOT/design/src/axi_xbar_unmuxed.sv  \ 

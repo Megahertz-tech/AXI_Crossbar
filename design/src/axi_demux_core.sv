@@ -43,6 +43,8 @@ module axi_demux_core #(
     logic                tr_in_flight_full;
     assign tr_in_flight_cnt     = aw_in_flight_cnt + ar_in_flight_cnt;
     assign tr_in_flight_full    = (tr_in_flight_cnt == MaxTrans); 
+    //Celine TODO (for now tie to 0)
+    assign ar_in_flight_cnt = 0;
  
 
 //{{{ AW channel
@@ -74,7 +76,7 @@ module axi_demux_core #(
         aw_valid_approved = 1'b0;
         if(slv_req_i.aw_valid) begin
             if(!tr_in_flight_full) begin
-                if(slv_req_i.aw.aw_atop == 5'b0_0000) begin
+                if(slv_req_i.aw.atop == 5'b0_0000) begin
                     if( (!lookup_aw_sel_taken) || (loopup_aw_sel == slv_aw_select_i)) begin
                         aw_valid_approved = 1'b1;
                     end
@@ -86,21 +88,38 @@ module axi_demux_core #(
             end
         end
     end
-    always_comb begin
-        mst_reqs_o = '0;
+    logic       w_valid_approved_delay, w_sel_pop_pulse, w_sel_valid;
+    select_t    w_select_from_fifo;
+    logic aw_ready, aw_ready_q;
+    logic w_ready, w_ready_q;
+    always_comb begin 
+        aw_ready = 1'b0;
         for(int unsigned i=0; i<NoMstPorts; i++) begin
-            //aw 
             if(aw_valid_approved) begin
                 if(i == slv_aw_select_i) begin
-                    mst_reqs_o[i].aw_valid = 1'b1;
-                    mst_reqs_o[i].aw = slv_req_i.aw;
+                    aw_ready = 1'b1;
                 end
             end
-            //w
+            if(w_sel_valid) begin
+                if(i == w_select_from_fifo) begin
+                    w_ready = 1'b1;
+                end
+            end
         end
     end
+    always_ff @(posedge clk_i or negedge rst_ni) begin
+        if(rst_ni) begin
+            aw_ready_q <= 1'b0;
+            w_ready_q  <= 1'b0;
+        end else begin
+            aw_ready_q <= aw_ready;
+            w_ready_q  <= w_ready;
+        end
+    end
+    //Celine TODO (for now use aw_ready) 
     logic aw_confirmed;  
-    assign aw_confirmed = aw_valid_approved & mst_resps_i[slv_aw_select_i].aw_ready; 
+    assign aw_confirmed = aw_valid_approved & aw_ready; 
+    //assign aw_confirmed = aw_valid_approved & mst_resps_i[slv_aw_select_i].aw_ready; 
 
 
     axi_id_in_flight_array #(
@@ -114,7 +133,7 @@ module axi_demux_core #(
     //look up (for atomic transaction)
     .lookup_axi_id_i        (slv_req_i.aw.id[0+:AxiLookBits]),
     .lookup_for_atomic_id_i (0),
-    .lookup_sel_occupied_o  (lookup_aw_sel_taken),
+    .lookup_sel_taken_o     (lookup_aw_sel_taken),
     .lookup_sel_o           (loopup_aw_sel),
     .loopup_for_atomic_id_taken_o(/*not used*/),
     //push
@@ -125,25 +144,39 @@ module axi_demux_core #(
     //pop
     .pop_en_i               (slv_resp_o.b_valid & slv_req_i.b_ready),
     .pop_axi_id_i           (slv_resp_o.b.id[0+:AxiLookBits])
-    )
+    );
 //}}}
 //{{{ W channel 
     /*  There is a FIFO for W to store the target destination it will go.
+        Realign the adrress and write data: we enforce W follows the AW, don't permit AW and W at the same cycle. 
         When aw_confirmed, push aw_select_i into FIFO 
-        When fifo is empty, there is a scenario that aw_valid_approved and w_valid is asserted at the same time. 
-            pre-condition: fifo_empty
+        when fifo is not empty, use sel pop from fifo. and We always use the sel from fifo. 
+            pre-condition: !fifo_empty 
+            if req_i.w_valid  --> w_valid_approved = 1'b1            
+            
         */
     
     logic       w_valid_approved;
     logic       w_sel_empty;
-    logic       w_sel_pup_pulse;
-    select_t    w_select, w_select_from_fifo;
+    //logic       w_valid_approved_delay, w_sel_pop_pulse, w_sel_valid;
+    //select_t    w_select_from_fifo;
     always_comb begin
         w_valid_approved = 1'b0;
-        if(slv_req_i.w_valid) begin
-            w_valid_approved = 1'b1;
+        if(!w_sel_empty) begin
+            if(slv_req_i.w_valid) begin
+                w_valid_approved = 1'b1;
+            end
         end
     end
+    always_ff @(posedge clk_i or negedge rst_ni) begin
+        if(!rst_ni) begin
+            w_valid_approved_delay <= 1'b0;
+        end else begin
+            w_valid_approved_delay <= w_valid_approved;
+        end
+    end
+    assign w_sel_pop_pulse  = w_valid_approved & (~w_valid_approved_delay);
+    assign w_sel_valid      = w_valid_approved & w_valid_approved_delay;
     fifo_v3 #(
         .FALL_THROUGH(0),
         .DEPTH(MaxTrans),
@@ -155,15 +188,37 @@ module axi_demux_core #(
         .testmode_i(test_i),
         .push_i(aw_confirmed),
         .data_i(slv_aw_select_i),
-        .pop_i(),
+        .pop_i(w_sel_pop_pulse),
         .data_o(w_select_from_fifo),
         .full_o(/*not used*/),
         .empty_o(w_sel_empty),
         .usage_o(/*not used*/)
     );
 //}}}
+    always_comb begin
+        mst_reqs_o = '0;
+        slv_resp_o = '0;
+        for(int unsigned i=0; i<NoMstPorts; i++) begin
+            //aw 
+            if(aw_valid_approved) begin
+                if(i == slv_aw_select_i) begin
+                    mst_reqs_o[i].aw_valid  = slv_req_i.aw_valid;
+                    mst_reqs_o[i].aw        = slv_req_i.aw;
+                    slv_resp_o.aw_ready     = mst_resps_i[i].aw_ready;
+                end
+            end
+            //w
+            if(w_sel_valid) begin
+                if(i == w_select_from_fifo) begin
+                    mst_reqs_o[i].w_valid   = slv_req_i.w_valid;
+                    mst_reqs_o[i].w         = slv_req_i.w;
+                    slv_resp_o.w_ready      = mst_resps_i[i].w_ready;
+                end
+            end
+        end
+    end
     
-    
+
     
     /**************************
         AW state macheine
