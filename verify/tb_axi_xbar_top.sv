@@ -232,11 +232,13 @@ module tb_axi_xbar_top;
         addr_map[i] = assign_addr_map(i);
     end
   end
+  //Celine TODO (now tie support_atomic to 1'b1)
   function rule_t assign_addr_map(int No);
     rule_t map;
     map.idx = No;
     map.start_addr = No * tb_xbar_param_pkg::BASE_ADDR_OFFSET;
     map.end_addr = (No+1) * tb_xbar_param_pkg::BASE_ADDR_OFFSET;
+    map.support_atomic = 1'b1;
     return map;
   endfunction
   

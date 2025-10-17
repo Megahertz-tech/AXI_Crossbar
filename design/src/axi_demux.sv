@@ -45,6 +45,7 @@ module axi_demux #(
   input  logic                          clk_i,
   input  logic                          rst_ni,
   input  logic                          test_i,
+  input  logic valid,
   // Slave Port
   input  axi_req_t                      slv_req_i,
   input  select_t                       slv_aw_select_i,

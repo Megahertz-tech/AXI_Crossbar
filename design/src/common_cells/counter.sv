@@ -82,7 +82,7 @@ module counter #(
   end
 
   // TODO: Register the counter value
-  `FF(count_q, count_d, '0)
+  //`FF(count_q, count_d, '0)
   always_ff @(posedge clk_i or negedge rst_ni) begin
         if(~rst_ni) count_q <= '0;
         else        count_q <= count_d;

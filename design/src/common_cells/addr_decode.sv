@@ -16,9 +16,11 @@ module addr_decode #(
   parameter int unsigned NoIndices = 32'd0,    // Number of indices to decode to
   parameter int unsigned NoRules   = 32'd0,    // Number of rules in the address map
   parameter type         addr_t    = logic,    // Address type
+  parameter type         atop_t = logic,
   parameter type         rule_t    = logic     // Rule type with idx, start_addr, end_addr fields
 ) (
   input  addr_t                        addr_i,            // Address to decode
+  input  atop_t  aw_atop,
   input  rule_t     [NoRules-1:0]      addr_map_i,        // Address map rules
   output logic      [$clog2(NoIndices)-1:0] idx_o,        // Decoded index
   output logic                         dec_valid_o,       // Valid decode (address matched a rule)
@@ -60,10 +62,21 @@ module addr_decode #(
   // TODO: Output logic
   always_comb begin
     if (any_rule_match) begin
-      // Address matched a rule
-      idx_o = addr_map_i[matched_rule_idx].idx;
-      dec_valid_o = 1'b1;
-      dec_error_o = 1'b0;
+        if(aw_atop == 0) begin
+            // Address matched a rule
+            idx_o = addr_map_i[matched_rule_idx].idx;
+            dec_valid_o = 1'b1;
+            dec_error_o = 1'b0;
+        end else begin
+            if(addr_map_i[matched_rule_idx].support_atomic) begin
+                dec_valid_o = 1'b1;
+                dec_error_o = 1'b0;
+            end else begin
+                dec_valid_o = 1'b0;
+                dec_error_o = 1'b1;
+            end
+            idx_o = addr_map_i[matched_rule_idx].idx;
+        end
     end else if (en_default_idx_i) begin
       // No rule matched, but default is enabled
       idx_o = default_idx_i;
@@ -77,6 +90,7 @@ module addr_decode #(
     end
   end
 
+  //{{{ assertions
   // TODO: Add assertions for parameter validation
   // pragma translate_off
   `ifndef VERILATOR
@@ -102,5 +116,6 @@ module addr_decode #(
   `endif
   `endif
   // pragma translate_on
+  //}}}
 
 endmodule

@@ -51,6 +51,7 @@ package axi_typedef_pkg;
         int unsigned idx;
         logic [31:0] start_addr;
         logic [31:0] end_addr;
+        logic        support_atomic;
     } xbar_rule_32_t;
 
     //}}}

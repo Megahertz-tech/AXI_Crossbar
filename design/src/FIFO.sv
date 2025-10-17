@@ -10,10 +10,10 @@ module FIFO #(
     input logic                     rst_n,          // Synchronous active-low reset
     
     input logic                     wr_en,          // Write enable
-    input logic [DATA_WIDTH-1:0]    data_in,    // Input data bus
-    input logic                     rd_en,          // Read enable
-    
-    output logic [DATA_WIDTH-1:0]   data_out,   // Output data bus
+    input logic [DATA_WIDTH-1:0]    data_in,        // Input data bus
+
+    input logic                     rd_en,          // Read enable    
+    output logic [DATA_WIDTH-1:0]   data_out,       // Output data bus
     output logic                    full,           // FIFO full flag
     output logic                    empty,          // FIFO empty flag
     output logic                    almost_full,    // FIFO almost full flag
