@@ -52,6 +52,181 @@ module axi_mux #(
 
   localparam int unsigned MstIdxBits    = $clog2(NoSlvPorts);
   localparam int unsigned MstAxiIDWidth = SlvAxiIDWidth + MstIdxBits;
+  typedef logic [MstIdxBits-1:0] extended_id_t;
+
+/*  topology                                                                                                                    */
+/*    --------                                                                                                                  */
+/* -->|  ID  |   aw                                                                                                               */
+/* ...|extend|                                                                                                                    */
+/* -->|      |                                                                                                                    */
+/*    |      |                                                                                                                    */
+/* <--|      |                                                                                                                    */
+/* ...|  ID  |                                                                                                                    */
+/* <--|strip |                                                                                                                    */
+/*    |      |                                                                                                                    */
+/*    --------                                                                                                                  */
+/*                                                                                                                              */
+/*                                                                                                                              */
+
+    //{{{ internal signals 
+    mst_aw_chan_t [NoSlvPorts-1:0]  aw_chans    ;
+    logic [NoSlvPorts-1:0]          aw_valids   ;
+    logic [NoSlvPorts-1:0]          aw_readies  ;
+    w_chan_t [NoSlvPorts-1:0]       w_chans     ;
+    logic [NoSlvPorts-1:0]          w_valids   ;
+    logic [NoSlvPorts-1:0]          w_readies  ;
+    mst_b_chan_t [NoSlvPorts-1:0]   b_chans     ;
+    logic [NoSlvPorts-1:0]          b_valids   ;
+    logic [NoSlvPorts-1:0]          b_readies  ;
+    logic [NoSlvPorts-1:0]
+    mst_ar_chan_t [NoSlvPorts-1:0]  ar_chans    ;
+    logic [NoSlvPorts-1:0]          ar_valids   ;
+    logic [NoSlvPorts-1:0]          ar_readies  ;
+    mst_r_chan_t[NoSlvPorts-1:0]    r_chans     ;
+    logic [NoSlvPorts-1:0]          r_valids   ;
+    logic [NoSlvPorts-1:0]          r_readies  ;
+    //}}}}
+//{{{ axi_id_prepend
+    /*  prepend extended id (slave port index) to master ports (connect with Subordinate) 
+        strip   extended id to slave ports.                                               */
+    typedef logic[MstIdxBits-1:0] id_extend_t;
+    for(genvar i=0; i<NoSlvPorts; i++) begin  : axi_id_prepend
+        axi_id_prepend #(
+        .NoBus            ( 32'd1               ), // Can take multiple axi busses
+        .AxiIdWidthSlvPort( SlvAxiIDWidth       ), // AXI ID Width of the Slave Ports
+        .AxiIdWidthMstPort( MstAxiIDWidth       ), // AXI ID Width of the Master Ports
+        .slv_aw_chan_t    ( slv_aw_chan_t       ),
+        .slv_w_chan_t     ( w_chan_t            ),
+        .slv_b_chan_t     ( slv_b_chan_t        ),
+        .slv_ar_chan_t    ( slv_ar_chan_t       ),
+        .slv_r_chan_t     ( slv_r_chan_t        ),
+        .mst_aw_chan_t    ( mst_aw_chan_t       ),
+        .mst_w_chan_t     ( w_chan_t            ),
+        .mst_b_chan_t     ( mst_b_chan_t        ),
+        .mst_ar_chan_t    ( mst_ar_chan_t       ),
+        .mst_r_chan_t     ( mst_r_chan_t        )        
+        ) i_axi_id_prepend (
+            .pre_id_i(id_extend_t'(i)),
+
+            .slv_aw_chans_i (slv_reqs_i[i].aw),              
+            .slv_aw_valids_i(slv_reqs_i[i].aw_valid),
+            .slv_aw_readies_o(slv_resps_o[i].aw_ready),
+                                 
+            .slv_w_chans_i(slv_reqs_i[i].w),
+            .slv_w_valids_i(slv_reqs_i[i].w_valid),
+            .slv_w_readies_o(slv_resps_o[i].w_ready),
+                                 
+            .slv_b_chans_o(slv_reqs_i[i].b),
+            .slv_b_valids_o(slv_resps_o[i].b_valid),
+            .slv_b_readies_i(slv_reqs_i[i].b_ready),
+                                 
+            .slv_ar_chans_i(slv_reqs_i[i].ar),
+            .slv_ar_valids_i(slv_reqs_i[i].ar_valid),
+            .slv_ar_readies_o(slv_resps_o[i].ar_ready),
+                                 
+            .slv_r_chans_o(slv_resps_o[i].r),
+            .slv_r_valids_o(slv_resps_o[i].r_valid),
+            .slv_r_readies_i(slv_reqs_i[i].r_ready),
+                                 
+            .mst_aw_chans_o(aw_chans[i]),
+            .mst_aw_valids_o(aw_valids[i]),
+            .mst_aw_readies_i(aw_ready[i]),
+                                 
+            .mst_w_chans_o(w_chans[i]),
+            .mst_w_valids_o(w_valids[i]),
+            .mst_w_readies_i(w_readies[i]),
+                                 
+            .mst_b_chans_i(b_chans[i]),
+            .mst_b_valids_i(b_valids[i]),
+            .mst_b_readies_o(b_readies[i]),
+                                 
+            .mst_ar_chans_o(ar[i]),
+            .mst_ar_valids_o(ar_valids[i]),
+            .mst_ar_readies_i(ar_readies[i]),
+                                 
+            .mst_r_chans_i(r_chans[i]),
+            .mst_r_valids_i(r_valids[i]),
+            .mst_r_readies_o(r_readies[i])      
+        );
+    end
+//}}}
+//{{{ arbitor for aw 
+    localparam int unsigned IDX_WIDTH = axi_math_pkg::idx_width(NoSlvPorts);
+    mst_aw_chan_t           aw_gnt;
+    logic                   aw_valid_gnt;
+    logic                   aw_ready_sp;
+    logic[IDX_WIDTH-1:0]    idx_gnt;
+    fair_round_robin_arbitrate #(
+        .NumIn     (NoSlvPorts   ),
+        .DataType  (slv_aw_chan_t)
+    ) i_fair_rr_arb (
+        .clk_i,
+        .rst_ni,
+        .flush_i    (1'b0),
+        .req_i      (aw_valids),
+        .data_i     (aw_chans),
+        .gnt_i      (aw_ready_sp),
+        .gnt_o      (aw_readies),
+        .req_o      (aw_valid_gnt),
+        .data_o     (aw_gnt),
+        .idx_o      (idx_gnt)  
+    );
+
+    spill_register #(
+        .T       ( aw_chan_t  ),
+        .Bypass  ( ~SpillAw   )
+    ) i_aw_spill_reg (
+        .clk_i,
+        .rst_ni,
+        .valid_i ( aw_valid_gnt   ),
+        .ready_o ( aw_ready_sp    ),
+        .data_i  ( aw_gnt         ),
+        .valid_o ( mst_req_o.aw_valid),
+        .ready_i ( mst_resp_i.aw_ready),
+        .data_o  ( mst_req_o.aw     )
+    );
+//}}}
+//{{{ w 
+/*      An interconnect that combines write transactions from different Managers must 
+        ensure that it forwards the write data in address order.                                 */
+    logic aw_confirmed;
+    assign aw_confirmed = aw_valid_gnt && mst_resp_i.aw_ready;
+    extended_id_t  w_ext_id;
+    fifo_v3 #(
+        .FALL_THROUGH   (0),
+        .DEPTH          (MaxTrans * iNoSlvPorts),
+        .dtype          (extended_id_t)
+    ) i_w_id_fifo (
+        .clk_i,
+        .rst_ni,
+        .flush_i(1'b0),
+        .testmode_i(test_i),
+        .push_i(aw_confirmed),
+        .data_i(aw_gnt.aw.id[SlvAxiIDWidth+:MstIdxBits]),
+        .pop_i(),
+        .data_o(w_ext_id),
+        .full_o(/*not used*/),
+        .empty_o(),
+        .usage_o(/*not used*/)
+    );
+
+
+
+
+
+//}}}
+
+
+
+
+
+
+
+
+
+
+
+
 
   // TODO: Implement the AXI multiplexer logic here
   //

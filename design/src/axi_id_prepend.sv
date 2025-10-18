@@ -63,12 +63,12 @@ module axi_id_prepend #(
   output logic         [NoBus-1:0] mst_r_readies_o
 );
 
-  // prepend the ID
   for (genvar i = 0; i < NoBus; i++) begin : gen_id_prepend
     if (PreIdWidth == 0) begin : gen_no_prepend
       assign mst_aw_chans_o[i] = slv_aw_chans_i[i];
       assign mst_ar_chans_o[i] = slv_ar_chans_i[i];
     end else begin : gen_prepend
+    // prepend the ID
       always_comb begin
         mst_aw_chans_o[i] = slv_aw_chans_i[i];
         mst_ar_chans_o[i] = slv_ar_chans_i[i];
@@ -76,8 +76,9 @@ module axi_id_prepend #(
         mst_ar_chans_o[i].id = {pre_id_i, slv_ar_chans_i[i].id[AxiIdWidthSlvPort-1:0]};
       end
     end
-    // The ID is in the highest bits of the struct, so an assignment from a channel with a wide ID
-    // to a channel with a shorter ID correctly cuts the prepended ID.
+    // strip the extended ID 
+            /*  The ID is in the highest bits of the struct, so an assignment from a channel with a wide ID
+                to a channel with a shorter ID correctly cuts the prepended ID.                                 */
     assign slv_b_chans_o[i] = mst_b_chans_i[i];
     assign slv_r_chans_o[i] = mst_r_chans_i[i];
   end
