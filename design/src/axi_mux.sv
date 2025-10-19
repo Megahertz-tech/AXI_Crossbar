@@ -54,19 +54,19 @@ module axi_mux #(
   localparam int unsigned MstAxiIDWidth = SlvAxiIDWidth + MstIdxBits;
   typedef logic [MstIdxBits-1:0] extended_id_t;
 
-/*  topology                                                                                                                    */
-/*    --------                                                                                                                  */
-/* -->|  ID  |   aw                                                                                                               */
-/* ...|extend|                                                                                                                    */
-/* -->|      |                                                                                                                    */
-/*    |      |                                                                                                                    */
-/* <--|      |                                                                                                                    */
-/* ...|  ID  |                                                                                                                    */
-/* <--|strip |                                                                                                                    */
-/*    |      |                                                                                                                    */
-/*    --------                                                                                                                  */
-/*                                                                                                                              */
-/*                                                                                                                              */
+/*    topology                                                             */
+/*      --------    ---------                       ||                     */
+/*   -->|  ID  | ==>|aw  arb|->    ->    ->    ->   ||                     */
+/*   ...|extend|    ---------   ----------          ||                     */
+/*   -->|      |      ==>  ==>  |w order | ->  ->   ||                     */
+/*      |      |                ----------          ||  Subordinate        */
+/*   <--|      |                ---------           ||                     */
+/*   ...|  ID  |      <==  <==  |b demux| <-   <-   ||                     */
+/*   <--|strip |    ---------   ----------          ||                     */
+/*      |      | ==>|ar  arb|->    ->    ->    ->   ||                     */
+/*      --------    ---------                       ||                     */
+/*  axi_id_prepend                                                         */
+/*                                                                         */
 
     //{{{ internal signals 
     mst_aw_chan_t [NoSlvPorts-1:0]  aw_chans    ;
@@ -78,7 +78,6 @@ module axi_mux #(
     mst_b_chan_t [NoSlvPorts-1:0]   b_chans     ;
     logic [NoSlvPorts-1:0]          b_valids   ;
     logic [NoSlvPorts-1:0]          b_readies  ;
-    logic [NoSlvPorts-1:0]
     mst_ar_chan_t [NoSlvPorts-1:0]  ar_chans    ;
     logic [NoSlvPorts-1:0]          ar_valids   ;
     logic [NoSlvPorts-1:0]          ar_readies  ;
@@ -116,7 +115,7 @@ module axi_mux #(
             .slv_w_valids_i(slv_reqs_i[i].w_valid),
             .slv_w_readies_o(slv_resps_o[i].w_ready),
                                  
-            .slv_b_chans_o(slv_reqs_i[i].b),
+            .slv_b_chans_o(slv_resps_o[i].b),
             .slv_b_valids_o(slv_resps_o[i].b_valid),
             .slv_b_readies_i(slv_reqs_i[i].b_ready),
                                  
@@ -130,7 +129,7 @@ module axi_mux #(
                                  
             .mst_aw_chans_o(aw_chans[i]),
             .mst_aw_valids_o(aw_valids[i]),
-            .mst_aw_readies_i(aw_ready[i]),
+            .mst_aw_readies_i(aw_readies[i]),
                                  
             .mst_w_chans_o(w_chans[i]),
             .mst_w_valids_o(w_valids[i]),
@@ -140,7 +139,7 @@ module axi_mux #(
             .mst_b_valids_i(b_valids[i]),
             .mst_b_readies_o(b_readies[i]),
                                  
-            .mst_ar_chans_o(ar[i]),
+            .mst_ar_chans_o(ar_chans[i]),
             .mst_ar_valids_o(ar_valids[i]),
             .mst_ar_readies_i(ar_readies[i]),
                                  
@@ -149,6 +148,7 @@ module axi_mux #(
             .mst_r_readies_o(r_readies[i])      
         );
     end
+    
 //}}}
 //{{{ arbitor for aw 
     localparam int unsigned IDX_WIDTH = axi_math_pkg::idx_width(NoSlvPorts);
@@ -156,10 +156,10 @@ module axi_mux #(
     logic                   aw_valid_gnt;
     logic                   aw_ready_sp;
     logic[IDX_WIDTH-1:0]    idx_gnt;
-    fair_round_robin_arbitrate #(
+    fair_round_robin_arbiter #(
         .NumIn     (NoSlvPorts   ),
-        .DataType  (slv_aw_chan_t)
-    ) i_fair_rr_arb (
+        .DataType  (mst_aw_chan_t)
+    ) i_aw_fair_rr_arb (
         .clk_i,
         .rst_ni,
         .flush_i    (1'b0),
@@ -173,7 +173,7 @@ module axi_mux #(
     );
 
     spill_register #(
-        .T       ( aw_chan_t  ),
+        .T       ( mst_aw_chan_t  ),
         .Bypass  ( ~SpillAw   )
     ) i_aw_spill_reg (
         .clk_i,
@@ -189,31 +189,119 @@ module axi_mux #(
 //{{{ w 
 /*      An interconnect that combines write transactions from different Managers must 
         ensure that it forwards the write data in address order.                                 */
+    typedef enum logic [1:0] {
+        AW_IDLE      = 2'b01,
+        AW_APPROVE   = 2'b10
+    } aw_state_e;
+    enum {I_BIT = 0, A_BIT = 1} state_bit;
+    aw_state_e      aw_cur_sta, aw_nxt_sta;
+    always_ff @(posedge clk_i or negedge rst_ni) begin
+        if(!rst_ni) begin
+            aw_cur_sta <= AW_IDLE;
+        end else begin
+            aw_cur_sta <= aw_nxt_sta;
+        end
+    end
+    logic aw_extended_id_push_en;
+    always_comb begin
+        aw_nxt_sta = aw_cur_sta;
+        aw_extended_id_push_en = 1'b0;
+        unique case(1'b1) 
+            aw_cur_sta[I_BIT]: begin
+                if(aw_valid_gnt) begin
+                    aw_nxt_sta = AW_APPROVE;
+                end
+            end
+            aw_cur_sta[A_BIT]: begin
+                if(aw_ready_sp) begin
+                    aw_nxt_sta = AW_IDLE;
+                    aw_extended_id_push_en = 1'b1;
+                end
+            end
+            default: begin end
+        endcase 
+    end
     logic aw_confirmed;
     assign aw_confirmed = aw_valid_gnt && mst_resp_i.aw_ready;
     extended_id_t  w_ext_id;
+    logic w_pop_en;
+    logic w_id_empty;
     fifo_v3 #(
         .FALL_THROUGH   (0),
-        .DEPTH          (MaxTrans * iNoSlvPorts),
+        .DEPTH          (MaxWTrans * NoSlvPorts),
         .dtype          (extended_id_t)
-    ) i_w_id_fifo (
+    ) i_w_extended_id_fifo (
         .clk_i,
         .rst_ni,
         .flush_i(1'b0),
         .testmode_i(test_i),
-        .push_i(aw_confirmed),
-        .data_i(aw_gnt.aw.id[SlvAxiIDWidth+:MstIdxBits]),
-        .pop_i(),
+        .push_i(aw_extended_id_push_en),
+        .data_i(aw_gnt.id[SlvAxiIDWidth+:MstIdxBits]),
+        .pop_i(w_pop_en),
         .data_o(w_ext_id),
         .full_o(/*not used*/),
-        .empty_o(),
+        .empty_o(w_id_empty),
         .usage_o(/*not used*/)
     );
+    typedef enum logic [1:0] {
+        W_IDLE      = 2'b01,
+        W_APPROVE   = 2'b10
+    } w_state_e;
 
-
-
-
-
+    w_state_e   w_cur_sta, w_nxt_sta;
+    always_ff @(posedge clk_i or negedge rst_ni) begin
+        if(!rst_ni) begin
+            w_cur_sta <= W_IDLE;
+        end else begin
+            w_cur_sta <= w_nxt_sta;
+        end
+    end
+    logic w_ready_sp;
+    always_comb begin
+        w_nxt_sta = w_cur_sta;
+        w_pop_en  = 0;
+        unique case(1'b1) 
+            w_cur_sta[I_BIT]: begin
+                if((!w_id_empty) && (w_valids != 0)) begin
+                    for(int unsigned i=0; i<NoSlvPorts; i++) begin
+                        if(w_valids[i] && (i == w_ext_id)) begin
+                            w_nxt_sta = W_APPROVE;
+                        end 
+                    end
+                end
+            end
+            w_cur_sta[A_BIT]: begin
+                if(w_valids[w_ext_id] && w_ready_sp && w_chans[w_ext_id].last) begin
+                    w_nxt_sta = W_IDLE;
+                    w_pop_en = 1'b1;
+                end
+            end
+            default: begin end
+        endcase 
+    end
+    logic       w_valid;
+    w_chan_t    w_chan;
+    always_comb begin
+        w_valid = 1'b0;
+        w_chan  = '0;
+        if(w_cur_sta==W_APPROVE) begin
+            w_valid = w_valids[w_ext_id];
+            w_chan  = w_chans[w_ext_id];
+        end
+    end
+    spill_register #(
+      .T       ( w_chan_t ),
+      .Bypass  ( ~SpillW  )
+    ) i_w_spill_reg (
+      .clk_i   ( clk_i              ),
+      .rst_ni  ( rst_ni             ),
+      .valid_i ( w_valid        ),
+      .ready_o ( mst_w_ready_sp        ),
+      .data_i  ( w_chan         ),
+      .valid_o ( mst_req_o.w_valid  ),
+      .ready_i ( mst_resp_i.w_ready ),
+      .data_o  ( mst_req_o.w        )
+    );
 //}}}
 
 

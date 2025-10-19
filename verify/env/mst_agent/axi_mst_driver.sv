@@ -9,7 +9,7 @@
 `include "tb_axi_types_pkg.sv"
 class axi_mst_driver extends uvm_driver #(axi_mst_seq_item);    
     //{{{ vif
-    typedef virtual v_axi_inf #(
+    typedef virtual v_axi_inf_mst #(
         .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
         .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
         .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_MASTER_ID_WIDTH_IN_USE),
@@ -17,7 +17,7 @@ class axi_mst_driver extends uvm_driver #(axi_mst_seq_item);
     ) virt_axi_mst_inf;
     typedef logic [AXI_MASTER_ID_WIDTH_IN_USE-1:0]   axi_id_t;
     //virtual v_axi_inf       vif;
-    virtual v_axi_inf #(
+    virtual v_axi_inf_mst #(
         .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
         .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
         .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_MASTER_ID_WIDTH_IN_USE),
@@ -184,7 +184,10 @@ class axi_mst_driver extends uvm_driver #(axi_mst_seq_item);
         vif.Master_cb.aw_qos    <= item.aw_qos   ;
         vif.Master_cb.aw_region <= item.aw_region;
         vif.Master_cb.aw_atop   <= item.aw_atop  ;
+        wait(vif.aw_ready);
+        #1ps;
         //if(vif.Master_cb.aw_ready !== 1'b1) @ (vif.Master_cb iff vif.Master_cb.aw_ready === 1'b1);
+        //repeat(2) 
         @ (vif.Master_cb);
         vif.Master_cb.aw_id     <= '0 ;
         vif.Master_cb.aw_addr   <= '0 ;
@@ -212,8 +215,11 @@ class axi_mst_driver extends uvm_driver #(axi_mst_seq_item);
             vif.Master_cb.w_strb   <=  item.w_strb[i]  ;           
             vif.Master_cb.w_last   <=  item.w_last[i]  ;           
             vif.Master_cb.w_user   <=  item.w_user  ;
+            @ (vif.w_ready);
             //if(vif.Master_cb.w_ready !== 1'b1) @ (vif.Master_cb iff vif.Master_cb.w_ready === 1'b1);
         end
+        #1ps;
+        //repeat(2) @ (vif.Master_cb);
         @ (vif.Master_cb);
         vif.Master_cb.w_valid  <= '0   ;           
         vif.Master_cb.w_data   <= '0   ;           

@@ -15,7 +15,7 @@ class xbar_env #(
       parameter int unsigned NoSlvPorts = 4
 ) extends uvm_env;
     
-    virtual v_axi_inf #(
+    virtual v_axi_inf_mst #(
         .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
         .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
         .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_MASTER_ID_WIDTH_IN_USE),
@@ -23,7 +23,7 @@ class xbar_env #(
     )mst_vif[NoMstPorts];
     axi_mst_agent               mst_agt[NoMstPorts];
     xbar_virtual_sequencer      virt_sqr;
-    virtual v_axi_inf#(
+    virtual v_axi_inf_slv #(
         .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
         .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
         .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE),
@@ -46,7 +46,7 @@ class xbar_env #(
             slv_agt[i] = axi_slv_agent::type_id::create($sformatf("slv_agt_%0d",i), this);
         end
         //{{{ uvm_config_db
-        if(!uvm_config_db#(virtual v_axi_inf #(
+        if(!uvm_config_db#(virtual v_axi_inf_mst #(
                 .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
                 .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
                 .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_MASTER_ID_WIDTH_IN_USE),
@@ -56,7 +56,7 @@ class xbar_env #(
         end
         else `uvm_info(get_full_name(), "get mvif_0", UVM_LOW)
         if(mst_vif[0]==null) `uvm_fatal("Get_Mst_Vif", "mst_vif[0] is null")
-        if(!uvm_config_db#(virtual v_axi_inf #(
+        if(!uvm_config_db#(virtual v_axi_inf_mst #(
                 .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
                 .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
                 .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_MASTER_ID_WIDTH_IN_USE),
@@ -65,7 +65,7 @@ class xbar_env #(
                 `uvm_error("Get_Mst_Vif", "no virtual interface is assigned")
         end
         else `uvm_info(get_full_name(), "get mvif_1", UVM_LOW)
-        if(!uvm_config_db#(virtual v_axi_inf #(
+        if(!uvm_config_db#(virtual v_axi_inf_mst #(
                 .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
                 .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
                 .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_MASTER_ID_WIDTH_IN_USE),
@@ -74,7 +74,7 @@ class xbar_env #(
                 `uvm_error("Get_Mst_Vif", "no virtual interface is assigned")
         end
         else `uvm_info(get_full_name(), "get mvif_2", UVM_LOW)
-        if(!uvm_config_db#(virtual v_axi_inf #(
+        if(!uvm_config_db#(virtual v_axi_inf_slv #(
                 .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
                 .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
                 .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE),
@@ -83,7 +83,7 @@ class xbar_env #(
                 `uvm_error("Get_Slv_Vif", "no virtual interface is assigned")
         end
         else `uvm_info(get_full_name(), "get svif_0", UVM_LOW)
-        if(!uvm_config_db#(virtual v_axi_inf #(
+        if(!uvm_config_db#(virtual v_axi_inf_slv #(
                 .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
                 .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
                 .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE),
@@ -92,7 +92,7 @@ class xbar_env #(
                 `uvm_error("Get_Slv_Vif", "no virtual interface is assigned")
         end
         else `uvm_info(get_full_name(), "get svif_1", UVM_LOW)
-        if(!uvm_config_db#(virtual v_axi_inf #(
+        if(!uvm_config_db#(virtual v_axi_inf_slv #(
                 .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
                 .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
                 .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE),
@@ -101,7 +101,7 @@ class xbar_env #(
                 `uvm_error("Get_Slv_Vif", "no virtual interface is assigned")
         end
         else `uvm_info(get_full_name(), "get svif_2", UVM_LOW)
-        if(!uvm_config_db#(virtual v_axi_inf #(
+        if(!uvm_config_db#(virtual v_axi_inf_slv #(
                 .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
                 .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
                 .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE),

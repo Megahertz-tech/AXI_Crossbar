@@ -8,7 +8,7 @@
 `define __AXI_SLV_AGENT_SV__
 `include "tb_axi_types_pkg.sv"
 class axi_slv_agent extends uvm_agent;
-typedef virtual v_axi_inf #(
+typedef virtual v_axi_inf_slv #(
         .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
         .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
         .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE),
@@ -17,7 +17,7 @@ typedef virtual v_axi_inf #(
     axi_slv_driver      drv;
     axi_slv_sequencer   sqr;
     //virtual v_axi_inf   vif;
-    virtual v_axi_inf #(
+    virtual v_axi_inf_slv #(
         .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
         .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
         .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE),
@@ -34,7 +34,7 @@ typedef virtual v_axi_inf #(
          `uvm_info(get_full_name(), "into build_phase", UVM_LOW)
          drv = axi_slv_driver::type_id::create("drv", this);
          sqr = axi_slv_sequencer::type_id::create("sqr", this);
-        drv.set_interface(vif);
+         drv.set_interface(vif);
     endfunction 
 
     function void connect_phase(uvm_phase phase);

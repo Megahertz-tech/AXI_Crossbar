@@ -51,9 +51,29 @@ module axi_multicut #(
 
     // TODO: Generate pipeline cuts
       logic  b_ready[NoCuts];
-      logic r_ready[NoCuts];
-    for (genvar i = 0; i < NoCuts; i++) begin : gen_cut
-      // AW channel cut
+      logic  r_ready[NoCuts];
+    for (genvar i = 0; i < NoCuts; i++) begin : gen_pipeline
+        // AW channel cut
+        axi_pipeline #(
+            .Bypass     (       1'b0 ),
+            .aw_chan_t  (  aw_chan_t ),
+            .w_chan_t   (   w_chan_t ),
+            .b_chan_t   (   b_chan_t ),
+            .ar_chan_t  (  ar_chan_t ),
+            .r_chan_t   (   r_chan_t ),
+            .axi_req_t  (  axi_req_t ),
+            .axi_resp_t ( axi_resp_t )
+        ) i_pipeline (
+            .clk_i,
+            .rst_ni,
+            .slv_req_i  ( cut_req[i]    ),
+            .slv_resp_o ( cut_resp[i]   ),
+            .mst_req_o  ( cut_req[i+1]  ),
+            .mst_resp_i ( cut_resp[i+1] )
+        );  
+
+
+      /*
       spill_register #(
         .T      ( aw_chan_t ),
         .Bypass ( 1'b0      )
@@ -129,6 +149,7 @@ module axi_multicut #(
         .ready_i ( cut_req[i].r_ready    ),
         .data_o  ( cut_resp[i].r         )
       );
+      */
     end
   end
 

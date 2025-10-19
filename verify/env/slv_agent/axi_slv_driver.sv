@@ -8,14 +8,14 @@
 `define __AXI_SLV_DRIVER_SV__
 `include "tb_axi_types_pkg.sv"
 class axi_slv_driver extends uvm_driver #(axi_slv_seq_item);
-typedef virtual v_axi_inf #(
+typedef virtual v_axi_inf_slv #(
         .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
         .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
         .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE),
         .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
     ) virt_axi_slv_inf;
     //virtual v_axi_inf   vif;
-    virtual v_axi_inf #(
+    virtual v_axi_inf_slv #(
         .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
         .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
         .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE),
@@ -74,6 +74,7 @@ typedef virtual v_axi_inf #(
     virtual task reset_if();
         `uvm_info("SLV driver"," reset inf", UVM_LOW)
         vif.Slave_cb.aw_ready  <= '1;
+        //vif.Slave_cb.aw_ready  <= '0;
         vif.Slave_cb.w_ready   <= '0;
         vif.Slave_cb.b_id      <= '0;
         vif.Slave_cb.b_resp    <= '0;
@@ -138,9 +139,13 @@ typedef virtual v_axi_inf #(
     //{{{ do_setup_aw
     virtual task do_setup_aw(axi_slv_seq_item item);
         aw_valid_e.wait_trigger();
-        vif.Slave_cb.aw_ready <= 1'b1;
+        if(!vif.Slave_cb.aw_ready) begin
+            @ (vif.Slave_cb);
+            vif.Slave_cb.aw_ready <= 1'b1;
+        end
+        #1ps;
         @ (vif.Slave_cb);
-        if(vif.Slave_cb.aw_valid) begin
+        if(vif.aw_valid) begin
             item.is_aw      = 1'b1;
             item.aw_id      = vif.aw_id      ;                   
             item.aw_addr    = vif.aw_addr    ;                    
@@ -156,7 +161,10 @@ typedef virtual v_axi_inf #(
             item.aw_region  = vif.aw_region  ;                    
             item.aw_atop    = vif.aw_atop    ;                    
         end
-        else begin
+        #1ps;
+        @ (vif.Slave_cb);
+        vif.Slave_cb.aw_ready <= 1'b0;
+        /*else begin
             @(vif.Slave_cb.aw_valid); 
             item.is_aw      = 1'b1;
             item.aw_id      = vif.aw_id      ;                   
@@ -172,8 +180,8 @@ typedef virtual v_axi_inf #(
             item.aw_qos     = vif.aw_qos     ;                    
             item.aw_region  = vif.aw_region  ;                    
             item.aw_atop    = vif.aw_atop    ;
-        end
-        @(negedge vif.Slave_cb.aw_valid);
+        end*/
+        //@(negedge vif.Slave_cb.aw_valid);
         aw_valid_e.reset();
         #1ps;
         aw_valid_done_e.trigger();
@@ -183,6 +191,11 @@ typedef virtual v_axi_inf #(
     virtual task do_setup_w(axi_slv_seq_item item);
         w_valid_e.wait_trigger();
         vif.Slave_cb.w_ready <= 1'b1;
+        @ (vif.w_last);
+        #1ps;
+        @ (vif.Slave_cb);
+        vif.Slave_cb.w_ready <= 1'b0;
+        /*
         @ (vif.Slave_cb);
         item.w_data = new[item.aw_burst+1];
         item.w_strb = new[item.aw_burst+1];
@@ -203,7 +216,7 @@ typedef virtual v_axi_inf #(
                 item.w_last[i] = vif.Slave_cb.w_last;
                 @ (vif.Slave_cb);
             end
-        end
+        end */
     endtask
     //}}}
     //{{{ wait_for_nclocks
@@ -214,7 +227,7 @@ typedef virtual v_axi_inf #(
     //{{{ wait_for_aw_valid
     task automatic wait_for_aw_valid();
         //`wait_sig_high(vif.Slave_cb, aw_valid)
-        @(posedge vif.Slave_cb.aw_valid);
+        @(posedge vif.aw_valid);
         aw_valid_e.trigger();
         aw_valid_done_e.wait_trigger();
         #1ps;

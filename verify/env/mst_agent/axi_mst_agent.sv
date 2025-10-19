@@ -9,7 +9,7 @@
 `include "tb_axi_types_pkg.sv"
 
 class axi_mst_agent extends uvm_agent;
-typedef virtual v_axi_inf #(
+typedef virtual v_axi_inf_mst #(
         .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
         .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
         .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_MASTER_ID_WIDTH_IN_USE),
@@ -20,7 +20,7 @@ typedef virtual v_axi_inf #(
     //axi_mst_monitor     mon;
     //virtual v_axi_inf   vif;
     
-    virtual v_axi_inf #(
+    virtual v_axi_inf_mst #(
         .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
         .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
         .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_MASTER_ID_WIDTH_IN_USE),

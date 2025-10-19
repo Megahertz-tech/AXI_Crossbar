@@ -220,8 +220,8 @@ import cf_math_pkg::idx_width;
       .slv_aw_select_i ( slv_aw_select       ),
       .slv_ar_select_i ( slv_ar_select       ),
       .slv_resp_o      ( slv_ports_resp_o[i] ),
-      .mst_reqs_o      ( slv_reqs         ),
-      .mst_resps_i     ( slv_resps        )
+      .mst_reqs_o      ( slv_reqs[i]         ),
+      .mst_resps_i     ( slv_resps[i]        )
     );
 
     // TODO: Instantiate error slave for decode errors

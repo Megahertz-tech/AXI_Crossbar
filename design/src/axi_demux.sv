@@ -56,13 +56,14 @@ module axi_demux #(
 );
 
   //Celine : Implement demultiplexer internal signals
-  axi_req_t     slv_req_sp;   //Celine: the demux_core input 
+  axi_req_t     slv_req_cut;   //Celine: the demux_core input 
   axi_resp_t    slv_resp_cut;  //Cleine: the demux_core output
+  /*
  
   select_t      slv_aw_select_sp, slv_ar_select_sp;  
 
 //{{{ insert register slice 
-    logic slv_aw_ready_sel_sp;
+    logic slv_aw_ready_sel_sp, slv_aw_valid_sel_sp;
     spill_register #(
         .T       ( select_t   ),
         .Bypass  ( ~SpillAw   )
@@ -72,8 +73,8 @@ module axi_demux #(
         .valid_i ( slv_req_i.aw_valid   ),
         .ready_o ( slv_aw_ready_sel_sp  ),
         .data_i  ( slv_aw_select_i      ),
-        .valid_o ( /* unused */         ),
-        .ready_i ( slv_resp_cut.aw_ready),
+        .valid_o ( slv_aw_valid_sel_sp  ),
+        .ready_i ( slv_resp_sp.aw_ready),
         .data_o  ( slv_aw_select_sp     )    
     );
     logic slv_aw_ready_sp, slv_aw_valid_sp;
@@ -87,10 +88,12 @@ module axi_demux #(
         .ready_o ( slv_aw_ready_sp     ),
         .data_i  ( slv_req_i.aw      ),
         .valid_o ( slv_aw_valid_sp         ),
-        .ready_i ( slv_resp_cut.aw_ready),
+        .ready_i ( slv_resp_sp.aw_ready),
         .data_o  ( slv_req_sp.aw     )    
     );
-    logic slv_ar_ready_sel_sp;
+    assign slv_resp_o.aw_ready = slv_aw_ready_sp & slv_aw_ready_sel_sp;
+    assign slv_req_sp.aw_valid = slv_aw_valid_sp & slv_aw_valid_sel_sp;
+    logic slv_ar_ready_sel_sp, slv_ar_valid_sel_sp;
     spill_register #(
         .T       ( select_t   ),
         .Bypass  ( ~SpillAr   )
@@ -100,8 +103,8 @@ module axi_demux #(
         .valid_i ( slv_req_i.ar_valid   ),
         .ready_o ( slv_ar_ready_sel_sp  ),
         .data_i  ( slv_ar_select_i      ),
-        .valid_o ( /* unused */         ),
-        .ready_i ( slv_resp_cut.ar_ready),
+        .valid_o ( slv_ar_valid_sel_sp  ),
+        .ready_i ( slv_resp_sp.ar_ready),
         .data_o  ( slv_ar_select_sp     )    
     );
     logic slv_ar_ready_sp, slv_ar_valid_sp;
@@ -115,34 +118,56 @@ module axi_demux #(
         .ready_o ( slv_ar_ready_sp     ),
         .data_i  ( slv_req_i.ar      ),
         .valid_o ( slv_ar_valid_sp         ),
-        .ready_i ( slv_resp_cut.ar_ready),
+        .ready_i ( slv_resp_sp.ar_ready),
         .data_o  ( slv_req_sp.ar     )    
     );
-//}}}
-//{{{ axi_demux_core
-    axi_demux_core #(
-        .AxiIdWidth     (AxiIdWidth), 
-        .AtopSupport    (AtopSupport), 
-        .axi_req_t      (axi_req_t), 
-        .axi_resp_t     (axi_resp_t), 
-        .NoMstPorts     (NoMstPorts), 
-        .MaxTrans       (MaxTrans), 
-        .AxiLookBits    (AxiLookBits), 
-        .UniqueIds      (UniqueIds)     
-    ) i_axi_demux_core(
+    assign slv_resp_o.ar_ready = slv_ar_ready_sp & slv_ar_ready_sel_sp;
+    assign slv_req_sp.ar_valid = slv_ar_valid_sp & slv_ar_valid_sel_sp;
+    
+    spill_register #(
+        .T       ( w_chan_t  ),
+        .Bypass  ( ~SpillW   )
+    ) i_w_spill_reg (
         .clk_i,
         .rst_ni,
-        .test_i,
-        .slv_req_i      (slv_req_i),
-        .slv_aw_select_i(slv_aw_select_i),
-        .slv_ar_select_i(slv_ar_select_i),
-        .slv_resp_o     (slv_resp_o),
-        .mst_reqs_o     (mst_reqs_o),
-        .mst_resps_i    (mst_resps_i)    
+        .valid_i ( slv_req_i.w_valid    ),
+        .ready_o ( slv_resp_o.w_ready   ),
+        .data_i  ( slv_req_i.w          ),
+        .valid_o ( slv_req_sp.w_valid  ),
+        .ready_i ( slv_resp_sp.w_ready ),
+        .data_o  ( slv_req_sp.w        )
     );
-//}}} 
+    spill_register #(
+    .T       ( b_chan_t ),
+    .Bypass  ( ~SpillB  )
+    ) i_b_spill_reg (
+    .clk_i,
+    .rst_ni,
+    .valid_i ( slv_resp_sp.b_valid ),
+    .ready_o ( slv_req_sp.b_ready  ),
+    .data_i  ( slv_resp_sp.b       ),
+    .valid_o ( slv_resp_o.b_valid   ),
+    .ready_i ( slv_req_i.b_ready    ),
+    .data_o  ( slv_resp_o.b         )
+    );
+    spill_register #(
+    .T       ( r_chan_t ),
+    .Bypass  ( ~SpillR  )
+    ) i_r_spill_reg (
+    .clk_i,
+    .rst_ni,
+    .valid_i ( slv_resp_sp.r_valid ),
+    .ready_o ( slv_req_sp.r_ready  ),
+    .data_i  ( slv_resp_sp.r       ),
+    .valid_o ( slv_resp_o.r_valid   ),
+    .ready_i ( slv_req_i.r_ready    ),
+    .data_o  ( slv_resp_o.r         )
+  );
+//}}}
+*/
+ 
 
-  /*
+  
 
   logic slv_aw_ready_chan, slv_aw_ready_sel;
   logic slv_aw_valid_chan, slv_aw_valid_sel;
@@ -198,7 +223,7 @@ module axi_demux #(
   );
 
   // TODO: Implement spill registers for B channel
-  logic b_ready;
+  //logic b_ready;
   spill_register #(
     .T       ( b_chan_t  ),
     .Bypass  ( ~SpillB   )
@@ -206,8 +231,8 @@ module axi_demux #(
     .clk_i,
     .rst_ni,
     .valid_i ( slv_resp_cut.b_valid ),
-    //.ready_o ( slv_resp_cut.b_ready ),
-    .ready_o ( b_ready ),
+    //.ready_o ( b_ready ),
+    .ready_o ( slv_req_cut.b_ready ),
     .data_i  ( slv_resp_cut.b       ),
     .valid_o ( slv_resp_o.b_valid   ),
     .ready_i ( slv_req_i.b_ready    ),
@@ -215,7 +240,7 @@ module axi_demux #(
   );
 
   // TODO: Implement spill registers for R channel
-  logic r_ready;
+  //logic r_ready;
   spill_register #(
     .T       ( r_chan_t  ),
     .Bypass  ( ~SpillR   )
@@ -223,51 +248,78 @@ module axi_demux #(
     .clk_i,
     .rst_ni,
     .valid_i ( slv_resp_cut.r_valid ),
-    .ready_o ( r_ready ),
-    //.ready_o ( slv_resp_cut.r_ready ),
+    //.ready_o ( r_ready ),
+    .ready_o ( slv_req_cut.r_ready ),
     .data_i  ( slv_resp_cut.r       ),
     .valid_o ( slv_resp_o.r_valid   ),
     .ready_i ( slv_req_i.r_ready    ),
     .data_o  ( slv_resp_o.r         )
   );
-*/
+
 
   // TODO: Implement select signal handling
-//  spill_register #(
-//    .T       ( select_t   ),
-//    .Bypass  ( ~SpillAw   )
-//  ) i_aw_select_spill_reg (
-//    .clk_i,
-//    .rst_ni,
-//    .valid_i ( slv_aw_valid_sel     ),
-//    .ready_o ( slv_aw_ready_sel     ),
-//    .data_i  ( slv_aw_select_i      ),
-//    .valid_o ( /* unused */         ),
-//    .ready_i ( slv_resp_cut.aw_ready && slv_aw_valid_chan ),
-//    .data_o  ( slv_aw_select        )
-//  );
-//
-//  spill_register #(
-//    .T       ( select_t   ),
-//    .Bypass  ( ~SpillAr   )
-//  ) i_ar_select_spill_reg (
-//    .clk_i,
-//    .rst_ni,
-//    .valid_i ( slv_ar_valid_sel     ),
-//    .ready_o ( slv_ar_ready_sel     ),
-//    .data_i  ( slv_ar_select_i      ),
-//    .valid_o ( /* unused */         ),
-//    .ready_i ( slv_resp_cut.ar_ready && slv_ar_valid_chan ),
-//    .data_o  ( slv_ar_select        )
-//  );
-//
-  // TODO: Implement ready/valid logic for select signals
-//  assign slv_aw_valid_sel = slv_req_i.aw_valid && slv_aw_ready_chan;
-//  assign slv_ar_valid_sel = slv_req_i.ar_valid && slv_ar_ready_chan;
-//  assign slv_resp_o.aw_ready = slv_aw_ready_chan && slv_aw_ready_sel;
-//  assign slv_resp_o.ar_ready = slv_ar_ready_chan && slv_ar_ready_sel;
+  spill_register #(
+    .T       ( select_t   ),
+    .Bypass  ( ~SpillAw   )
+  ) i_aw_select_spill_reg (
+    .clk_i,
+    .rst_ni,
+    .valid_i ( slv_req_i.aw_valid     ),
+    .ready_o ( slv_aw_ready_sel     ),
+    .data_i  ( slv_aw_select_i      ),
+    .valid_o ( slv_aw_valid_sel         ),
+    //.valid_o ( /* unused */         ),
+    .ready_i ( slv_resp_cut.aw_ready),
+    //.ready_i ( (slv_resp_cut.aw_ready && slv_aw_valid_chan )),
+    .data_o  ( slv_aw_select        )
+  );
 
-  
+  spill_register #(
+    .T       ( select_t   ),
+    .Bypass  ( ~SpillAr   )
+  ) i_ar_select_spill_reg (
+    .clk_i,
+    .rst_ni,
+    .valid_i ( slv_req_i.ar_valid     ),
+    .ready_o ( slv_ar_ready_sel     ),
+    .data_i  ( slv_ar_select_i      ),
+    .valid_o ( slv_ar_valid_sel         ),
+    //.valid_o ( /* unused */         ),
+    .ready_i ( slv_resp_cut.ar_ready),
+    //.ready_i ( (slv_resp_cut.ar_ready && slv_ar_valid_chan) ),
+    .data_o  ( slv_ar_select        )
+  );
+
+// TODO: Implement ready/valid logic for select signals
+  //assign slv_aw_valid_sel = slv_req_i.aw_valid && slv_aw_ready_chan;
+  //assign slv_ar_valid_sel = slv_req_i.ar_valid && slv_ar_ready_chan;
+  assign slv_resp_o.aw_ready = slv_aw_ready_chan && slv_aw_ready_sel;
+  assign slv_resp_o.ar_ready = slv_ar_ready_chan && slv_ar_ready_sel;
+  assign slv_req_cut.aw_valid = slv_aw_valid_chan & slv_aw_valid_sel;
+  assign slv_req_cut.ar_valid = slv_ar_valid_chan & slv_ar_valid_sel;
+
+ //{{{ axi_demux_core
+    axi_demux_core #(
+        .AxiIdWidth     (AxiIdWidth), 
+        .AtopSupport    (AtopSupport), 
+        .axi_req_t      (axi_req_t), 
+        .axi_resp_t     (axi_resp_t), 
+        .NoMstPorts     (NoMstPorts), 
+        .MaxTrans       (MaxTrans), 
+        .AxiLookBits    (AxiLookBits), 
+        .UniqueIds      (UniqueIds)     
+    ) i_axi_demux_core(
+        .clk_i,
+        .rst_ni,
+        .test_i,
+        .slv_req_i      (slv_req_cut),
+        .slv_aw_select_i(slv_aw_select),
+        .slv_ar_select_i(slv_ar_select),
+        .slv_resp_o     (slv_resp_cut),
+        .mst_reqs_o     (mst_reqs_o),
+        .mst_resps_i    (mst_resps_i)    
+    );
+//}}} 
 
   // TODO: Complete the demultiplexer implementation
   // Students need to implement:

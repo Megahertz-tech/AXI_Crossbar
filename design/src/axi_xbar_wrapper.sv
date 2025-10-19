@@ -71,12 +71,27 @@ module axi_xbar_wrapper
 
   for (genvar i = 0; i < Cfg.NoMstPorts; i++) begin : gen_assign_mst
     `AXI_ASSIGN_FROM_REQ(mst_ports[i], mst_reqs[i])
+    //`AXI_ASSIGN_TO_REQ(mst_reqs[i], mst_ports[i])
     `AXI_ASSIGN_TO_RESP(mst_resps[i], mst_ports[i])
+    //`AXI_ASSIGN_FROM_RESP(mst_ports[i], mst_resps[i])
   end
   for (genvar i = 0; i < Cfg.NoSlvPorts; i++) begin : gen_assign_slv
     `AXI_ASSIGN_TO_REQ(slv_reqs[i], slv_ports[i])
-    //`AXI_ASSIGN_FROM_RESP(slv_ports[i], slv_resps[i])
-    `AXI_ASSIGN_TO_RESP(slv_resps[i], slv_ports[i])
+        //assign slv_ports[i].aw_ready = slv_resps[i].aw_ready;
+        //assign slv_ports[i].w_ready = slv_resps[i].w_ready;
+        //assign slv_ports[i].b_valid = slv_resps[i].b_valid;
+        //assign slv_ports[i].b_id = slv_resps[i].b.id;
+        //assign slv_ports[i].b_resp = slv_resps[i].b.resp;
+        //assign slv_ports[i].b_user = slv_resps[i].b.user;
+        //assign slv_ports[i].ar_ready = slv_resps[i].ar_ready;
+        //assign slv_ports[i].r_valid = slv_resps[i].r_valid;
+        //assign slv_ports[i].r_id = slv_resps[i].r.id;
+        //assign slv_ports[i].r_data = slv_resps[i].r.data;
+        //assign slv_ports[i].r_resp = slv_resps[i].r.resp;
+        //assign slv_ports[i].r_last = slv_resps[i].r.last;
+        //assign slv_ports[i].r_user = slv_resps[i].r.user;
+    `AXI_ASSIGN_FROM_RESP(slv_ports[i], slv_resps[i])
+    //`AXI_ASSIGN_TO_RESP(slv_resps[i], slv_ports[i])
   end
 
   // TODO: Instantiate the main crossbar

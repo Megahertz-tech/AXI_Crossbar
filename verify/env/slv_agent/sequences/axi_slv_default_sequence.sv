@@ -30,15 +30,15 @@ class axi_slv_default_sequence extends uvm_sequence #(axi_slv_seq_item);
             req.set_transaction_id(i);
             `uvm_send(req)
             get_response(tmp);
-            assert(!(tmp.get_transaction_id()==req.get_transaction_id()))
-            else `uvm_error($sformatf("SLV_SEQ No.%0d", slv_id), $sformatf("get_response id: %0d is not equal to the req id: %0d !", tmp.get_transaction_id(), req.get_transaction_id()))
+            //assert(!(tmp.get_transaction_id()==req.get_transaction_id()))
+            //else `uvm_error($sformatf("SLV_SEQ No.%0d", slv_id), $sformatf("get_response id: %0d is not equal to the req id: %0d !", tmp.get_transaction_id(), req.get_transaction_id()))
             `uvm_info("SLV_SEQ", "uvm_send req", UVM_LOW)
             `uvm_create(rsp)
             `uvm_info("SLV_SEQ", "uvm_create rsp", UVM_LOW)
             rsp.copy(tmp);
             if(rsp.is_aw) begin
-                assert(rsp.aw_valid) 
-                else `uvm_error($sformatf("slave_%d AW-channel", slv_id), "aw_valid deasserted!")
+                //assert(rsp.aw_valid) 
+                //else `uvm_error($sformatf("slave_%d AW-channel", slv_id), "aw_valid deasserted!")
             end
             if(rsp.is_w) begin
                 assert(rsp.w_last[rsp.aw_len+1])

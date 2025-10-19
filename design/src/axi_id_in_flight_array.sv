@@ -89,7 +89,7 @@ module axi_id_in_flight_array #(
             .en_i       ( count_en    ),
             .load_i     ( 1'b0      ),
             .down_i     ( count_down  ),
-            .d_i        ( 0        ),
+            .d_i        ( {CntWidth{1'b0}}     ),
             .q_o        ( id_in_flight_cnts[i] ),
             .overflow_o ( /* not use */ )
         );

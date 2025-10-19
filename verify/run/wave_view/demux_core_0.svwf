@@ -1,0 +1,99 @@
+
+#
+# Mnemonic Maps
+#
+mmap new  -reuse -name {Boolean as Logic} -radix %b -contents {{%c=FALSE -edgepriority 1 -shape low}
+{%c=TRUE -edgepriority 1 -shape high}}
+mmap new  -reuse -name {Example Map} -radix %x -contents {{%b=11???? -bgcolor orange -label REG:%x -linecolor yellow -shape bus}
+{%x=1F -bgcolor red -label ERROR -linecolor white -shape EVENT}
+{%x=2C -bgcolor red -label ERROR -linecolor white -shape EVENT}
+{%x=* -label %x -linecolor gray -shape bus}}
+
+array unset createdGroup
+array set createdGroup {}
+#
+# Groups
+#
+if {[catch {group get -using [list {Group 1}]}]} {
+set createdGroup([list {Group 1}]) 1
+catch {group new -name {Group 1} -overlay 0}
+}
+if {[catch {group get -using [list {Group 2}]}]} {
+set createdGroup([list {Group 2}]) 1
+catch {group new -name {Group 2} -overlay 0}
+}
+if {[catch {group get -using [list {Group 3}]}]} {
+set createdGroup([list {Group 3}]) 1
+catch {group new -name {Group 3} -overlay 0}
+}
+if {[info exists createdGroup([list {Group 1}])]} {
+group using {Group 1}
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+group insert \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.gen_mst_port_mux[3].i_axi_mux.i_aw_fair_rr_arb.cur_sta[1:0]}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.gen_mst_port_mux[2].i_axi_mux.i_aw_fair_rr_arb.cur_sta[1:0]}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.gen_mst_port_mux[1].i_axi_mux.i_aw_fair_rr_arb.cur_sta[1:0]}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.gen_mst_port_mux[0].i_axi_mux.i_aw_fair_rr_arb.cur_sta[1:0]}]} ]
+}
+
+if {[info exists createdGroup([list {Group 2}])]} {
+group using {Group 2}
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+group insert \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.slv_aw_select_i[2:0]}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.slv_aw_select_i[2:0]}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.slv_aw_select_i[2:0]}]} ]
+}
+
+if {[info exists createdGroup([list {Group 3}])]} {
+group using {Group 3}
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+group insert \
+    [subst  {[format {tb_axi_xbar_top.slave_infs[0].aw_valid}]} ] \
+    [subst  {[format {tb_axi_xbar_top.slave_infs[0].aw_ready}]} ] \
+    [subst  {[format {tb_axi_xbar_top.slave_infs[1].aw_valid}]} ] \
+    [subst  {[format {tb_axi_xbar_top.slave_infs[1].aw_ready}]} ] \
+    [subst  {[format {tb_axi_xbar_top.slave_infs[2].aw_valid}]} ] \
+    [subst  {[format {tb_axi_xbar_top.slave_infs[2].aw_ready}]} ] \
+    [subst  {[format {tb_axi_xbar_top.slave_infs[3].aw_valid}]} ] \
+    [subst  {[format {tb_axi_xbar_top.slave_infs[3].aw_ready}]} ]
+}
+
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.master_infs[0].aw_valid}]}
+	} ]]
+waveform format $id -color #ff9900
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.master_infs[1].aw_valid}]}
+	} ]]
+waveform format $id -color #ff9900
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.master_infs[2].aw_valid}]}
+	} ]]
+waveform format $id -color #ff9900
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.master_infs[0].aw_ready}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.master_infs[1].aw_ready}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.master_infs[2].aw_ready}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.clk}]}
+	} ]]
+
+set groupId0 [waveform add -groups {{Group 2}}]
+
+
+waveform xview limits 61005.001ps 567977.592ps
