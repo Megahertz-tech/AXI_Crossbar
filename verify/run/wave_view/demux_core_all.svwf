@@ -142,11 +142,14 @@ group insert \
     [subst  {[format {tb_axi_xbar_top.master_infs[0].w_valid}]} ] \
     [subst  {[format {tb_axi_xbar_top.master_infs[0].w_last}]} ] \
     [subst  {[format {tb_axi_xbar_top.master_infs[0].w_ready}]} ] \
-    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.aw_sel_cur[2:0]}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.slv_aw_select_i[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.aw_in_flight_cnt[3:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.aw_sel_cur[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.aw_push_en}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.slv_req_i.aw.id}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.lookup_aw_sel_taken}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.loopup_aw_sel[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.w_sel_empty}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.w_cur_sta[1:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.w_pop_cur}]} ] \
@@ -167,7 +170,11 @@ group insert \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.slv_aw_select_i[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.aw_in_flight_cnt[3:0]}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.aw_sel_cur[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.aw_push_en}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.slv_req_i.aw.id}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.lookup_aw_sel_taken}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.loopup_aw_sel[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.w_sel_empty}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.w_cur_sta[1:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.w_pop_cur}]} ] \
@@ -187,9 +194,12 @@ group insert \
     [subst  {[format {tb_axi_xbar_top.master_infs[2].w_ready}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.slv_aw_select_i[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]} ] \
-    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.ar_in_flight_cnt[3:0]}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.aw_in_flight_cnt[3:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.aw_sel_cur[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.aw_push_en}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.slv_req_i.aw.id}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.lookup_aw_sel_taken}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.loopup_aw_sel[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.w_sel_empty}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.w_cur_sta[1:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.w_pop_cur}]} ] \
@@ -218,16 +228,22 @@ foreach {name attrs} [subst  {
     {[format {tb_axi_xbar_top.master_infs[0].w_valid}]} {}
     {[format {tb_axi_xbar_top.master_infs[0].w_last}]} {}
     {[format {tb_axi_xbar_top.master_infs[0].w_ready}]} {}
-    {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.aw_sel_cur[2:0]}]} {}
+    {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.slv_aw_select_i[2:0]}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.aw_in_flight_cnt[3:0]}]} {}
-    {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.aw_sel_cur[2:0]}]} {}
+    {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.aw_sel_cur[2:0]}]} {-color #ff00ff -namecolor #ff00ff}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.aw_push_en}]} {}
+    {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.slv_req_i.aw.id}]} {-color #ffff00}
+    {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.lookup_aw_sel_taken}]} {}
+    {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.loopup_aw_sel[2:0]}]} {-color #ffff00}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.w_sel_empty}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.w_cur_sta[1:0]}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.w_pop_cur}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.w_select_from_fifo[2:0]}]} {}
 }] childcmds {
+    {}
+    {}
+    {}
     {}
     {}
     {}
@@ -269,12 +285,20 @@ foreach {name attrs} [subst  {
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.slv_aw_select_i[2:0]}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.aw_in_flight_cnt[3:0]}]} {}
+    {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.aw_sel_cur[2:0]}]} {-color #ff00ff -namecolor #ff00ff}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.aw_push_en}]} {}
+    {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.slv_req_i.aw.id}]} {-color #ffff00}
+    {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.lookup_aw_sel_taken}]} {}
+    {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.loopup_aw_sel[2:0]}]} {-color #ffff00}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.w_sel_empty}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.w_cur_sta[1:0]}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.w_pop_cur}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.w_select_from_fifo[2:0]}]} {}
 }] childcmds {
+    {}
+    {}
+    {}
+    {}
     {}
     {}
     {}
@@ -314,14 +338,20 @@ foreach {name attrs} [subst  {
     {[format {tb_axi_xbar_top.master_infs[2].w_ready}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.slv_aw_select_i[2:0]}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]} {}
-    {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.ar_in_flight_cnt[3:0]}]} {}
-    {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.aw_sel_cur[2:0]}]} {}
+    {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.aw_in_flight_cnt[3:0]}]} {}
+    {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.aw_sel_cur[2:0]}]} {-color #ff00ff -namecolor #ff00ff}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.aw_push_en}]} {}
+    {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.slv_req_i.aw.id}]} {-color #ffff00}
+    {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.lookup_aw_sel_taken}]} {}
+    {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.loopup_aw_sel[2:0]}]} {-color #ffff00}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.w_sel_empty}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.w_cur_sta[1:0]}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.w_pop_cur}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.w_select_from_fifo[2:0]}]} {}
 }] childcmds {
+    {}
+    {}
+    {}
     {}
     {}
     {}

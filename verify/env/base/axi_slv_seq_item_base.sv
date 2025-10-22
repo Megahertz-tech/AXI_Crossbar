@@ -13,7 +13,7 @@ import uvm_pkg::*;
 class axi_slv_seq_item_base #(
     parameter int unsigned AXI_ADDR_WIDTH = tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE,
     parameter int unsigned AXI_DATA_WIDTH = tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE,
-    parameter int unsigned AXI_ID_WIDTH   = tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE,
+    parameter int unsigned AXI_ID_WIDTH   = tb_xbar_param_pkg::AXI_MASTER_ID_WIDTH_IN_USE,
     parameter int unsigned AXI_USER_WIDTH = tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE
 )extends uvm_sequence_item;
     localparam int unsigned AXI_STRB_WIDTH = AXI_DATA_WIDTH / 8;

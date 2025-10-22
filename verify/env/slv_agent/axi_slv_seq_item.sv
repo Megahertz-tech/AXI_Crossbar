@@ -135,6 +135,12 @@ class axi_slv_seq_item extends axi_slv_seq_item_base;
     function void pre_randomize();
 
     endfunction
+    function void set_access_b_response();
+        b_id = this.aw_id;
+        b_resp = AXI_OKAY;
+        b_user = '0;
+        b_valid = 1'b1;
+    endfunction 
 
     function string convert2string();
         string s;

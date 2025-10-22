@@ -26,6 +26,8 @@ def parse_args():
     parser.add_argument('-cov', dest='cov', help='set coverage enable', choices=('0','1'), default='0')
     parser.add_argument('-comp', dest='comp', help='compile option: 1-compile enable, 0-do not compile', choices=('0','1'), default='1')
     parser.add_argument('-sim', dest='sim', help='simulation option: co: compile only; ro: simulate only; cr: compile and simulate ', default='cr')
+    # for test_cfg
+    parser.add_argument('-en_slv_b', dest='enable_slv_b_channel', help='enable slave b channel - 0: all disable, 1: enable slave 0, 2: enable slave 1, 3: enable slave 0&1 ... this argumet will be parsed as binary bits', default='0')
     #parser.add_argument('-', dest='', help='', default=)
     args = parser.parse_args()   
     return args
@@ -43,6 +45,7 @@ def gen_run_param(args):
     run_param = ' +UVM_TESTNAME=%s '%args.testcase
     run_param += ' -svseed ' + str(random.randint(0,0xffffffff))
     run_param += ' -l %s'%(args.log)
+    run_param += ' +enable_slv_b_channel=' + args.enable_slv_b_channel
     return(run_param+' ')
 
 

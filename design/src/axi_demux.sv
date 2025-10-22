@@ -178,6 +178,7 @@ module axi_demux #(
   select_t slv_aw_select, slv_ar_select;
 
   // TODO: Implement spill registers for AW channel
+  //{{{
   spill_register #(
     .T       ( aw_chan_t  ),
     .Bypass  ( ~SpillAw   )
@@ -297,6 +298,7 @@ module axi_demux #(
   assign slv_resp_o.ar_ready = slv_ar_ready_chan && slv_ar_ready_sel;
   assign slv_req_cut.aw_valid = slv_aw_valid_chan & slv_aw_valid_sel;
   assign slv_req_cut.ar_valid = slv_ar_valid_chan & slv_ar_valid_sel;
+//}}}
 
  //{{{ axi_demux_core
     axi_demux_core #(
@@ -304,6 +306,8 @@ module axi_demux #(
         .AtopSupport    (AtopSupport), 
         .axi_req_t      (axi_req_t), 
         .axi_resp_t     (axi_resp_t), 
+        .b_chan_t       (b_chan_t),
+        .r_chan_t       (r_chan_t),
         .NoMstPorts     (NoMstPorts), 
         .MaxTrans       (MaxTrans), 
         .AxiLookBits    (AxiLookBits), 

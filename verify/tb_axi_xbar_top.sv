@@ -27,7 +27,8 @@ module tb_axi_xbar_top;
     //{{{ tb cfg 
     parameter int   TbNumSlaves     = tb_xbar_param_pkg::TB_SLAVE_NUMBER_IN_USE;        // Number of slave ports to test
     parameter int   TbNumMasters    = tb_xbar_param_pkg::TB_MASTER_NUMBER_IN_USE;       // Number of master ports to test
-    parameter int   TbSlvIdWidth    = tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE;     // Extended ID width for testing
+    parameter int   TbMstIdWidth    = tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE;     // Extended ID width for testing
+    parameter int   TbSlvIdWidth    = tb_xbar_param_pkg::AXI_MASTER_ID_WIDTH_IN_USE;
     parameter int   TbAxiDataWidth  = tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE;         // Data width for verification
     parameter int   TbAxiAddrWidth  = tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE;         // Address width
     parameter int   TbNumAddrRules  = tb_xbar_param_pkg::TB_ADDR_RULES_NUMBER_IN_USE;   // Number of address map rules
@@ -53,14 +54,15 @@ module tb_axi_xbar_top;
       rst_n <= 1'b1;
     end
     //}}}
-  localparam int MstPortsIdxWidth = axi_math_pkg::idx_width(TbNumMasters);
-  localparam int MstIdWidth = TbSlvIdWidth + MstPortsIdxWidth;
+  localparam int MstPortsIdxWidth = axi_math_pkg::idx_width(TbNumMasters); //extended id width from the persipective of xbar
+  //localparam int TbSlvIdWidth = TbMstIdWidth + MstPortsIdxWidth;
     //{{{ Interfaces 
     // interfaces for DUT
     axi_inf # (
         .AXI_ADDR_WIDTH ( TbAxiAddrWidth      ),
         .AXI_DATA_WIDTH ( TbAxiDataWidth      ),
-        .AXI_ID_WIDTH   ( MstIdWidth          ),
+        //.AXI_ID_WIDTH   ( MstIdWidth          ),
+        .AXI_ID_WIDTH   ( TbMstIdWidth          ),
         .AXI_USER_WIDTH ( TbAxiUserWidth      )
     ) master_infs[TbNumMasters-1:0]();
     axi_inf # (
@@ -73,7 +75,7 @@ module tb_axi_xbar_top;
     v_axi_inf_mst # (
         .AXI_ADDR_WIDTH ( TbAxiAddrWidth      ),
         .AXI_DATA_WIDTH ( TbAxiDataWidth      ),
-        .AXI_ID_WIDTH   ( MstIdWidth          ),
+        .AXI_ID_WIDTH   ( TbMstIdWidth          ),
         .AXI_USER_WIDTH ( TbAxiUserWidth      )
     ) master_vifs[TbNumMasters] ();
         //.clk (clk),
@@ -200,12 +202,14 @@ module tb_axi_xbar_top;
     parameter axi_typedef_pkg::xbar_cfg_t XbarCfg = '{
     NoSlvPorts:         TbNumMasters,       // Number of slave ports (master connections)     
     NoMstPorts:         TbNumSlaves,        // Number of master ports (slave connections)
-    MaxMstTrans:        8,
-    MaxSlvTrans:        4,
+    MaxMstTrans:        tb_xbar_param_pkg::TB_MAX_MASTER_TRANS, //8,
+    MaxSlvTrans:        tb_xbar_param_pkg::TB_MAX_SLAVE_TRANS,  //4,
     FallThrough:        1'b0,
     LatencyMode:        10'b10_010_10_010,  // Pipeline AW/AR Demux: [AW, W, B, AR, R] Mux: [AW, W, B, AR, R]
-    AxiIdWidthSlvPorts: TbSlvIdWidth,
-    AxiIdUsedSlvPorts:  TbSlvIdWidth,
+    //AxiIdWidthSlvPorts: TbSlvIdWidth,
+    AxiIdWidthSlvPorts: TbMstIdWidth,
+    //AxiIdUsedSlvPorts:  TbSlvIdWidth,
+    AxiIdUsedSlvPorts:  TbMstIdWidth,
     UniqueIds:          1'b0,
     AxiAddrWidth:       TbAxiAddrWidth,
     AxiDataWidth:       TbAxiDataWidth,
@@ -217,11 +221,11 @@ module tb_axi_xbar_top;
     // Connectivity matrix - students can modify for testing partial connectivity
   localparam bit [TbNumSlaves-1:0][TbNumMasters-1:0] Connectivity = '1;
 
-  // Configuration inputs
+  // Configuration inputs (addr_map)
   typedef axi_typedef_pkg::xbar_rule_32_t            rule_t;
   rule_t [TbNumAddrRules-1:0]                        addr_map;
   logic [XbarCfg.NoSlvPorts-1:0]                     en_default_mst_port = '0;
-  logic [TbNumSlaves-1:0][MstPortsIdxWidth-1:0]      default_mst_port;
+  logic [TbNumSlaves-1:0][MstPortsIdxWidth-1:0]      default_mst_port = '0;
   logic test_en = 1'b0;
   
   initial begin
@@ -271,72 +275,62 @@ module tb_axi_xbar_top;
   .mst_ports                (slave_infs)
   );
   
-    //{{{ UVM test setup  master_vifs
+    // tb configuration 
+    bit[TbNumSlaves-1:0] enable_slv_b_channel = '0;
+  
+    //{{{ UVM test setup (config, vifs) 
     //initial begin
-        //uvm_config_db#(virtual fifo_if)::set(null, "uvm_test_top.env*", "vif", fif_if);
-        //for(genvar i=0; i<TbNumMasters; i++) begin
-        initial begin    
-            uvm_config_db#(virtual v_axi_inf_mst #(
-            .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
-            .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
-            .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_MASTER_ID_WIDTH_IN_USE),
-            .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
-            ))::set(uvm_root::get(), "uvm_test_top.env*", "mst_vif[0]", master_vifs[0]);
-            uvm_config_db#(virtual v_axi_inf_mst #(
-            .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
-            .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
-            .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_MASTER_ID_WIDTH_IN_USE),
-            .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
-            ))::set(uvm_root::get(), "uvm_test_top.env*", "mst_vif[1]", master_vifs[1]);
-            uvm_config_db#(virtual v_axi_inf_mst #(
-            .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
-            .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
-            .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_MASTER_ID_WIDTH_IN_USE),
-            .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
-            ))::set(uvm_root::get(), "uvm_test_top.env*", "mst_vif[2]", master_vifs[2]);
-        //end
-        //end
-        //for(genvar i=0; i<TbNumSlaves; i++) begin
-        //initial begin    
-            uvm_config_db#(virtual v_axi_inf_slv #(
-            .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
-            .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
-            .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE),
-            .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
-            ))::set(uvm_root::get(), "uvm_test_top.env*", "slv_vif[0]", slave_vifs[0]);
-            uvm_config_db#(virtual v_axi_inf_slv #(
-            .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
-            .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
-            .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE),
-            .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
-            ))::set(uvm_root::get(), "uvm_test_top.env*", "slv_vif[1]", slave_vifs[1]);
-            uvm_config_db#(virtual v_axi_inf_slv #(
-            .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
-            .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
-            .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE),
-            .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
-            ))::set(uvm_root::get(), "uvm_test_top.env*", "slv_vif[2]", slave_vifs[2]);
-            uvm_config_db#(virtual v_axi_inf_slv #(
-            .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
-            .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
-            .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE),
-            .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
-            ))::set(uvm_root::get(), "uvm_test_top.env*", "slv_vif[3]", slave_vifs[3]);
+    initial begin    
+        void'($value$plusargs("enable_slv_b_channel=%d", enable_slv_b_channel));
+        $display("enable_slv_b_channel: %0b", enable_slv_b_channel);
+        //uvm setup configuration
+        uvm_config_db#(int)::set(uvm_root::get(),"uvm_test_top","enable_slv_b_channel",enable_slv_b_channel);
+        //{{{ uvm setup vifs 
+        uvm_config_db#(virtual v_axi_inf_mst #(
+        .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
+        .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
+        .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE), 
+        .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
+        ))::set(uvm_root::get(), "uvm_test_top.env*", "mst_vif[0]", master_vifs[0]);
+        uvm_config_db#(virtual v_axi_inf_mst #(
+        .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
+        .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
+        .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE),
+        .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
+        ))::set(uvm_root::get(), "uvm_test_top.env*", "mst_vif[1]", master_vifs[1]);
+        uvm_config_db#(virtual v_axi_inf_mst #(
+        .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
+        .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
+        .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE),
+        .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
+        ))::set(uvm_root::get(), "uvm_test_top.env*", "mst_vif[2]", master_vifs[2]);
+        uvm_config_db#(virtual v_axi_inf_slv #(
+        .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
+        .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
+        .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_MASTER_ID_WIDTH_IN_USE),
+        .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
+        ))::set(uvm_root::get(), "uvm_test_top.env*", "slv_vif[0]", slave_vifs[0]);
+        uvm_config_db#(virtual v_axi_inf_slv #(
+        .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
+        .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
+        .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_MASTER_ID_WIDTH_IN_USE),
+        .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
+        ))::set(uvm_root::get(), "uvm_test_top.env*", "slv_vif[1]", slave_vifs[1]);
+        uvm_config_db#(virtual v_axi_inf_slv #(
+        .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
+        .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
+        .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_MASTER_ID_WIDTH_IN_USE),
+        .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
+        ))::set(uvm_root::get(), "uvm_test_top.env*", "slv_vif[2]", slave_vifs[2]);
+        uvm_config_db#(virtual v_axi_inf_slv #(
+        .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
+        .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
+        .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_MASTER_ID_WIDTH_IN_USE),
+        .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
+        ))::set(uvm_root::get(), "uvm_test_top.env*", "slv_vif[3]", slave_vifs[3]);
+        //}}}
         run_test("xbar_simple_test_case");
-        end
-        //end
-        /*
-        uvm_config_db#(virtual axi_inf #(
-        .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
-        .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
-        .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE),
-        .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE))()[TbNumMasters])::set(uvm_root::get(), "uvm_test_top.mst_env*", "mvif", master_vifs);
-        uvm_config_db#(virtual axi_inf #(
-        .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
-        .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
-        .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE),
-        .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE))()[TbNumSlaves])::set(uvm_root::get(), "uvm_test_top.mst_env*", "svif", slave_vifs);
-        */
+    end
     //}}}
     //{{{ Final check
     final begin

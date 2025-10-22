@@ -55,6 +55,7 @@ package axi_typedef_pkg;
     } xbar_rule_32_t;
 
     //}}}
+
 endpackage 
 
 // import package into $unit

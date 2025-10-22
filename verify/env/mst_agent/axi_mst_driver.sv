@@ -12,7 +12,7 @@ class axi_mst_driver extends uvm_driver #(axi_mst_seq_item);
     typedef virtual v_axi_inf_mst #(
         .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
         .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
-        .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_MASTER_ID_WIDTH_IN_USE),
+        .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE),
         .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
     ) virt_axi_mst_inf;
     typedef logic [AXI_MASTER_ID_WIDTH_IN_USE-1:0]   axi_id_t;
@@ -20,7 +20,7 @@ class axi_mst_driver extends uvm_driver #(axi_mst_seq_item);
     virtual v_axi_inf_mst #(
         .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),
         .AXI_DATA_WIDTH (tb_xbar_param_pkg::AXI_DATA_WIDTH_IN_USE),
-        .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_MASTER_ID_WIDTH_IN_USE),
+        .AXI_ID_WIDTH   (tb_xbar_param_pkg::AXI_SLAVE_ID_WIDTH_IN_USE),
         .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
     )       vif;
     //}}}
@@ -94,8 +94,10 @@ class axi_mst_driver extends uvm_driver #(axi_mst_seq_item);
        vif.Master_cb.w_last    <= '0;
        vif.Master_cb.w_user    <= '0;
        vif.Master_cb.w_valid   <= '0;
-       vif.Master_cb.b_ready   <= '1;
-       vif.Master_cb.r_ready   <= '1;
+       //vif.Master_cb.b_ready   <= '1;
+       //vif.Master_cb.r_ready   <= '1;
+       vif.Master_cb.b_ready   <= '0;
+       vif.Master_cb.r_ready   <= '0;
        vif.Master_cb.ar_id     <= '0;
        vif.Master_cb.ar_valid  <= 1'b0;
        vif.Master_cb.ar_addr   <= '0;
@@ -115,12 +117,12 @@ class axi_mst_driver extends uvm_driver #(axi_mst_seq_item);
     //{{{ main
     task main();
         `uvm_info("mst drv", "enter main()", UVM_LOW)
-        //fork 
+        fork 
             //get_item();
             execute_item();
             //get_read_transaction();
-            //get_write_response();
-        //join
+            get_write_response();
+        join
     endtask
     //}}}
     //{{{ get_item
@@ -151,6 +153,19 @@ class axi_mst_driver extends uvm_driver #(axi_mst_seq_item);
                 drive_ar_address(tx);
             end
             seq_item_port.item_done();
+        end
+    endtask
+    //}}}
+    //{{{ get_write_response
+    virtual task get_write_response();
+        forever begin
+            @(posedge vif.b_valid);
+            #5ns;
+            @ (vif.Master_cb);
+            vif.Master_cb.b_ready <= 1'b1;
+            #5ns;
+            @ (vif.Master_cb);
+            vif.Master_cb.b_ready <= 1'b0;            
         end
     endtask
     //}}}

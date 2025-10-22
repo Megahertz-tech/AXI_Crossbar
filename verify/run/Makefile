@@ -28,7 +28,10 @@ compile:
 
 sim: 
 	./run_test -test ${TESTNAME} -sim rc -gui gui &
-
+sim_no_b:
+	./run_test -test ${TESTNAME} -sim rc -gui gui -en_slv_b 0 &
+sim_b:
+	./run_test -test ${TESTNAME} -sim rc -gui gui -en_slv_b 15 &
 
 clear: 
 	rm -rf __pycache__ 

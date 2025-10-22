@@ -62,19 +62,20 @@ module axi_mux #(
   end
   //}}}
 
-/*    topology                                                             */
-/*      --------    ---------                       ||                     */
-/*   -->|  ID  | ==>|aw  arb|->    ->    ->    ->   ||                     */
-/*   ...|extend|    ---------   ----------          ||                     */
-/*   -->|      |      ==>  ==>  |w order | ->  ->   ||                     */
-/*      |      |                ----------          ||  Subordinate        */
-/*   <--|      |                ---------           ||                     */
-/*   ...|  ID  |      <==  <==  |b demux| <-   <-   ||                     */
-/*   <--|strip |    ---------   ----------          ||                     */
-/*      |      | ==>|ar  arb|->    ->    ->    ->   ||                     */
-/*      --------    ---------                       ||                     */
-/*  axi_id_prepend                                                         */
-/*                                                                         */
+/*    topology                                                                       */
+/*      -------- <= ---------      <-    <-    <-  --------   ||                     */
+/*   ==>|  ID  | ==>|aw  arb|-->  -->   -->   -->  |      | <-||                     */
+/*   ...|extend|    ---------   ----------         |      |...||                     */
+/*    =>|      | ==>  ==>  ==>  |w order |--> -->  |      |-->||                     */
+/*      |      |  <=   <=   <=  ---------- <-  <-  |spill |   ||                     */
+/*      |      |                                   |      |   || Subordinate         */
+/*    <=|      |  =>   =>   =>  ---------- ->  ->  | reg  | ->||                     */
+/*   ...|  ID  | <==  <==  <==  |b demux |<-- <--  |      |...||                     */
+/*   <==|strip |    ---------   ----------         |      |<--||                     */
+/*      |      | ==>|ar  arb|-->  -->   -->   -->  |      |   ||                     */
+/*      -------- <= ---------      <-    <-    <-  --------   ||                     */
+/*     id_prepend    fair_rr     fifo/demux        spill reg                         */
+/*                                                            interface              */
 
     //{{{ internal signals 
     mst_aw_chan_t [NoSlvPorts-1:0]  aw_chans    ;
@@ -173,7 +174,7 @@ module axi_mux #(
     mst_aw_chan_t           aw_gnt;
     logic                   aw_valid_gnt;
     logic                   aw_ready_sp;
-    logic[IDX_WIDTH-1:0]    idx_gnt;
+    logic[IDX_WIDTH-1:0]    aw_idx_gnt;
     fair_round_robin_arbiter #(
         .NumIn     (NoSlvPorts   ),
         .DataType  (mst_aw_chan_t)
@@ -187,7 +188,7 @@ module axi_mux #(
         .gnt_o      (aw_readies),
         .req_o      (aw_valid_gnt),
         .data_o     (aw_gnt),
-        .idx_o      (idx_gnt)  
+        .idx_o      (aw_idx_gnt)  
     );
 
     spill_register #(
@@ -343,7 +344,34 @@ module axi_mux #(
       .data_o  ( mst_req_o.w        )
     );
 //}}}
-
+//{{{ b
+    // demux b 
+    logic           b_valid_sp;
+    mst_b_chan_t    b_chan_sp;
+    extended_id_t   b_id_ext;  
+    assign b_id_ext = mst_resp_i.b.id[SlvAxiIDWidth +: MstIdxBits];
+    assign b_chans  = {NoSlvPorts{b_chan_sp}}; // go to strip id function
+    always_comb begin 
+        b_valids = '0;
+        if(b_valid_sp) begin
+            b_valids[b_id_ext] = 1'b1;
+        end
+    end
+    //assign slv_b_valids = (b_valid_sp) ? (1<<b_id_ext) : '0;
+    spill_register #(
+      .T       ( mst_b_chan_t ),
+      .Bypass  ( ~SpillB      )
+    ) i_b_spill_reg (
+      .clk_i   ( clk_i                      ),
+      .rst_ni  ( rst_ni                     ),
+      .valid_i ( mst_resp_i.b_valid         ),
+      .ready_i ( b_readies[b_id_ext] ),
+      .data_i  ( mst_resp_i.b               ),
+      .valid_o ( b_valid_sp                 ),
+      .ready_o ( mst_req_o.b_ready          ),
+      .data_o  ( b_chan_sp                  )
+    );
+//}}}
 
 
 

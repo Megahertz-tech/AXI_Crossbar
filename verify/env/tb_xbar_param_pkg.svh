@@ -22,6 +22,8 @@ package tb_xbar_param_pkg;
     parameter int unsigned  AXI_USER_WIDTH_IN_USE = 8  ; 
 
     parameter time  CLK_PERIOD = 4ns; 
+    parameter int unsigned  TB_MAX_MASTER_TRANS  = 8;
+    parameter int unsigned  TB_MAX_SLAVE_TRANS   = 4;
 //}}}
 
     //{{{ configure parameters 
