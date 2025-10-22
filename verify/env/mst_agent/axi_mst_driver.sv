@@ -215,7 +215,7 @@ class axi_mst_driver extends uvm_driver #(axi_mst_seq_item);
             vif.Master_cb.w_strb   <=  item.w_strb[i]  ;           
             vif.Master_cb.w_last   <=  item.w_last[i]  ;           
             vif.Master_cb.w_user   <=  item.w_user  ;
-            @ (vif.w_ready);
+            wait (vif.w_ready);
             //if(vif.Master_cb.w_ready !== 1'b1) @ (vif.Master_cb iff vif.Master_cb.w_ready === 1'b1);
         end
         #1ps;

@@ -139,9 +139,6 @@ group clear 0 end
 group insert \
     [subst  {[format {tb_axi_xbar_top.master_infs[0].aw_valid}]} ] \
     [subst  {[format {tb_axi_xbar_top.master_infs[0].aw_ready}]} ] \
-    [subst  {[format {tb_axi_xbar_top.master_infs[0].w_valid}]} ] \
-    [subst  {[format {tb_axi_xbar_top.master_infs[0].w_last}]} ] \
-    [subst  {[format {tb_axi_xbar_top.master_infs[0].w_ready}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.aw_sel_cur[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.aw_in_flight_cnt[3:0]}]} ] \
@@ -209,9 +206,6 @@ set gpID0 [lindex $gpGlist0 0]
 foreach {name attrs} [subst  {
     {[format {tb_axi_xbar_top.master_infs[0].aw_valid}]} {-color #ff9900}
     {[format {tb_axi_xbar_top.master_infs[0].aw_ready}]} {}
-    {[format {tb_axi_xbar_top.master_infs[0].w_valid}]} {}
-    {[format {tb_axi_xbar_top.master_infs[0].w_last}]} {}
-    {[format {tb_axi_xbar_top.master_infs[0].w_ready}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.aw_sel_cur[2:0]}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.aw_in_flight_cnt[3:0]}]} {}
@@ -222,9 +216,6 @@ foreach {name attrs} [subst  {
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.w_pop_cur}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.w_select_from_fifo[2:0]}]} {}
 }] childcmds {
-    {}
-    {}
-    {}
     {}
     {}
     {}
@@ -249,6 +240,7 @@ foreach {name attrs} [subst  {
     set gpGlist0 [lrange $gpGlist0 1 end]
     set gpID0 [lindex $gpGlist0 0]
 }
+waveform hierarchy collapse $groupId0
 
 
 set groupId0 [waveform add -groups demux_core_1]
@@ -289,6 +281,7 @@ foreach {name attrs} [subst  {
     set gpGlist0 [lrange $gpGlist0 1 end]
     set gpID0 [lindex $gpGlist0 0]
 }
+waveform hierarchy collapse $groupId0
 
 
 set groupId0 [waveform add -groups demux_core_2]
@@ -331,6 +324,7 @@ foreach {name attrs} [subst  {
     set gpGlist0 [lrange $gpGlist0 1 end]
     set gpID0 [lindex $gpGlist0 0]
 }
+waveform hierarchy collapse $groupId0
 
 
 set groupId0 [waveform add -groups mux_aw_rr_ARB_0]

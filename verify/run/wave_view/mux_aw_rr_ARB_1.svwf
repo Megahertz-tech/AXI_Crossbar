@@ -50,6 +50,10 @@ if {[catch {group get -using [list {mux_aw_rr_ARB_0}]}]} {
 set createdGroup([list {mux_aw_rr_ARB_0}]) 1
 catch {group new -name mux_aw_rr_ARB_0 -overlay 0}
 }
+if {[catch {group get -using [list {mux_ae_rr_ARB_1}]}]} {
+set createdGroup([list {mux_ae_rr_ARB_1}]) 1
+catch {group new -name mux_ae_rr_ARB_1 -overlay 0}
+}
 if {[info exists createdGroup([list {Group 1}])]} {
 group using {Group 1}
 group set -overlay 0
@@ -161,6 +165,9 @@ group clear 0 end
 group insert \
     [subst  {[format {tb_axi_xbar_top.master_infs[1].aw_valid}]} ] \
     [subst  {[format {tb_axi_xbar_top.master_infs[1].aw_ready}]} ] \
+    [subst  {[format {tb_axi_xbar_top.master_infs[1].w_valid}]} ] \
+    [subst  {[format {tb_axi_xbar_top.master_infs[1].w_last}]} ] \
+    [subst  {[format {tb_axi_xbar_top.master_infs[1].w_ready}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.slv_aw_select_i[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.aw_in_flight_cnt[3:0]}]} ] \
@@ -179,6 +186,9 @@ group clear 0 end
 group insert \
     [subst  {[format {tb_axi_xbar_top.master_infs[2].aw_valid}]} ] \
     [subst  {[format {tb_axi_xbar_top.master_infs[2].aw_ready}]} ] \
+    [subst  {[format {tb_axi_xbar_top.master_infs[2].w_valid}]} ] \
+    [subst  {[format {tb_axi_xbar_top.master_infs[2].w_last}]} ] \
+    [subst  {[format {tb_axi_xbar_top.master_infs[2].w_ready}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.slv_aw_select_i[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.ar_in_flight_cnt[3:0]}]} ] \
@@ -200,6 +210,19 @@ group insert \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.gen_mst_port_mux[0].i_axi_mux.i_aw_fair_rr_arb.req_i[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.gen_mst_port_mux[0].i_axi_mux.i_aw_fair_rr_arb.cur_gnt_index[1:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.gen_mst_port_mux[0].i_axi_mux.i_aw_fair_rr_arb.cur_frr_ptr[1:0]}]} ]
+}
+
+if {[info exists createdGroup([list {mux_ae_rr_ARB_1}])]} {
+group using mux_ae_rr_ARB_1
+group set -overlay 0
+group set -comment {}
+group clear 0 end
+group insert \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.gen_mst_port_mux[1].i_axi_mux.i_aw_fair_rr_arb.req_o}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.gen_mst_port_mux[1].i_axi_mux.i_aw_fair_rr_arb.cur_frr_ptr[1:0]}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.gen_mst_port_mux[1].i_axi_mux.i_aw_fair_rr_arb.cur_gnt_index[1:0]}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.gen_mst_port_mux[1].i_axi_mux.i_aw_fair_rr_arb.req_i[2:0]}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.gen_mst_port_mux[1].i_axi_mux.i_aw_fair_rr_arb.cur_sta[1:0]}]} ]
 }
 
 
@@ -249,6 +272,7 @@ foreach {name attrs} [subst  {
     set gpGlist0 [lrange $gpGlist0 1 end]
     set gpID0 [lindex $gpGlist0 0]
 }
+waveform hierarchy collapse $groupId0
 
 
 set groupId0 [waveform add -groups demux_core_1]
@@ -257,6 +281,9 @@ set gpID0 [lindex $gpGlist0 0]
 foreach {name attrs} [subst  {
     {[format {tb_axi_xbar_top.master_infs[1].aw_valid}]} {-color #ff9900}
     {[format {tb_axi_xbar_top.master_infs[1].aw_ready}]} {}
+    {[format {tb_axi_xbar_top.master_infs[1].w_valid}]} {}
+    {[format {tb_axi_xbar_top.master_infs[1].w_last}]} {}
+    {[format {tb_axi_xbar_top.master_infs[1].w_ready}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.slv_aw_select_i[2:0]}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.aw_in_flight_cnt[3:0]}]} {}
@@ -266,6 +293,9 @@ foreach {name attrs} [subst  {
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.w_pop_cur}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.w_select_from_fifo[2:0]}]} {}
 }] childcmds {
+    {}
+    {}
+    {}
     {}
     {}
     {}
@@ -289,6 +319,7 @@ foreach {name attrs} [subst  {
     set gpGlist0 [lrange $gpGlist0 1 end]
     set gpID0 [lindex $gpGlist0 0]
 }
+waveform hierarchy collapse $groupId0
 
 
 set groupId0 [waveform add -groups demux_core_2]
@@ -297,6 +328,9 @@ set gpID0 [lindex $gpGlist0 0]
 foreach {name attrs} [subst  {
     {[format {tb_axi_xbar_top.master_infs[2].aw_valid}]} {-color #ff9900}
     {[format {tb_axi_xbar_top.master_infs[2].aw_ready}]} {}
+    {[format {tb_axi_xbar_top.master_infs[2].w_valid}]} {}
+    {[format {tb_axi_xbar_top.master_infs[2].w_last}]} {}
+    {[format {tb_axi_xbar_top.master_infs[2].w_ready}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.slv_aw_select_i[2:0]}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.ar_in_flight_cnt[3:0]}]} {}
@@ -318,6 +352,9 @@ foreach {name attrs} [subst  {
     {}
     {}
     {}
+    {}
+    {}
+    {}
 } {
     set expected [ join [waveform signals -format path $gpID0] ]
     if {[string equal $name $expected] || $name == "cdivider"} {
@@ -331,9 +368,14 @@ foreach {name attrs} [subst  {
     set gpGlist0 [lrange $gpGlist0 1 end]
     set gpID0 [lindex $gpGlist0 0]
 }
+waveform hierarchy collapse $groupId0
 
 
 set groupId0 [waveform add -groups mux_aw_rr_ARB_0]
+waveform hierarchy collapse $groupId0
 
 
-waveform xview limits 0 4096000ps
+set groupId0 [waveform add -groups mux_ae_rr_ARB_1]
+
+
+waveform xview limits 0 1790891.772ps

@@ -61,7 +61,7 @@ module axi_id_in_flight_array #(
         logic   count_en, count_down, overflow;
         always_ff @(posedge (clk_i) or negedge (rst_ni)) begin 
             if(~rst_ni)         sels[i] <= '0;
-            else if(push_en[i]) sels[i] <= push_axi_id_i; 
+            else if(push_en[i]) sels[i] <= push_sel_i; 
         end
         always_comb begin
             unique case({push_en[i], pop_en[i]})

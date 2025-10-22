@@ -58,7 +58,7 @@ module fair_round_robin_arbiter #(
                 if((req_i != 0) && (!access_start)) begin
                     nxt_sta = ACCESS;
                     nxt_gnt_index = pick_grant_pos(req_i, cur_frr_ptr); 
-                    nxt_frr_ptr = (cur_frr_ptr + 1) % NumIn;
+                    nxt_frr_ptr   = (pick_grant_pos(req_i, cur_frr_ptr) + 1) % NumIn;
                 end
             end
             cur_sta[A_BIT]: begin
@@ -83,15 +83,17 @@ module fair_round_robin_arbiter #(
             req_i_delay <= req_i;
         end
     end    
+    assign data_o  = data_i[cur_gnt_index];
+    assign idx_o   = cur_gnt_index;
     always_comb begin
         req_o = 1'b0; 
-        data_o = '0;
-        idx_o = '0;
+        //data_o = '0;
+        //idx_o = '0;
         gnt_o = '0;
         if(cur_sta==ACCESS)begin
             req_o   = req_i_delay[cur_gnt_index];
-            data_o  = data_i[cur_gnt_index];
-            idx_o   = cur_gnt_index;
+            //data_o  = data_i[cur_gnt_index];
+            //idx_o   = cur_gnt_index;
             gnt_o   = gnt_i << cur_gnt_index;
         end
     end

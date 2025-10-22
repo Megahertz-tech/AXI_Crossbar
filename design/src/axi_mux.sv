@@ -53,6 +53,14 @@ module axi_mux #(
   localparam int unsigned MstIdxBits    = $clog2(NoSlvPorts);
   localparam int unsigned MstAxiIDWidth = SlvAxiIDWidth + MstIdxBits;
   typedef logic [MstIdxBits-1:0] extended_id_t;
+  //{{{ inner debug signals 
+  logic [NoSlvPorts-1:0]          debug_i_aw_valids;
+  logic [NoSlvPorts-1:0]          debug_i_w_valids ;
+  for(genvar i=0;i<NoSlvPorts;i++)begin
+    assign debug_i_aw_valids[i] = slv_reqs_i[i].aw_valid;
+    assign debug_i_w_valids[i] = slv_reqs_i[i].w_valid;
+  end
+  //}}}
 
 /*    topology                                                             */
 /*      --------    ---------                       ||                     */
@@ -150,6 +158,16 @@ module axi_mux #(
     end
     
 //}}}
+//{{{ inner id full debug signals 
+    logic [NoSlvPorts-1:0] [SlvAxiIDWidth-1:0] debug_ext_before_aw_id;
+    logic [NoSlvPorts-1:0] [MstAxiIDWidth-1:0] debug_ext_after_aw_id;
+    id_extend_t[NoSlvPorts-1:0]     debug_ext_aw_id;
+    for(genvar i=0; i<NoSlvPorts; i++) begin
+        assign debug_ext_before_aw_id[i] = slv_reqs_i[i].aw.id;
+        assign debug_ext_after_aw_id[i] = aw_chans[i].id;
+        assign debug_ext_aw_id[i] = aw_chans[i].id[SlvAxiIDWidth +: MstIdxBits];
+    end
+//}}}
 //{{{ arbitor for aw 
     localparam int unsigned IDX_WIDTH = axi_math_pkg::idx_width(NoSlvPorts);
     mst_aw_chan_t           aw_gnt;
@@ -210,23 +228,29 @@ module axi_mux #(
             aw_cur_sta[I_BIT]: begin
                 if(aw_valid_gnt) begin
                     aw_nxt_sta = AW_APPROVE;
+                    aw_extended_id_push_en = 1'b1; // w can arrive following the aw 
                 end
             end
             aw_cur_sta[A_BIT]: begin
                 if(aw_ready_sp) begin
                     aw_nxt_sta = AW_IDLE;
-                    aw_extended_id_push_en = 1'b1;
                 end
             end
             default: begin end
         endcase 
     end
-    logic aw_confirmed;
-    assign aw_confirmed = aw_valid_gnt && mst_resp_i.aw_ready;
+    //{{{ w inner debug signals
+    logic debug_aw_confirmed;
+    assign debug_aw_confirmed = aw_valid_gnt && mst_resp_i.aw_ready;
+    extended_id_t   debug_w_push_id;
+    assign debug_w_push_id = aw_gnt.id[SlvAxiIDWidth +: MstIdxBits];
+    logic [MstAxiIDWidth-1:0]  debug_w_aw_gnt_id_full;
+    assign debug_w_aw_gnt_id_full = aw_gnt.id;
+    //}}}
     extended_id_t  w_ext_id;
     logic w_pop_en;
     logic w_id_empty;
-    fifo_v3 #(
+    fifo_v4 #(
         .FALL_THROUGH   (0),
         .DEPTH          (MaxWTrans * NoSlvPorts),
         .dtype          (extended_id_t)
@@ -236,6 +260,7 @@ module axi_mux #(
         .flush_i(1'b0),
         .testmode_i(test_i),
         .push_i(aw_extended_id_push_en),
+        //.data_i(mst_req_o.aw.id[SlvAxiIDWidth+:MstIdxBits]),
         .data_i(aw_gnt.id[SlvAxiIDWidth+:MstIdxBits]),
         .pop_i(w_pop_en),
         .data_o(w_ext_id),
@@ -256,7 +281,18 @@ module axi_mux #(
             w_cur_sta <= w_nxt_sta;
         end
     end
-    logic w_ready_sp;
+    logic [NoSlvPorts-1:0]          w_valids_delay;         
+    w_chan_t [NoSlvPorts-1:0]       w_chans_delay ;
+    always_ff @(posedge clk_i or negedge rst_ni) begin
+        if(!rst_ni) begin
+            w_valids_delay <= '0;
+            w_chans_delay  <= '0;
+        end else begin
+            w_valids_delay <= w_valids;
+            w_chans_delay  <= w_chans;
+        end
+    end
+    logic mst_w_ready_sp;
     always_comb begin
         w_nxt_sta = w_cur_sta;
         w_pop_en  = 0;
@@ -271,7 +307,8 @@ module axi_mux #(
                 end
             end
             w_cur_sta[A_BIT]: begin
-                if(w_valids[w_ext_id] && w_ready_sp && w_chans[w_ext_id].last) begin
+                if(w_valids_delay[w_ext_id] && mst_w_ready_sp && w_chans_delay[w_ext_id].last) begin
+                //if(w_valids[w_ext_id] && mst_w_ready_sp && w_chans[w_ext_id].last) begin
                     w_nxt_sta = W_IDLE;
                     w_pop_en = 1'b1;
                 end
@@ -279,14 +316,17 @@ module axi_mux #(
             default: begin end
         endcase 
     end
+
     logic       w_valid;
     w_chan_t    w_chan;
     always_comb begin
-        w_valid = 1'b0;
-        w_chan  = '0;
-        if(w_cur_sta==W_APPROVE) begin
-            w_valid = w_valids[w_ext_id];
-            w_chan  = w_chans[w_ext_id];
+        w_valid     = 1'b0;
+        w_chan      = '0;
+        w_readies   = '0;
+        if(w_cur_sta == W_APPROVE) begin
+            w_valid = w_valids_delay[w_ext_id];
+            w_chan  = w_chans_delay[w_ext_id];
+            if(mst_w_ready_sp) w_readies = 1'b1 << w_ext_id;
         end
     end
     spill_register #(
@@ -303,6 +343,7 @@ module axi_mux #(
       .data_o  ( mst_req_o.w        )
     );
 //}}}
+
 
 
 

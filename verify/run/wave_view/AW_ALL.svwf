@@ -51,12 +51,15 @@ group insert \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.slv_aw_select_i[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.aw_sel_cur[2:0]}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.aw_in_flight_cnt[3:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.slv_aw_select_i[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.aw_sel_cur[2:0]}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.aw_in_flight_cnt[3:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.slv_aw_select_i[2:0]}]} ] \
-    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.aw_sel_cur[2:0]}]} ]
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.aw_sel_cur[2:0]}]} ] \
+    [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.aw_in_flight_cnt[3:0]}]} ]
 }
 
 if {[info exists createdGroup([list {Group 3}])]} {
@@ -150,6 +153,7 @@ foreach {name attrs} [subst  {
     set gpGlist0 [lrange $gpGlist0 1 end]
     set gpID0 [lindex $gpGlist0 0]
 }
+waveform hierarchy collapse $groupId0
 
 
 set groupId0 [waveform add -groups {{Group 2}}]
@@ -159,13 +163,19 @@ foreach {name attrs} [subst  {
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.slv_aw_select_i[2:0]}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.aw_sel_cur[2:0]}]} {-color #ff9900 -namecolor #ff9900}
+    {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.aw_in_flight_cnt[3:0]}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.slv_aw_select_i[2:0]}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.aw_sel_cur[2:0]}]} {-color #ff9900 -namecolor #ff9900}
+    {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.aw_in_flight_cnt[3:0]}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.slv_aw_select_i[2:0]}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.aw_sel_cur[2:0]}]} {-color #ff9900 -namecolor #ff9900}
+    {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.aw_in_flight_cnt[3:0]}]} {}
 }] childcmds {
+    {}
+    {}
+    {}
     {}
     {}
     {}
@@ -190,4 +200,4 @@ foreach {name attrs} [subst  {
 }
 
 
-waveform xview limits 0 2155748.944ps
+waveform xview limits 0 4311497.888ps

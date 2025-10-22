@@ -21,9 +21,11 @@
     $CB_PRJ_ROOT/design/src/common_cells/cf_math_pkg.sv  \ 
     $CB_PRJ_ROOT/design/src/common_cells/counter.sv  \ 
     $CB_PRJ_ROOT/design/src/common_cells/fifo_v3.sv  \ 
+    $CB_PRJ_ROOT/design/src/common_cells/fifo_v4.sv  \ 
     $CB_PRJ_ROOT/design/src/common_cells/rr_arb_tree.sv  \ 
-    $CB_PRJ_ROOT/design/src/common_cells/spill_register.sv  \ 
     $CB_PRJ_ROOT/design/src/common_cells/fair_round_robin_arbiter.sv  \ 
+//    $CB_PRJ_ROOT/design/src/common_cells/spill_register.sv  \ 
+    $CB_PRJ_ROOT/design/src/axi_spill_register.sv  \
     $CB_PRJ_ROOT/design/src/axi_pipeline.sv  \ 
     $CB_PRJ_ROOT/design/src/axi_demux.sv  \ 
     $CB_PRJ_ROOT/design/src/axi_err_slv.sv  \ 

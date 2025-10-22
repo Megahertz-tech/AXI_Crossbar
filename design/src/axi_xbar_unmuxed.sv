@@ -224,7 +224,9 @@ import cf_math_pkg::idx_width;
       .mst_resps_i     ( slv_resps[i]        )
     );
 
+assign slv_resps[i][cfg_NoMstPorts] = '0;
     // TODO: Instantiate error slave for decode errors
+    /*
     axi_err_slv #(
       .AxiIdWidth  ( Cfg.AxiIdWidthSlvPorts ),
       .axi_req_t   ( req_t                  ),
@@ -240,6 +242,7 @@ import cf_math_pkg::idx_width;
       .slv_req_i  ( slv_reqs[i][Cfg.NoMstPorts]   ),
       .slv_resp_o ( slv_resps[i][cfg_NoMstPorts]  )
     );
+    */
   end
 
   // TODO: Implement crossbar connections with pipeline stages
@@ -249,7 +252,8 @@ import cf_math_pkg::idx_width;
       if (Connectivity[i][j]) begin : gen_connection
         // TODO: Add pipeline stages for timing optimization
         axi_multicut #(
-          .NoCuts     ( Cfg.PipelineStages ),
+          //.NoCuts     ( Cfg.PipelineStages ),
+          .NoCuts     ( 'd0 ),
           .aw_chan_t  ( aw_chan_t          ),
           .w_chan_t   ( w_chan_t           ),
           .b_chan_t   ( b_chan_t           ),

@@ -161,6 +161,9 @@ group clear 0 end
 group insert \
     [subst  {[format {tb_axi_xbar_top.master_infs[1].aw_valid}]} ] \
     [subst  {[format {tb_axi_xbar_top.master_infs[1].aw_ready}]} ] \
+    [subst  {[format {tb_axi_xbar_top.master_infs[1].w_valid}]} ] \
+    [subst  {[format {tb_axi_xbar_top.master_infs[1].w_last}]} ] \
+    [subst  {[format {tb_axi_xbar_top.master_infs[1].w_ready}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.slv_aw_select_i[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.aw_in_flight_cnt[3:0]}]} ] \
@@ -179,6 +182,9 @@ group clear 0 end
 group insert \
     [subst  {[format {tb_axi_xbar_top.master_infs[2].aw_valid}]} ] \
     [subst  {[format {tb_axi_xbar_top.master_infs[2].aw_ready}]} ] \
+    [subst  {[format {tb_axi_xbar_top.master_infs[2].w_valid}]} ] \
+    [subst  {[format {tb_axi_xbar_top.master_infs[2].w_last}]} ] \
+    [subst  {[format {tb_axi_xbar_top.master_infs[2].w_ready}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.slv_aw_select_i[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]} ] \
     [subst  {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.ar_in_flight_cnt[3:0]}]} ] \
@@ -257,6 +263,9 @@ set gpID0 [lindex $gpGlist0 0]
 foreach {name attrs} [subst  {
     {[format {tb_axi_xbar_top.master_infs[1].aw_valid}]} {-color #ff9900}
     {[format {tb_axi_xbar_top.master_infs[1].aw_ready}]} {}
+    {[format {tb_axi_xbar_top.master_infs[1].w_valid}]} {}
+    {[format {tb_axi_xbar_top.master_infs[1].w_last}]} {}
+    {[format {tb_axi_xbar_top.master_infs[1].w_ready}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.slv_aw_select_i[2:0]}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.aw_in_flight_cnt[3:0]}]} {}
@@ -266,6 +275,9 @@ foreach {name attrs} [subst  {
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.w_pop_cur}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.w_select_from_fifo[2:0]}]} {}
 }] childcmds {
+    {}
+    {}
+    {}
     {}
     {}
     {}
@@ -297,6 +309,9 @@ set gpID0 [lindex $gpGlist0 0]
 foreach {name attrs} [subst  {
     {[format {tb_axi_xbar_top.master_infs[2].aw_valid}]} {-color #ff9900}
     {[format {tb_axi_xbar_top.master_infs[2].aw_ready}]} {}
+    {[format {tb_axi_xbar_top.master_infs[2].w_valid}]} {}
+    {[format {tb_axi_xbar_top.master_infs[2].w_last}]} {}
+    {[format {tb_axi_xbar_top.master_infs[2].w_ready}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.slv_aw_select_i[2:0]}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.ar_in_flight_cnt[3:0]}]} {}
@@ -307,6 +322,9 @@ foreach {name attrs} [subst  {
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.w_pop_cur}]} {}
     {[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.w_select_from_fifo[2:0]}]} {}
 }] childcmds {
+    {}
+    {}
+    {}
     {}
     {}
     {}
@@ -332,8 +350,23 @@ foreach {name attrs} [subst  {
     set gpID0 [lindex $gpGlist0 0]
 }
 
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[0].i_axi_demux.i_axi_demux_core.aw_sel_cur[2:0]}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[1].i_axi_demux.i_axi_demux_core.slv_aw_select_i[2:0]}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.aw_cur_sta[2:0]}]}
+	} ]]
+set id [waveform add -signals [subst  {
+	{[format {tb_axi_xbar_top.i_axi_dut_wrapper.i_xbar.i_xbar_unmuxed.gen_slv_port_demux[2].i_axi_demux.i_axi_demux_core.aw_sel_cur[2:0]}]}
+	} ]]
 
-set groupId0 [waveform add -groups mux_aw_rr_ARB_0]
-
-
-waveform xview limits 0 4096000ps
+waveform xview limits 0 5124575.52ps

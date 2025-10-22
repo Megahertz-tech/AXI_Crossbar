@@ -16,7 +16,7 @@ class axi_mst_regular_sequence extends uvm_sequence #(axi_mst_seq_item);
     endfunction
 
     task body();
-        axi_mst_seq_item req;
+        axi_mst_seq_item    req;
         int rand_delay;
         int addr_off, No_slice;
         `uvm_info("MST_SEQ","enter body()",UVM_LOW)

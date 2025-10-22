@@ -154,6 +154,16 @@ module axi_demux_core #(
     .pop_axi_id_i           (slv_resp_o.b.id[0+:AxiLookBits])
     );
 //}}}
+//{{{ aw inner debug signals
+    logic debug_aw_slv_req_i_aw_valid;
+    assign debug_aw_slv_req_i_aw_valid  = slv_req_i.aw_valid;
+    logic[NoMstPorts-1:0] debug_aw_mst_resp_aw_readies; 
+    for(genvar i=0; i<NoMstPorts;i++)begin: debug_mst_resp_aw_ready
+        assign debug_aw_mst_resp_aw_readies[i] = mst_resps_i[i].aw_ready;    
+    end
+    logic debug_aw_SM_A2I_condition;
+    assign debug_aw_SM_A2I_condition = mst_resps_i[aw_sel_cur].aw_ready;
+//}}}
 //{{{ W channel 
     /*  There is a FIFO for W to store the target destination it will go.
         Realign the adrress and write data: we enforce W follows the AW, don't permit AW and W at the same cycle. 
@@ -171,27 +181,31 @@ module axi_demux_core #(
         I_BIT = 0,
         A_BIT = 1
     } state_bit_e;
-    
+
     w_state_e   w_cur_sta,  w_nxt_sta;
     logic       w_pop_cur, w_pop_nxt;
+    logic       w_pop_en;
     select_t    w_select_from_fifo;
     always_ff @(posedge clk_i or negedge rst_ni) begin
         if(!rst_ni) begin
             w_cur_sta <= W_IDLE;
-            w_pop_cur <= w_pop_nxt;
+            w_pop_cur <= 1'b0;
         end else begin
             w_cur_sta <= w_nxt_sta;
+            w_pop_cur <= w_pop_nxt;
         end
     end
     logic       w_sel_empty;
     always_comb begin
         w_nxt_sta = w_cur_sta;
         w_pop_nxt  = w_pop_cur;
+        w_pop_en = 1'b0;
         unique case(1'b1)
             w_cur_sta[I_BIT]: begin 
                 if((!w_sel_empty) && slv_req_i.w_valid) begin
                     w_nxt_sta = W_APPROVE;
                     w_pop_nxt = 1'b1;
+                    w_pop_en  = 1'b1;
                 end
             end 
             w_cur_sta[A_BIT]: begin
@@ -203,6 +217,7 @@ module axi_demux_core #(
             default: begin end
         endcase
     end
+    
     fifo_v3 #(
         .FALL_THROUGH(0),
         .DEPTH(MaxTrans),
@@ -214,12 +229,26 @@ module axi_demux_core #(
         .testmode_i(test_i),
         .push_i(aw_push_en),
         .data_i(slv_aw_select_i),
-        .pop_i(w_pop_cur),
+        //.pop_i(w_pop_cur),
+        .pop_i(w_pop_en),
         .data_o(w_select_from_fifo),
         .full_o(/*not used*/),
         .empty_o(w_sel_empty),
         .usage_o(/*not used*/)
     );
+//}}}
+//{{{ w inner debug signals
+    logic debug_w_slv_req_i_w_valid, debug_w_slv_req_i_w_last;
+    assign debug_w_slv_req_i_w_valid  = slv_req_i.w_valid;
+    assign debug_w_slv_req_i_w_last  = slv_req_i.w.last;
+    logic[NoMstPorts-1:0] debug_w_mst_resp_w_readies; 
+    for(genvar i=0; i<NoMstPorts;i++)begin: debug_mst_resp_w_ready
+        assign debug_w_mst_resp_w_readies[i] = mst_resps_i[i].w_ready;    
+    end
+    logic debug_w_w_select_ready;
+    assign debug_w_w_select_ready = mst_resps_i[w_select_from_fifo].w_ready;
+    logic debug_w_SM_A2I_condition;
+    assign debug_w_SM_A2I_condition = slv_req_i.w_valid && slv_req_i.w.last && mst_resps_i[w_select_from_fifo].w_ready;
 //}}}
     always_comb begin
         mst_reqs_o = '0;

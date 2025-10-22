@@ -87,7 +87,7 @@ interface v_axi_inf_mst #(
 
     //{{{ Master_cb
     clocking Master_cb @(posedge clk, negedge rst_n);
-        default input #500ps output #500ps;
+        default input #50ps output #50ps;
          output  aw_id      ;
          output  aw_addr    ;
          output  aw_lock    ;

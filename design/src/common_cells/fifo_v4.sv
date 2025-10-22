@@ -1,7 +1,12 @@
-// FIFO v3 - Simple FIFO implementation
-// Basic FIFO for storing and retrieving data
-
-module fifo_v3 #(
+/* ***********************************************************
+    document:       fifo_v4.sv
+    author:         Celine (He Zhao) 
+    Date:           10/03/2025
+    Description:     
+**************************************************************/
+`ifndef __FIFO_V4_SV__
+`define __FIFO_V4_SV__
+module fifo_v4 #(
   parameter bit          FALL_THROUGH = 1'b0,
   parameter int unsigned DEPTH        = 8,
   parameter type         dtype        = logic [31:0],
@@ -27,15 +32,15 @@ module fifo_v3 #(
     //internal signals
     dtype [DEPTH-1:0]  mem;
     logic [PONT_WIDTH-1:0]  read_ptr, write_ptr, status_cnt;
-    logic [PONT_WIDTH-1:0]  out_ptr;
+    //logic [PONT_WIDTH-1:0]  out_ptr;
 
     //status 
     assign full_o  = (status_cnt == DEPTH);
     assign empty_o = (status_cnt == 0);
 
     //output
-    //assign data_o  = mem[read_ptr];
-    assign data_o  = mem[out_ptr];
+    assign data_o  = mem[read_ptr];
+    //assign data_o  = mem[out_ptr];
     assign usage_o = status_cnt;
     
     /*
@@ -52,13 +57,13 @@ module fifo_v3 #(
     always_ff @(posedge clk_i or negedge rst_ni) begin
       if (!rst_ni) begin
         //initiate
-        out_ptr    <= '0;
+        //out_ptr    <= '0;
         read_ptr   <= '0;
         write_ptr  <= '0;
         status_cnt <= '0;
         mem        <= '0;
       end else if (flush_i) begin
-        out_ptr    <= '0;
+        //out_ptr    <= '0;
         read_ptr  <= '0;
         write_ptr <= '0;
         status_cnt <= '0;
@@ -74,7 +79,7 @@ module fifo_v3 #(
           end
           //pop
           if (pop_i && !empty_o) begin
-              out_ptr  <= read_ptr;
+              //out_ptr  <= read_ptr;
               read_ptr <= (read_ptr + 1) % DEPTH;
               if (!push_i || full_o) begin 
                   status_cnt <= status_cnt - 1;
@@ -85,3 +90,10 @@ module fifo_v3 #(
 
 
 endmodule
+
+
+
+
+
+
+`endif 
