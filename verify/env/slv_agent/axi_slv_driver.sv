@@ -37,10 +37,12 @@ typedef virtual v_axi_inf_slv #(
     //int                 mem[int];
     axi_slv_seq_item    req_q[$];
     bit                 schedule_b_q[$];
+    bit                 schedule_r_q[$];
     //axi_slv_seq_item    aw, w, b, ar, r;
     semaphore           access_sem = new(1);
     semaphore           trans_sem = new(MaxTrans);
     event               schedule_b_e;
+    event               schedule_r_e;
     //logic [ID_WIDTH-1:0];
 
    `uvm_component_utils(axi_slv_driver)
@@ -248,10 +250,11 @@ typedef virtual v_axi_inf_slv #(
     //}}}
     // schedule_b_response 
     task automatic schedule_b_response();
-        axi_slv_seq_item    aw, b;
+        axi_slv_seq_item    aw;
         wait(schedule_b_q.size()!=0);
         assert(req_q.size()) else `uvm_error("SLV_DRV", "schedule_b_response req_q is empty!!!")
         aw = req_q.pop_front();
+        assert(aw.is_aw) else `uvm_error("SLV_DRV", "schedule_b_response this req is not aw!!!")
         void'(schedule_b_q.pop_front());
         aw.set_access_b_response();
         @ (vif.Slave_cb);
@@ -267,6 +270,47 @@ typedef virtual v_axi_inf_slv #(
         vif.Slave_cb.b_user  <= '0;
         trans_sem.put(1);
     endtask 
+    //{{{ do_setup_ar
+    virtual task  automatic  do_setup_ar();
+                axi_slv_seq_item    ar_req;
+                axi_slv_seq_item    ar;
+                @(posedge vif.ar_valid);
+                trans_sem.get(1);
+                ar = axi_slv_seq_item::type_id::create("ar");
+                if(!vif.Slave_cb.ar_ready) begin
+                    @ (vif.Slave_cb);
+                    vif.Slave_cb.ar_ready <= 1'b1;
+                end
+                #10ps;
+                //@ (vif.Slave_cb);
+                if(vif.ar_valid) begin
+                    ar.is_ar      = 1'b1;
+                    ar.ar_id      = vif.ar_id      ;                   
+                    ar.ar_addr    = vif.ar_addr    ;                    
+                    ar.ar_lock    = vif.ar_lock    ;                    
+                    ar.ar_valid   = vif.ar_valid   ;                    
+                    ar.ar_user    = vif.ar_user    ;                    
+                    ar.ar_len     = vif.ar_len     ;                    
+                    ar.ar_size    = vif.ar_size    ;                    
+                    ar.ar_burst   = vif.ar_burst   ;                    
+                    ar.ar_cache   = vif.ar_cache   ;                    
+                    ar.ar_prot    = vif.ar_prot    ;                    
+                    ar.ar_qos     = vif.ar_qos     ;                    
+                    ar.ar_region  = vif.ar_region  ;                    
+                end
+                #10ps;
+                @ (vif.Slave_cb);
+                vif.Slave_cb.ar_ready <= 1'b0;
+                req_q.push_back(ar);
+                access_sem.get(1);
+                seq_item_port.get_next_item(ar_req);
+                ar_req.copy(ar);
+                #10ps;
+                seq_item_port.item_done(ar_req);
+                access_sem.put(1);
+                schedule_r_q.push_back(1'b1);
+    endtask
+    //}}}
 
     //{{{ wait_for_nclocks
     task automatic wait_for_nclocks (int n = 1);
@@ -353,7 +397,8 @@ typedef virtual v_axi_inf_slv #(
             forever begin do_setup_w(); end
             // b 
             if(enable_b_channel)  forever begin schedule_b_response(); end
-
+            // ar
+            forever begin do_setup_ar(); end 
         join
     endtask
 endclass: axi_slv_driver

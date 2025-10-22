@@ -158,6 +158,7 @@ class axi_mst_seq_item extends axi_mst_seq_item_base;
     endfunction
     //}}}
     
+    
 
 endclass
 

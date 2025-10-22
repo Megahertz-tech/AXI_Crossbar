@@ -169,8 +169,8 @@ module axi_mux #(
         assign debug_ext_aw_id[i] = aw_chans[i].id[SlvAxiIDWidth +: MstIdxBits];
     end
 //}}}
+    localparam int unsigned IDX_WIDTH = axi_math_pkg::idx_width(NoSlvPorts); 
 //{{{ arbitor for aw 
-    localparam int unsigned IDX_WIDTH = axi_math_pkg::idx_width(NoSlvPorts);
     mst_aw_chan_t           aw_gnt;
     logic                   aw_valid_gnt;
     logic                   aw_ready_sp;
@@ -372,7 +372,41 @@ module axi_mux #(
       .data_o  ( b_chan_sp                  )
     );
 //}}}
+//{{{ arbitor for ar 
+    mst_ar_chan_t           ar_gnt;
+    logic                   ar_valid_gnt;
+    logic                   ar_ready_sp;
+    logic[IDX_WIDTH-1:0]    ar_idx_gnt;
+    fair_round_robin_arbiter #(
+        .NumIn     (NoSlvPorts   ),
+        .DataType  (mst_ar_chan_t)
+    ) i_ar_fair_rr_arb (
+        .clk_i,
+        .rst_ni,
+        .flush_i    (1'b0),
+        .req_i      (ar_valids),
+        .data_i     (ar_chans),
+        .gnt_i      (ar_ready_sp),
+        .gnt_o      (ar_readies),
+        .req_o      (ar_valid_gnt),
+        .data_o     (ar_gnt),
+        .idx_o      (ar_idx_gnt)  
+    );
 
+    spill_register #(
+        .T       ( mst_ar_chan_t  ),
+        .Bypass  ( ~SpillAr   )
+    ) i_ar_spill_reg (
+        .clk_i,
+        .rst_ni,
+        .valid_i ( ar_valid_gnt   ),
+        .ready_o ( ar_ready_sp    ),
+        .data_i  ( ar_gnt         ),
+        .valid_o ( mst_req_o.ar_valid),
+        .ready_i ( mst_resp_i.ar_ready),
+        .data_o  ( mst_req_o.ar     )
+    );
+//}}}
 
 
 

@@ -46,7 +46,7 @@ module axi_demux_core #(
     assign tr_in_flight_cnt     = aw_in_flight_cnt + ar_in_flight_cnt;
     assign tr_in_flight_full    = (tr_in_flight_cnt == MaxTrans); 
     //Celine TODO (for now tie to 0)
-    assign ar_in_flight_cnt = 0;
+    //assign ar_in_flight_cnt = 0;
  
 
 //{{{ AW channel
@@ -96,7 +96,7 @@ module axi_demux_core #(
     logic       lookup_aw_sel_taken; 
     logic       lookup_aw_sel_from_ar_taken;
     //Celine TODO (for now tie to 0) 
-    assign lookup_aw_sel_from_ar_taken = 1'b0;
+    //assign lookup_aw_sel_from_ar_taken = 1'b0;
     always_comb begin
         aw_nxt_sta = aw_cur_sta;
         aw_sel_nxt = aw_sel_cur;
@@ -141,19 +141,19 @@ module axi_demux_core #(
     .rst_ni,
     .test_i,
     //look up (for atomic transaction)
-    .lookup_axi_id_i        (slv_req_i.aw.id[0+:AxiLookBits]),
-    .lookup_for_atomic_id_i ({AxiLookBits{1'b0}}),
+    .lookup_axi_id_i        (slv_req_i.aw.id[0 +: AxiLookBits]),
+    .lookup_for_atomic_id_i ({AxiLookBits{1'b0}}),  //not used: tie to 0
     .lookup_sel_taken_o     (lookup_aw_sel_taken),
     .lookup_sel_o           (loopup_aw_sel),
     .loopup_for_atomic_id_taken_o(/*not used*/),
     //push
     .push_sel_i             (slv_aw_select_i),
-    .push_axi_id_i          (slv_req_i.aw.id[0+:AxiLookBits]),
+    .push_axi_id_i          (slv_req_i.aw.id[0 +: AxiLookBits]),
     .push_en_i              (aw_push_en),
     .in_fligh_cnt_o         (aw_in_flight_cnt),
     //pop
     .pop_en_i               (slv_resp_o.b_valid & slv_req_i.b_ready),
-    .pop_axi_id_i           (slv_resp_o.b.id[0+:AxiLookBits])
+    .pop_axi_id_i           (slv_resp_o.b.id[0 +: AxiLookBits])
     );
 //}}}
 //{{{ aw inner debug signals
@@ -252,7 +252,7 @@ module axi_demux_core #(
     logic debug_w_SM_A2I_condition;
     assign debug_w_SM_A2I_condition = slv_req_i.w_valid && slv_req_i.w.last && mst_resps_i[w_select_from_fifo].w_ready;
 //}}}
-    
+    localparam int unsigned IDX_WIDTH = axi_math_pkg::idx_width(NoMstPorts);
 //{{{ B channel arbitor
     //localparam int unsigned IDX_WIDTH       = axi_math_pkg::idx_width(NoMstPorts);
     //localparam int unsigned AXI_USER_WIDTH  = tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE;
@@ -262,7 +262,7 @@ module axi_demux_core #(
     b_chan_t                            b_gnt;
     b_chan_t [NoMstPorts-1:0]           b_chans;
     logic                   b_valid_gnt;
-    logic[AxiIdWidth-1:0]   b_idx_gnt;
+    logic[IDX_WIDTH-1:0]    b_idx_gnt;
     logic[NoMstPorts-1:0]   b_valids;
     logic[NoMstPorts-1:0]   b_readies;
     for(genvar i=0;i<NoMstPorts;i++)begin
@@ -291,6 +291,75 @@ module axi_demux_core #(
 
 //}}}
 //{{{ AR channel 
+    typedef enum logic [1:0] {
+        AR_IDLE     = 2'b01,
+        AR_APPROVE   = 2'b10
+    } ar_state_e;
+    enum {
+        AR_I_BIT = 0,
+        AR_A_BIT = 1
+    } ar_state_bit_e;
+    ar_state_e      ar_cur_sta, ar_nxt_sta;
+    select_t        ar_sel_cur, ar_sel_nxt;
+    always_ff @(posedge clk_i or negedge rst_ni) begin
+        if(!rst_ni) begin
+            ar_cur_sta <= AR_IDLE;
+            ar_sel_cur <= '0;
+        end else begin
+            ar_cur_sta <= ar_nxt_sta;
+            ar_sel_cur <= ar_sel_nxt;
+        end
+    end
+    logic       ar_push_en;
+    select_t    loopup_ar_sel;
+    logic       lookup_ar_sel_taken;
+    always_comb begin
+        ar_nxt_sta = ar_cur_sta;
+        ar_sel_nxt = ar_sel_cur;
+        ar_push_en    = 1'b0;
+        unique case(1'b1)
+            ar_cur_sta[AR_I_BIT]: begin
+                if(slv_req_i.ar_valid && (!tr_in_flight_full)) begin
+                    if((!lookup_ar_sel_taken) || (loopup_ar_sel == slv_ar_select_i))begin
+                        ar_nxt_sta = AR_APPROVE;
+                        ar_sel_nxt = slv_ar_select_i;
+                    end
+                end
+            end
+            ar_cur_sta[AR_A_BIT]: begin
+                if(mst_resps_i[ar_sel_cur].ar_ready) begin
+                    ar_nxt_sta = AR_IDLE;
+                    ar_push_en    = 1'b1;
+                end
+            end
+            default: begin end
+        endcase
+    end
+    axi_id_in_flight_array #(
+        .AxiLookBits    (AxiLookBits),  
+        .MaxTrans       (MaxTrans),
+        .select_t       (select_t)
+    ) i_ar_id_in_flight_array(
+    .clk_i,
+    .rst_ni,
+    .test_i,
+    //look up (for atomic transaction)
+    .lookup_axi_id_i        (slv_req_i.ar.id[0 +: AxiLookBits]),
+    .lookup_for_atomic_id_i (slv_req_i.aw.id[0 +: AxiLookBits]), //for atomic transaction aw SM
+    .lookup_sel_taken_o     (lookup_ar_sel_taken),
+    .lookup_sel_o           (loopup_ar_sel),
+    .loopup_for_atomic_id_taken_o(lookup_aw_sel_from_ar_taken),  //for atomic transaction aw SM
+    //push
+    .push_sel_i             (slv_ar_select_i),
+    .push_axi_id_i          (slv_req_i.ar.id[0 +: AxiLookBits]),
+    .push_en_i              (ar_push_en),
+    .in_fligh_cnt_o         (ar_in_flight_cnt),
+    //pop   
+    .pop_en_i               (slv_resp_o.r_valid && slv_resp_o.r.last && slv_req_i.r_ready),
+    .pop_axi_id_i           (slv_resp_o.r.id[0 +: AxiLookBits])
+    );
+
+
 //}}}
 //{{{ R channel
 
@@ -301,7 +370,7 @@ module axi_demux_core #(
         slv_resp_o = '0;
         for(int unsigned i=0; i<NoMstPorts; i++) begin
             //aw 
-            if(!(aw_cur_sta==AW_IDLE)) begin
+            if(!(aw_cur_sta == AW_IDLE)) begin
                 if(i == aw_sel_cur) begin
                     mst_reqs_o[i].aw_valid  = slv_req_i.aw_valid;
                     mst_reqs_o[i].aw        = slv_req_i.aw;
@@ -309,7 +378,7 @@ module axi_demux_core #(
                 end
             end
             //w
-            if(w_cur_sta==W_APPROVE) begin
+            if(w_cur_sta == W_APPROVE) begin
                 if(i == w_select_from_fifo) begin
                     mst_reqs_o[i].w_valid   = slv_req_i.w_valid;
                     mst_reqs_o[i].w         = slv_req_i.w;
@@ -318,6 +387,14 @@ module axi_demux_core #(
             end
             //b
             mst_reqs_o[i].b_ready    = b_readies[i]; 
+            //ar 
+            if(ar_cur_sta == AR_APPROVE)begin
+                if(i == ar_sel_cur) begin
+                    mst_reqs_o[i].ar_valid  = slv_req_i.ar_valid;
+                    mst_reqs_o[i].ar        = slv_req_i.ar;
+                    slv_resp_o.ar_ready     = mst_resps_i[i].ar_ready;
+                end
+            end
         end
         //b
         slv_resp_o.b_valid   = b_valid_gnt;

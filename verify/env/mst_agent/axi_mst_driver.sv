@@ -26,7 +26,7 @@ class axi_mst_driver extends uvm_driver #(axi_mst_seq_item);
     //}}}
     axi_mst_seq_item        tx;
     shortint                mst_id;
-    axi_mst_seq_item        TXs_q[$];
+    //axi_mst_seq_item        TXs_q[$];
     axi_id_t                AWID_q[$];
     axi_id_t                ARID_q[$];
     bit                     rsp_in_flight_en;
@@ -131,7 +131,7 @@ class axi_mst_driver extends uvm_driver #(axi_mst_seq_item);
             axi_mst_seq_item tx;
             seq_item_port.get_next_item(tx);
             accept_tr(tx);
-            TXs_q.push_back(tx);
+            //TXs_q.push_back(tx);
             seq_item_port.item_done();
         end
     endtask
@@ -258,6 +258,7 @@ class axi_mst_driver extends uvm_driver #(axi_mst_seq_item);
         vif.Master_cb.ar_prot   <= item.ar_prot  ;
         vif.Master_cb.ar_qos    <= item.ar_qos   ;
         vif.Master_cb.ar_region <= item.ar_region;
+        wait(vif.ar_ready);
         //if(vif.Master_cb.ar_ready !== 1'b1) @ (vif.Master_cb iff vif.Master_cb.ar_ready === 1'b1);
         @ (vif.Master_cb);
         vif.Master_cb.ar_id     <= '0 ;
