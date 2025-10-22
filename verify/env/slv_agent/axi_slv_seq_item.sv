@@ -8,6 +8,7 @@
 `define __AXI_SLV_SEQ_ITEM_SV__
 class axi_slv_seq_item extends axi_slv_seq_item_base;
     bit is_aw, is_w, is_b, is_ar, is_r;
+    rand bit[2:0]  ar2r_delay;
     //{{{ AW channel 
     id_t              aw_id     ;
     addr_t            aw_addr   ;
@@ -141,6 +142,30 @@ class axi_slv_seq_item extends axi_slv_seq_item_base;
         b_user = '0;
         b_valid = 1'b1;
     endfunction 
+    function void set_one_transfer_transaction_r();
+        int data;
+        assert(std::randomize(ar2r_delay));
+        r_id = this.ar_id;
+        r_data = new[ar_len+1];
+        r_last = new[ar_len+1];
+        r_resp = new[ar_len+1];
+        r_valid = 1'b1;
+        r_user = '0;
+        foreach(r_data[i]) begin
+            assert(std::randomize(data));
+            r_data[i] = data;
+        end
+        //foreach(r_strb[i]) begin
+        //    r_strb[i] = '1;
+        //end
+        foreach(r_last[i]) begin
+            r_last[i] = 0;
+        end
+        r_last[ar_len] = 1;
+        foreach(r_resp[i]) begin
+            r_resp[i] = AXI_OKAY;
+        end
+    endfunction
 
     function string convert2string();
         string s;

@@ -170,7 +170,7 @@ module axi_mux #(
     end
 //}}}
     localparam int unsigned IDX_WIDTH = axi_math_pkg::idx_width(NoSlvPorts); 
-//{{{ arbitor for aw 
+//{{{ arbiter for aw 
     mst_aw_chan_t           aw_gnt;
     logic                   aw_valid_gnt;
     logic                   aw_ready_sp;
@@ -357,7 +357,6 @@ module axi_mux #(
             b_valids[b_id_ext] = 1'b1;
         end
     end
-    //assign slv_b_valids = (b_valid_sp) ? (1<<b_id_ext) : '0;
     spill_register #(
       .T       ( mst_b_chan_t ),
       .Bypass  ( ~SpillB      )
@@ -372,7 +371,7 @@ module axi_mux #(
       .data_o  ( b_chan_sp                  )
     );
 //}}}
-//{{{ arbitor for ar 
+//{{{ arbiter for ar 
     mst_ar_chan_t           ar_gnt;
     logic                   ar_valid_gnt;
     logic                   ar_ready_sp;
@@ -407,7 +406,33 @@ module axi_mux #(
         .data_o  ( mst_req_o.ar     )
     );
 //}}}
-
+//{{{ r
+    // demux r 
+    logic           r_valid_sp;
+    mst_r_chan_t    r_chan_sp;
+    extended_id_t   r_id_ext;  
+    assign r_id_ext = mst_resp_i.r.id[SlvAxiIDWidth +: MstIdxBits];
+    assign r_chans  = {NoSlvPorts{r_chan_sp}}; // go to strip id function
+    always_comb begin 
+        r_valids = '0;
+        if(r_valid_sp) begin
+            r_valids[r_id_ext] = 1'b1;
+        end
+    end
+    spill_register #(
+      .T       ( mst_r_chan_t ),
+      .Bypass  ( ~SpillR      )
+    ) i_r_spill_reg (
+      .clk_i   ( clk_i                      ),
+      .rst_ni  ( rst_ni                     ),
+      .valid_i ( mst_resp_i.r_valid         ),
+      .ready_i ( r_readies[r_id_ext] ),
+      .data_i  ( mst_resp_i.r               ),
+      .valid_o ( r_valid_sp                 ),
+      .ready_o ( mst_req_o.r_ready          ),
+      .data_o  ( r_chan_sp                  )
+    );
+//}}}
 
 
 

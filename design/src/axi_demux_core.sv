@@ -253,12 +253,7 @@ module axi_demux_core #(
     assign debug_w_SM_A2I_condition = slv_req_i.w_valid && slv_req_i.w.last && mst_resps_i[w_select_from_fifo].w_ready;
 //}}}
     localparam int unsigned IDX_WIDTH = axi_math_pkg::idx_width(NoMstPorts);
-//{{{ B channel arbitor
-    //localparam int unsigned IDX_WIDTH       = axi_math_pkg::idx_width(NoMstPorts);
-    //localparam int unsigned AXI_USER_WIDTH  = tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE;
-    //typedef logic [AxiIdWidth-1:0]      id_t;
-    //typedef logic [AXI_USER_WIDTH-1:0]  user_t;
-    //`AXI_TYPEDEF_B_CHAN_T(b_chan_t, id_t, user_t)
+//{{{ B channel arbiter
     b_chan_t                            b_gnt;
     b_chan_t [NoMstPorts-1:0]           b_chans;
     logic                   b_valid_gnt;
@@ -268,10 +263,7 @@ module axi_demux_core #(
     for(genvar i=0;i<NoMstPorts;i++)begin
         assign b_valids[i]              = mst_resps_i[i].b_valid;   
         assign b_chans[i]               = mst_resps_i[i].b;
-        //assign mst_reqs_o[i].b_ready    = b_readies[i];
     end
-    //assign slv_resp_o.b_valid   = b_valid_gnt;
-    //assign slv_resp_o.b         = b_gnt;
     fair_round_robin_arbiter #(
         .NumIn     (NoMstPorts   ),
         .DataType  (b_chan_t)
@@ -287,8 +279,6 @@ module axi_demux_core #(
         .data_o     (b_gnt),
         .idx_o      (b_idx_gnt)  
     );
-    
-
 //}}}
 //{{{ AR channel 
     typedef enum logic [1:0] {
@@ -358,11 +348,33 @@ module axi_demux_core #(
     .pop_en_i               (slv_resp_o.r_valid && slv_resp_o.r.last && slv_req_i.r_ready),
     .pop_axi_id_i           (slv_resp_o.r.id[0 +: AxiLookBits])
     );
-
-
 //}}}
-//{{{ R channel
-
+//{{{ R channel arbiter
+    r_chan_t                            r_gnt;
+    r_chan_t [NoMstPorts-1:0]           r_chans;
+    logic                   r_valid_gnt;
+    logic[IDX_WIDTH-1:0]    r_idx_gnt;
+    logic[NoMstPorts-1:0]   r_valids;
+    logic[NoMstPorts-1:0]   r_readies;
+    for(genvar i=0;i<NoMstPorts;i++)begin
+        assign r_valids[i]              = mst_resps_i[i].r_valid;   
+        assign r_chans[i]               = mst_resps_i[i].r;
+    end
+    fair_round_robin_arbiter #(
+        .NumIn     (NoMstPorts   ),
+        .DataType  (r_chan_t)
+    ) i_r_fair_rr_arb (
+        .clk_i,
+        .rst_ni,
+        .flush_i    (1'b0),
+        .req_i      (r_valids),
+        .data_i     (r_chans),
+        .gnt_i      (slv_req_i.r_ready),
+        .gnt_o      (r_readies),
+        .req_o      (r_valid_gnt),
+        .data_o     (r_gnt),
+        .idx_o      (r_idx_gnt)  
+    );
 //}}}
 //{{{ output 
     always_comb begin
@@ -395,10 +407,15 @@ module axi_demux_core #(
                     slv_resp_o.ar_ready     = mst_resps_i[i].ar_ready;
                 end
             end
+            //r 
+            mst_reqs_o[i].r_ready   = r_readies[i];
         end
         //b
         slv_resp_o.b_valid   = b_valid_gnt;
         slv_resp_o.b         = b_gnt;
+        //r
+        slv_resp_o.r_valid   = r_valid_gnt;
+        slv_resp_o.r         = r_gnt;
     end
 //}}}}
 

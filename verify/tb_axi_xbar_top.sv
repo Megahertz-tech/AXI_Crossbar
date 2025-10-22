@@ -277,14 +277,18 @@ module tb_axi_xbar_top;
   
     // tb configuration 
     bit[TbNumSlaves-1:0] enable_slv_b_channel = '0;
+    bit[TbNumSlaves-1:0] enable_r_channel = '0;
   
     //{{{ UVM test setup (config, vifs) 
     //initial begin
     initial begin    
         void'($value$plusargs("enable_slv_b_channel=%d", enable_slv_b_channel));
         $display("enable_slv_b_channel: %0b", enable_slv_b_channel);
+        void'($value$plusargs("enable_r_channel=%d", enable_r_channel));
+        $display("enable_slv_b_channel: %0b", enable_r_channel);
         //uvm setup configuration
         uvm_config_db#(int)::set(uvm_root::get(),"uvm_test_top","enable_slv_b_channel",enable_slv_b_channel);
+        uvm_config_db#(int)::set(uvm_root::get(),"uvm_test_top","enable_r_channel",enable_r_channel);
         //{{{ uvm setup vifs 
         uvm_config_db#(virtual v_axi_inf_mst #(
         .AXI_ADDR_WIDTH (tb_xbar_param_pkg::AXI_ADDR_WIDTH_IN_USE),

@@ -12,6 +12,7 @@ import uvm_pkg::*;
 
 class xbar_test_base extends uvm_test;
     bit[tb_xbar_param_pkg::TB_SLAVE_NUMBER_IN_USE-1:0]  enable_slv_b_channel = '0;
+    bit[tb_xbar_param_pkg::TB_SLAVE_NUMBER_IN_USE-1:0]  enable_r_channel = '0;
     `uvm_component_utils(xbar_test_base)
     xbar_env #(
         .NoMstPorts(tb_xbar_param_pkg::TB_MASTER_NUMBER_IN_USE),
@@ -30,6 +31,7 @@ class xbar_test_base extends uvm_test;
          )::type_id::create("env", this);
          //slv_env = xbar_axi_slave_env #(tb_xbar_param_pkg::AXI_SLAVE_NUMBER_IN_USE)::type_id::create("slv_env", this);
          uvm_config_db#(int)::get(this,"", "enable_slv_b_channel",enable_slv_b_channel);
+         uvm_config_db#(int)::get(this,"", "enable_r_channel",enable_r_channel);
     endfunction 
 
     function void connect_phase(uvm_phase phase);
@@ -37,6 +39,8 @@ class xbar_test_base extends uvm_test;
         foreach(env.slv_agt[i]) begin
             env.slv_agt[i].drv.enable_b_channel = this.enable_slv_b_channel[i];
             `uvm_info("TEST_CFG", $sformatf("No.%0d slave driver enable_b_channel: %b", i, env.slv_agt[i].drv.enable_b_channel), UVM_LOW)
+            env.slv_agt[i].drv.enable_r_channel = this.enable_r_channel[i];
+            `uvm_info("TEST_CFG", $sformatf("No.%0d slave driver enable_r_channel: %b", i, env.slv_agt[i].drv.enable_r_channel), UVM_LOW)
         end
     endfunction
 

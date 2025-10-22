@@ -120,8 +120,8 @@ class axi_mst_driver extends uvm_driver #(axi_mst_seq_item);
         fork 
             //get_item();
             execute_item();
-            //get_read_transaction();
             get_write_response();
+            get_read_transaction();
         join
     endtask
     //}}}
@@ -278,6 +278,16 @@ class axi_mst_driver extends uvm_driver #(axi_mst_seq_item);
     //}}}
     //{{{ get_read_transaction
     virtual task get_read_transaction();
+        forever begin
+            @(posedge vif.r_valid);
+            #5ns;
+            @ (vif.Master_cb);
+            vif.Master_cb.r_ready <= 1'b1;
+            #5ns;
+            wait(vif.r_last);
+            @ (vif.Master_cb);
+            vif.Master_cb.r_ready <= 1'b0;
+        end
     endtask
     //}}}
 endclass

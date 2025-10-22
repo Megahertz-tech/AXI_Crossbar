@@ -34,6 +34,8 @@ sim_b:
 	./run_test -test ${TESTNAME} -sim rc -gui gui -en_slv_b 15 &
 sim_no_r:
 	./run_test -test ${TESTNAME} -sim rc -gui gui -en_slv_b 15 &
+sim_r: 
+	./run_test -test ${TESTNAME} -sim rc -gui gui -en_slv_b 15 -en_slv_r 15 &
 
 clear: 
 	rm -rf __pycache__ 

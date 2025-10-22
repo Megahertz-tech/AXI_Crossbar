@@ -25,6 +25,7 @@ typedef virtual v_axi_inf_slv #(
     parameter int unsigned ID_WIDTH = tb_xbar_param_pkg::AXI_MASTER_ID_WIDTH_IN_USE;
 
     bit enable_b_channel = 1'b1;
+    bit enable_r_channel = 1'b1;
 
 
 
@@ -105,7 +106,8 @@ typedef virtual v_axi_inf_slv #(
         vif.Slave_cb.b_resp    <= '0;
         vif.Slave_cb.b_user    <= '0;
         vif.Slave_cb.b_valid   <= '0;
-        vif.Slave_cb.ar_ready  <= '1;
+        //vif.Slave_cb.ar_ready  <= '1;
+        vif.Slave_cb.ar_ready  <= '0;
         vif.Slave_cb.r_id      <= '0;
         vif.Slave_cb.r_data    <= '0;
         vif.Slave_cb.r_resp    <= '0;
@@ -248,7 +250,7 @@ typedef virtual v_axi_inf_slv #(
                 schedule_b_q.push_back(1'b1);
     endtask
     //}}}
-    // schedule_b_response 
+    //{{{ schedule_b_response 
     task automatic schedule_b_response();
         axi_slv_seq_item    aw;
         wait(schedule_b_q.size()!=0);
@@ -270,6 +272,38 @@ typedef virtual v_axi_inf_slv #(
         vif.Slave_cb.b_user  <= '0;
         trans_sem.put(1);
     endtask 
+    //}}}
+    //{{{ schedule_r
+    task automatic schedule_r();
+        axi_slv_seq_item ar;
+        wait(schedule_r_q.size()!=0);
+        assert(req_q.size()) else `uvm_error("SLV_DRV", "schedule_r req_q is empty!!!")
+        ar = req_q.pop_front();
+        assert(ar.is_ar) else `uvm_error("SLV_DRV", "schedule_r this req is not ar!!!")
+        void'(schedule_r_q.pop_front());
+        ar.set_one_transfer_transaction_r();
+        repeat(ar.ar2r_delay) @ (vif.Slave_cb);
+        for(int unsigned i=0; i<ar.ar_len+1; i++) begin
+            @ (vif.Slave_cb);
+            vif.Slave_cb.r_id     <=  ar.r_id;
+            vif.Slave_cb.r_valid  <=  ar.r_valid ;           
+            vif.Slave_cb.r_data   <=  ar.r_data[i]  ;           
+            vif.Slave_cb.r_last   <=  ar.r_last[i]  ;           
+            vif.Slave_cb.r_user   <=  ar.r_user  ;
+            vif.Slave_cb.r_resp   <=  ar.r_resp[i];
+            wait (vif.r_ready);
+        end
+        #1ps;
+        @ (vif.Slave_cb);
+        vif.Slave_cb.r_valid  <= '0   ;           
+        vif.Slave_cb.r_data   <= '0   ;           
+        vif.Slave_cb.r_last   <= '0   ;           
+        vif.Slave_cb.r_user   <= '0   ;
+        vif.Slave_cb.r_resp   <= '0   ;
+        trans_sem.put(1);
+    endtask
+    //}}}
+
     //{{{ do_setup_ar
     virtual task  automatic  do_setup_ar();
                 axi_slv_seq_item    ar_req;
@@ -399,6 +433,8 @@ typedef virtual v_axi_inf_slv #(
             if(enable_b_channel)  forever begin schedule_b_response(); end
             // ar
             forever begin do_setup_ar(); end 
+            // r
+            if(enable_r_channel) forever begin schedule_r(); end 
         join
     endtask
 endclass: axi_slv_driver
