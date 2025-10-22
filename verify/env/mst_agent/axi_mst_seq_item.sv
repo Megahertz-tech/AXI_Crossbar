@@ -22,8 +22,8 @@ class axi_mst_seq_item extends axi_mst_seq_item_base;
     rand prot_t            aw_prot;
     rand qos_t             aw_qos;
     rand region_t          aw_region;
-    rand atop_t            aw_atop;
     //
+    rand axi_atop_e        aw_atop;
     rand axi_burst_size    aw_size;
     rand axi_burst_type    aw_burst;
     //}}}
@@ -81,7 +81,7 @@ class axi_mst_seq_item extends axi_mst_seq_item_base;
         `uvm_field_int(aw_prot,UVM_DEFAULT | UVM_HEX);
         `uvm_field_int(aw_qos,UVM_DEFAULT | UVM_HEX);
         `uvm_field_int(aw_region,UVM_DEFAULT | UVM_HEX);
-        `uvm_field_int(aw_atop,UVM_DEFAULT | UVM_HEX);
+        `uvm_field_enum(axi_atop_e, aw_atop,UVM_DEFAULT);
         `uvm_field_array_int(w_data, UVM_DEFAULT | UVM_HEX)
         `uvm_field_array_int(w_strb, UVM_DEFAULT | UVM_BIN)
         `uvm_field_array_int(w_last, UVM_DEFAULT | UVM_BIN)
@@ -135,13 +135,13 @@ class axi_mst_seq_item extends axi_mst_seq_item_base;
             aw_size = AXI_BURST_SIZE_8_BYTES;
             aw_burst = AXI_INCREMENTING_BURST;
             //aw_len = 0;
-            aw_cache = 4'b0001; // Bufferable
-            aw_prot = 3'b000;   // Unprivileged access
-            aw_lock = 1'b0;     // Normal access
-            aw_qos = 0;         // not participating in any QoS scheme
+            aw_cache = 4'b0001;         // Bufferable
+            aw_prot = 3'b000;           // Unprivileged access
+            aw_lock = 1'b0;             // Normal access
+            aw_qos = 0;                 // not participating in any QoS scheme
             aw_user = 0;
-            aw_region = 0;      // no additional address regions
-            aw_atop = 0;        //Non-atomic operation
+            aw_region = 0;              // no additional address regions
+            aw_atop = AXI_NON_ATOMIC;   //Non-atomic operation
         end
         else begin
             ar_valid = 1'b1; 
@@ -157,7 +157,21 @@ class axi_mst_seq_item extends axi_mst_seq_item_base;
         end
     endfunction
     //}}}
-    
+//{{{ set_one_transfer_transaction_atomic_aw
+    function void set_one_transfer_transaction_atomic_aw();
+            aw_valid = 1;  
+            aw_size = AXI_BURST_SIZE_8_BYTES;
+            aw_burst = AXI_INCREMENTING_BURST;
+            //aw_len = 0;
+            aw_cache = 4'b0001;         // Bufferable
+            aw_prot = 3'b000;           // Unprivileged access
+            aw_lock = 1'b0;             // Normal access
+            aw_qos = 0;                 // not participating in any QoS scheme
+            aw_user = 0;
+            aw_region = 0;              // no additional address regions
+            //aw_atop = AXI_ATOMIC_STORE;     // atomic operation    
+    endfunction 
+//}}}
     
 
 endclass

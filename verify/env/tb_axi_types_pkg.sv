@@ -87,6 +87,13 @@ package tb_axi_types_pkg;
         AXI_WRITE_ACCESS,
         AXI_READ_ACCESS
     } axi_access_type;
+    typedef enum logic[5:0] {
+        AXI_NON_ATOMIC   = 6'b00_0000,
+        AXI_ATOMIC_STORE = 6'b01_0000, //response without data
+        AXI_ATOMIC_LOAD  = 6'b10_0000, //response with data
+        AXI_ATOMIC_SWAP  = 6'b11_0000, //response with data
+        AXI_ATOMIC_COMP  = 6'b11_0001  //response with data
+    } axi_atop_e;
 
 
   function automatic axi_cache encode_memory_type(axi_memory_type memory_type, bit read_access);

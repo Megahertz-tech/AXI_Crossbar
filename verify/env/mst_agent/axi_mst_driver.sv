@@ -141,15 +141,22 @@ class axi_mst_driver extends uvm_driver #(axi_mst_seq_item);
         forever begin
             seq_item_port.get_next_item(tx);
             `uvm_info("mst drv","get item", UVM_LOW)
-            //wait(TXs_q.size() !=0 );
-            //tx = TXs_q.pop_front();
+
+            //none atomic
             if(tx.access_type == AXI_WRITE_ACCESS) begin
-                drive_aw_address(tx);
-                drive_write_transaction(tx);
-                if(!rsp_in_flight_en) begin
-                    //wait_write_response(tx);
-                end
-            end else begin
+                if(tx.aw_atop == 6'b00_0000) begin
+                    drive_aw_address(tx);
+                    drive_write_transaction(tx);
+                    //if(!rsp_in_flight_en) begin
+                        //wait_write_response(tx);
+                    //end
+                end 
+                else begin
+                    drive_aw_address(tx);
+                end 
+            end 
+            //atomic 
+            else begin
                 drive_ar_address(tx);
             end
             seq_item_port.item_done();

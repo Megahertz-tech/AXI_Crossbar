@@ -28,6 +28,7 @@
         $CB_PRJ_ROOT/verify/env/mst_agent/axi_mst_driver.sv  \
         $CB_PRJ_ROOT/verify/env/mst_agent/axi_mst_agent.sv  \
         $CB_PRJ_ROOT/verify/env/mst_agent/sequences/axi_mst_regular_sequence.sv  \
+        $CB_PRJ_ROOT/verify/env/mst_agent/sequences/axi_mst_atomic_sequence.sv  \
         $CB_PRJ_ROOT/verify/env/slv_agent/axi_slv_driver.sv  \
         $CB_PRJ_ROOT/verify/env/slv_agent/axi_slv_agent.sv  \
         $CB_PRJ_ROOT/verify/env/base/xbar_virtual_sequence_base.sv  \
@@ -37,5 +38,6 @@
         $CB_PRJ_ROOT/verify/env/base/xbar_test_base.sv \
 
         $CB_PRJ_ROOT/verify/test/xbar_simple_test_case.sv \
+        $CB_PRJ_ROOT/verify/test/xbar_atomic_transaction_test_case.sv \
 
         $CB_PRJ_ROOT/verify/tb_axi_xbar_top.sv \

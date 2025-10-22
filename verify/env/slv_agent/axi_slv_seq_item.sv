@@ -7,8 +7,9 @@
 `ifndef __AXI_SLV_SEQ_ITEM_SV__
 `define __AXI_SLV_SEQ_ITEM_SV__
 class axi_slv_seq_item extends axi_slv_seq_item_base;
-    bit is_aw, is_w, is_b, is_ar, is_r;
+    bit is_aw, is_w, is_b, is_ar, is_r, is_atomic_ar;
     rand bit[2:0]  ar2r_delay;
+    rand bit[2:0]  w2b_delay;
     //{{{ AW channel 
     id_t              aw_id     ;
     addr_t            aw_addr   ;
@@ -141,6 +142,7 @@ class axi_slv_seq_item extends axi_slv_seq_item_base;
         b_resp = AXI_OKAY;
         b_user = '0;
         b_valid = 1'b1;
+        assert(std::randomize(w2b_delay));
     endfunction 
     function void set_one_transfer_transaction_r();
         int data;

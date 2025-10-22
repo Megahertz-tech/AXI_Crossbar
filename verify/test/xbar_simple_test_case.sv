@@ -28,11 +28,11 @@ class xbar_simple_test_case extends xbar_test_base;
 
         foreach(slv_default_seq[i]) begin
             slv_default_seq[i] = axi_slv_default_sequence::type_id::create($sformatf("slv_default_seq_%0d", i));
-                `uvm_info("slv_default_seq",$sformatf("slv_default_seq_%0d create",i),UVM_LOW)
+                `uvm_info("TEST_CASE",$sformatf("slv_default_seq_%0d create",i),UVM_LOW)
         end
         foreach(mst_regular_seq[i]) begin
             mst_regular_seq[i] = axi_mst_regular_sequence::type_id::create($sformatf("mst_regular_seq_%0d", i));
-                `uvm_info("mst_regular_seq",$sformatf("mst_regular_seq_%0d create",i),UVM_LOW)
+                `uvm_info("TEST_CASE",$sformatf("mst_regular_seq_%0d create",i),UVM_LOW)
         end
         
         fork
