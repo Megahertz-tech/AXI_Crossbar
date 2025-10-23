@@ -107,24 +107,24 @@ import cf_math_pkg::idx_width;
   // This module handles address decoding and demultiplexing from slave ports
   // to individual master port lanes
   axi_xbar_unmuxed #(
-    .Cfg          (Cfg),
-    .ATOPs        (ATOPs),
-    .Connectivity (Connectivity),
+    .Cfg          (Cfg          ),
+    .ATOPs        (ATOPs        ),
+    .Connectivity (Connectivity ),
     .aw_chan_t    (slv_aw_chan_t),
-    .w_chan_t     (w_chan_t),
-    .b_chan_t     (slv_b_chan_t),
+    .w_chan_t     (w_chan_t     ),
+    .b_chan_t     (slv_b_chan_t ),
     .ar_chan_t    (slv_ar_chan_t),
-    .r_chan_t     (slv_r_chan_t),
-    .req_t        (slv_req_t),
-    .resp_t       (slv_resp_t),
-    .rule_t       (rule_t)
+    .r_chan_t     (slv_r_chan_t ),
+    .req_t        (slv_req_t    ),
+    .resp_t       (slv_resp_t   ),
+    .rule_t       (rule_t       )
   ) i_xbar_unmuxed (
     .clk_i,
     .rst_ni,
     .test_i,
     .slv_ports_req_i,
     .slv_ports_resp_o,
-    .mst_ports_req_o  (mst_reqs),
+    .mst_ports_req_o  (mst_reqs ),
     .mst_ports_resp_i (mst_resps),
     .addr_map_i,
     .en_default_mst_port_i,

@@ -49,17 +49,46 @@ module axi_mux #(
   output mst_req_t                   mst_req_o,
   input  mst_resp_t                  mst_resp_i
 );
+  // Implement the AXI multiplexer logic here
+  //
+  // HINTS:
+  // 1. Handle the case where NoSlvPorts == 1 (pass-through)
+  // 2. For multiple slave ports, you need to:
+  //    a) Prepend slave port index to transaction IDs
+  //    b) Arbitrate between slave port requests (AW and AR channels)
+  //    c) Multiplex W channel based on AW arbitration decisions
+  //    d) Demultiplex B and R channels based on MSB bits of response IDs
+  //    e) Use FIFOs to track write transaction routing
+  // 3. Consider spill registers for timing optimization
+  // 4. Ensure proper AXI protocol compliance (handshaking, etc.)
+  //
+  // Key submodules you'll need:
+  // - axi_id_prepend: To add slave port index to transaction IDs
+  // - rr_arb_tree: Round-robin arbiter for AW/AR channels
+  // - fifo_v3: FIFO for tracking write transactions
+  // - spill_register: Pipeline registers for timing
+  //
+  // Architecture Overview:
+  // [Slave Ports] -> [ID Prepend] -> [Arbiters] -> [Spill Regs] -> [Master Port]
+  //                                      |
+  //                                  [W FIFO] (tracks AW decisions)
+  //
+  // [Master Port] -> [Spill Regs] -> [ID Decode] -> [Slave Ports]
+
+  // Your implementation goes here...
 
   localparam int unsigned MstIdxBits    = $clog2(NoSlvPorts);
   localparam int unsigned MstAxiIDWidth = SlvAxiIDWidth + MstIdxBits;
   typedef logic [MstIdxBits-1:0] extended_id_t;
   //{{{ inner debug signals 
+`ifdef DEBUG_DESIGN_SIGNAL
   logic [NoSlvPorts-1:0]          debug_i_aw_valids;
   logic [NoSlvPorts-1:0]          debug_i_w_valids ;
   for(genvar i=0;i<NoSlvPorts;i++)begin
     assign debug_i_aw_valids[i] = slv_reqs_i[i].aw_valid;
-    assign debug_i_w_valids[i] = slv_reqs_i[i].w_valid;
+    assign debug_i_w_valids[i]  = slv_reqs_i[i].w_valid;
   end
+`endif
   //}}}
 
 /*    topology                                                                       */
@@ -160,6 +189,7 @@ module axi_mux #(
     
 //}}}
 //{{{ inner id full debug signals 
+`ifdef DEBUG_DESIGN_SIGNAL
     logic [NoSlvPorts-1:0] [SlvAxiIDWidth-1:0] debug_ext_before_aw_id;
     logic [NoSlvPorts-1:0] [MstAxiIDWidth-1:0] debug_ext_after_aw_id;
     id_extend_t[NoSlvPorts-1:0]     debug_ext_aw_id;
@@ -168,6 +198,7 @@ module axi_mux #(
         assign debug_ext_after_aw_id[i] = aw_chans[i].id;
         assign debug_ext_aw_id[i] = aw_chans[i].id[SlvAxiIDWidth +: MstIdxBits];
     end
+`endif
 //}}}
     localparam int unsigned IDX_WIDTH = axi_math_pkg::idx_width(NoSlvPorts); 
 //{{{ arbiter for aw 
@@ -181,28 +212,28 @@ module axi_mux #(
     ) i_aw_fair_rr_arb (
         .clk_i,
         .rst_ni,
-        .flush_i    (1'b0),
-        .req_i      (aw_valids),
-        .data_i     (aw_chans),
-        .gnt_i      (aw_ready_sp),
-        .gnt_o      (aw_readies),
-        .req_o      (aw_valid_gnt),
-        .data_o     (aw_gnt),
-        .idx_o      (aw_idx_gnt)  
+        .flush_i    (1'b0           ),
+        .req_i      (aw_valids      ),
+        .data_i     (aw_chans       ),
+        .gnt_i      (aw_ready_sp    ),
+        .gnt_o      (aw_readies     ),
+        .req_o      (aw_valid_gnt   ),
+        .data_o     (aw_gnt         ),
+        .idx_o      (aw_idx_gnt     )  
     );
 
     spill_register #(
-        .T       ( mst_aw_chan_t  ),
-        .Bypass  ( ~SpillAw   )
+        .T       ( mst_aw_chan_t    ),
+        .Bypass  ( ~SpillAw         )
     ) i_aw_spill_reg (
         .clk_i,
         .rst_ni,
-        .valid_i ( aw_valid_gnt   ),
-        .ready_o ( aw_ready_sp    ),
-        .data_i  ( aw_gnt         ),
-        .valid_o ( mst_req_o.aw_valid),
-        .ready_i ( mst_resp_i.aw_ready),
-        .data_o  ( mst_req_o.aw     )
+        .valid_i ( aw_valid_gnt         ),
+        .ready_o ( aw_ready_sp          ),
+        .data_i  ( aw_gnt               ),
+        .valid_o ( mst_req_o.aw_valid   ),
+        .ready_i ( mst_resp_i.aw_ready  ),
+        .data_o  ( mst_req_o.aw         )
     );
 //}}}
 //{{{ w 
@@ -213,6 +244,7 @@ module axi_mux #(
         AW_APPROVE   = 2'b10
     } aw_state_e;
     enum {I_BIT = 0, A_BIT = 1} state_bit;
+
     aw_state_e      aw_cur_sta, aw_nxt_sta;
     always_ff @(posedge clk_i or negedge rst_ni) begin
         if(!rst_ni) begin
@@ -223,51 +255,42 @@ module axi_mux #(
     end
     logic aw_extended_id_push_en;
     always_comb begin
-        aw_nxt_sta = aw_cur_sta;
-        aw_extended_id_push_en = 1'b0;
+        aw_nxt_sta              = aw_cur_sta;
+        aw_extended_id_push_en  = 1'b0;
         unique case(1'b1) 
             aw_cur_sta[I_BIT]: begin
                 if(aw_valid_gnt) begin
-                    aw_nxt_sta = AW_APPROVE;
-                    aw_extended_id_push_en = 1'b1; // w can arrive following the aw 
+                    aw_nxt_sta              = AW_APPROVE;
+                    aw_extended_id_push_en  = 1'b1; // w can arrive following the aw 
                 end
             end
             aw_cur_sta[A_BIT]: begin
                 if(aw_ready_sp) begin
-                    aw_nxt_sta = AW_IDLE;
+                    aw_nxt_sta              = AW_IDLE;
                 end
             end
             default: begin end
         endcase 
     end
-    //{{{ w inner debug signals
-    logic debug_aw_confirmed;
-    assign debug_aw_confirmed = aw_valid_gnt && mst_resp_i.aw_ready;
-    extended_id_t   debug_w_push_id;
-    assign debug_w_push_id = aw_gnt.id[SlvAxiIDWidth +: MstIdxBits];
-    logic [MstAxiIDWidth-1:0]  debug_w_aw_gnt_id_full;
-    assign debug_w_aw_gnt_id_full = aw_gnt.id;
-    //}}}
     extended_id_t  w_ext_id;
     logic w_pop_en;
     logic w_id_empty;
     fifo_v4 #(
-        .FALL_THROUGH   (0),
-        .DEPTH          (MaxWTrans * NoSlvPorts),
-        .dtype          (extended_id_t)
+        .FALL_THROUGH   (0                      ),
+        .DEPTH          (MaxWTrans * NoSlvPorts ),
+        .dtype          (extended_id_t          )
     ) i_w_extended_id_fifo (
         .clk_i,
         .rst_ni,
-        .flush_i(1'b0),
-        .testmode_i(test_i),
-        .push_i(aw_extended_id_push_en),
-        //.data_i(mst_req_o.aw.id[SlvAxiIDWidth+:MstIdxBits]),
-        .data_i(aw_gnt.id[SlvAxiIDWidth+:MstIdxBits]),
-        .pop_i(w_pop_en),
-        .data_o(w_ext_id),
-        .full_o(/*not used*/),
-        .empty_o(w_id_empty),
-        .usage_o(/*not used*/)
+        .flush_i    (1'b0                   ),
+        .testmode_i (test_i                 ),
+        .push_i     (aw_extended_id_push_en ),
+        .data_i     (aw_gnt.id[SlvAxiIDWidth +: MstIdxBits]),
+        .pop_i      (w_pop_en               ),
+        .data_o     (w_ext_id               ),
+        .full_o     (/*not used*/           ),
+        .empty_o    (w_id_empty             ),
+        .usage_o    (/*not used*/           )
     );
     typedef enum logic [1:0] {
         W_IDLE      = 2'b01,
@@ -309,9 +332,8 @@ module axi_mux #(
             end
             w_cur_sta[A_BIT]: begin
                 if(w_valids_delay[w_ext_id] && mst_w_ready_sp && w_chans_delay[w_ext_id].last) begin
-                //if(w_valids[w_ext_id] && mst_w_ready_sp && w_chans[w_ext_id].last) begin
-                    w_nxt_sta = W_IDLE;
-                    w_pop_en = 1'b1;
+                    w_nxt_sta   = W_IDLE;
+                    w_pop_en    = 1'b1;
                 end
             end
             default: begin end
@@ -327,7 +349,9 @@ module axi_mux #(
         if(w_cur_sta == W_APPROVE) begin
             w_valid = w_valids_delay[w_ext_id];
             w_chan  = w_chans_delay[w_ext_id];
-            if(mst_w_ready_sp) w_readies = 1'b1 << w_ext_id;
+            if(mst_w_ready_sp) begin 
+                w_readies = 1'b1 << w_ext_id;
+            end
         end
     end
     spill_register #(
@@ -336,14 +360,24 @@ module axi_mux #(
     ) i_w_spill_reg (
       .clk_i   ( clk_i              ),
       .rst_ni  ( rst_ni             ),
-      .valid_i ( w_valid        ),
-      .ready_o ( mst_w_ready_sp        ),
-      .data_i  ( w_chan         ),
+      .valid_i ( w_valid            ),
+      .ready_o ( mst_w_ready_sp     ),
+      .data_i  ( w_chan             ),
       .valid_o ( mst_req_o.w_valid  ),
       .ready_i ( mst_resp_i.w_ready ),
       .data_o  ( mst_req_o.w        )
     );
 //}}}
+    //{{{ w inner debug signals
+`ifdef DEBUG_DESIGN_SIGNAL
+    logic debug_aw_confirmed;
+    assign debug_aw_confirmed = aw_valid_gnt && mst_resp_i.aw_ready;
+    extended_id_t   debug_w_push_id;
+    assign debug_w_push_id = aw_gnt.id[SlvAxiIDWidth +: MstIdxBits];
+    logic [MstAxiIDWidth-1:0]  debug_w_aw_gnt_id_full;
+    assign debug_w_aw_gnt_id_full = aw_gnt.id;
+`endif
+    //}}}
 //{{{ b
     // demux b 
     logic           b_valid_sp;
@@ -351,6 +385,7 @@ module axi_mux #(
     extended_id_t   b_id_ext;  
     assign b_id_ext = mst_resp_i.b.id[SlvAxiIDWidth +: MstIdxBits];
     assign b_chans  = {NoSlvPorts{b_chan_sp}}; // go to strip id function
+
     always_comb begin 
         b_valids = '0;
         if(b_valid_sp) begin
@@ -382,28 +417,28 @@ module axi_mux #(
     ) i_ar_fair_rr_arb (
         .clk_i,
         .rst_ni,
-        .flush_i    (1'b0),
-        .req_i      (ar_valids),
-        .data_i     (ar_chans),
-        .gnt_i      (ar_ready_sp),
-        .gnt_o      (ar_readies),
-        .req_o      (ar_valid_gnt),
-        .data_o     (ar_gnt),
-        .idx_o      (ar_idx_gnt)  
+        .flush_i    (1'b0           ),
+        .req_i      (ar_valids      ),
+        .data_i     (ar_chans       ),
+        .gnt_i      (ar_ready_sp    ),
+        .gnt_o      (ar_readies     ),
+        .req_o      (ar_valid_gnt   ),
+        .data_o     (ar_gnt         ),
+        .idx_o      (ar_idx_gnt     )  
     );
 
     spill_register #(
-        .T       ( mst_ar_chan_t  ),
-        .Bypass  ( ~SpillAr   )
+        .T       ( mst_ar_chan_t    ),
+        .Bypass  ( ~SpillAr         )
     ) i_ar_spill_reg (
         .clk_i,
         .rst_ni,
-        .valid_i ( ar_valid_gnt   ),
-        .ready_o ( ar_ready_sp    ),
-        .data_i  ( ar_gnt         ),
-        .valid_o ( mst_req_o.ar_valid),
-        .ready_i ( mst_resp_i.ar_ready),
-        .data_o  ( mst_req_o.ar     )
+        .valid_i ( ar_valid_gnt         ),
+        .ready_o ( ar_ready_sp          ),
+        .data_i  ( ar_gnt               ),
+        .valid_o ( mst_req_o.ar_valid   ),
+        .ready_i ( mst_resp_i.ar_ready  ),
+        .data_o  ( mst_req_o.ar         )
     );
 //}}}
 //{{{ r
@@ -426,51 +461,13 @@ module axi_mux #(
       .clk_i   ( clk_i                      ),
       .rst_ni  ( rst_ni                     ),
       .valid_i ( mst_resp_i.r_valid         ),
-      .ready_i ( r_readies[r_id_ext] ),
+      .ready_i ( r_readies[r_id_ext]        ),
       .data_i  ( mst_resp_i.r               ),
       .valid_o ( r_valid_sp                 ),
       .ready_o ( mst_req_o.r_ready          ),
       .data_o  ( r_chan_sp                  )
     );
 //}}}
-
-
-
-
-
-
-
-
-
-
-
-  // TODO: Implement the AXI multiplexer logic here
-  //
-  // HINTS:
-  // 1. Handle the case where NoSlvPorts == 1 (pass-through)
-  // 2. For multiple slave ports, you need to:
-  //    a) Prepend slave port index to transaction IDs
-  //    b) Arbitrate between slave port requests (AW and AR channels)
-  //    c) Multiplex W channel based on AW arbitration decisions
-  //    d) Demultiplex B and R channels based on MSB bits of response IDs
-  //    e) Use FIFOs to track write transaction routing
-  // 3. Consider spill registers for timing optimization
-  // 4. Ensure proper AXI protocol compliance (handshaking, etc.)
-  //
-  // Key submodules you'll need:
-  // - axi_id_prepend: To add slave port index to transaction IDs
-  // - rr_arb_tree: Round-robin arbiter for AW/AR channels
-  // - fifo_v3: FIFO for tracking write transactions
-  // - spill_register: Pipeline registers for timing
-  //
-  // Architecture Overview:
-  // [Slave Ports] -> [ID Prepend] -> [Arbiters] -> [Spill Regs] -> [Master Port]
-  //                                      |
-  //                                  [W FIFO] (tracks AW decisions)
-  //
-  // [Master Port] -> [Spill Regs] -> [ID Decode] -> [Slave Ports]
-
-  // Your implementation goes here...
 
 endmodule
 

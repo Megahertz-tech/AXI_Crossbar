@@ -77,7 +77,7 @@ import cf_math_pkg::idx_width;
   input  logic      [Cfg.NoSlvPorts-1:0][MstPortsIdxWidth-1:0]          default_mst_port_i
 );
 
-  // TODO: Define internal types and parameters
+  //  Define internal types and parameters
   typedef logic [Cfg.AxiAddrWidth-1:0] addr_t;
 
   // Account for the decoding error slave (one additional port)
@@ -85,7 +85,7 @@ import cf_math_pkg::idx_width;
       (Cfg.NoMstPorts == 32'd1) ? 32'd1 : unsigned'($clog2(Cfg.NoMstPorts + 1));
   typedef logic [MstPortsIdxWidthOne-1:0] mst_port_idx_t;
 
-  // TODO: Define internal signals
+  // Define internal signals
   // Signals from the axi_demuxes, one index more for decode error
   req_t  [Cfg.NoSlvPorts-1:0][Cfg.NoMstPorts:0]  slv_reqs;
   resp_t [Cfg.NoSlvPorts-1:0][Cfg.NoMstPorts:0]  slv_resps;
@@ -107,7 +107,7 @@ import cf_math_pkg::idx_width;
 //}}} 
 
 
-  // TODO: Generate demultiplexer instances for each slave port
+  //  Generate demultiplexer instances for each slave port
   for (genvar i = 0; i < Cfg.NoSlvPorts; i++) begin : gen_slv_port_demux
     logic [MstPortsIdxWidth-1:0]          dec_aw,        dec_ar;
     mst_port_idx_t                        slv_aw_select, slv_ar_select;
@@ -117,7 +117,7 @@ import cf_math_pkg::idx_width;
     resp_t                                slv_ports_resp;
     resp_t                                slv_ports_resp_err;
 
-    // TODO: Implement address decoder for AW channel
+    // Implement address decoder for AW channel
     //{{{ addr_decode
     addr_decode #(
       .NoIndices  ( Cfg.NoMstPorts  ),
@@ -155,7 +155,7 @@ import cf_math_pkg::idx_width;
     );
     //}}}
 
-    // TODO: Implement decode error routing
+    // Implement decode error routing
     // Route to error slave (port index NoMstPorts) if decode error
     assign slv_aw_select = (dec_aw_error) ?
         mst_port_idx_t'(Cfg.NoMstPorts) : mst_port_idx_t'(dec_aw);
@@ -192,7 +192,7 @@ import cf_math_pkg::idx_width;
     // pragma translate_on
     //}}}
 
-    // TODO: Instantiate AXI demultiplexer for this slave port
+    // Instantiate AXI demultiplexer for this slave port
     axi_demux #(
       .AxiIdWidth     ( Cfg.AxiIdWidthSlvPorts ),  // ID Width
       .AtopSupport    ( ATOPs                  ),
@@ -224,15 +224,12 @@ import cf_math_pkg::idx_width;
       .mst_resps_i     ( slv_resps[i]        )
     );
 
-assign slv_resps[i][cfg_NoMstPorts] = '0;
-    // TODO: Instantiate error slave for decode errors
-    /*
-    axi_err_slv #(
+    // Instantiate error slave for decode errors
+    axi_xbar_default_slave #(
       .AxiIdWidth  ( Cfg.AxiIdWidthSlvPorts ),
       .axi_req_t   ( req_t                  ),
       .axi_resp_t  ( resp_t                 ),
       .Resp        ( axi_pkg::RESP_DECERR   ),
-      .ATOPs       ( ATOPs                  ),
       .MaxTrans    ( 4                      )   // Minimize resource usage for error responses
     ) i_axi_err_slv (
       .clk_i,   // Clock
@@ -242,7 +239,6 @@ assign slv_resps[i][cfg_NoMstPorts] = '0;
       .slv_req_i  ( slv_reqs[i][Cfg.NoMstPorts]   ),
       .slv_resp_o ( slv_resps[i][cfg_NoMstPorts]  )
     );
-    */
   end
 
   // TODO: Implement crossbar connections with pipeline stages
@@ -251,6 +247,24 @@ assign slv_resps[i][cfg_NoMstPorts] = '0;
     for (genvar j = 0; j < Cfg.NoMstPorts; j++) begin : gen_xbar_mst_cross
       if (Connectivity[i][j]) begin : gen_connection
         // TODO: Add pipeline stages for timing optimization
+        //axi_multicut #(
+        //  .NoCuts     ( Cfg.PipelineStages ),
+        //  //.NoCuts     ( 'd0 ),
+        //  .aw_chan_t  ( aw_chan_t          ),
+        //  .w_chan_t   ( w_chan_t           ),
+        //  .b_chan_t   ( b_chan_t           ),
+        //  .ar_chan_t  ( ar_chan_t          ),
+        //  .r_chan_t   ( r_chan_t           ),
+        //  .axi_req_t  ( req_t              ),
+        //  .axi_resp_t ( resp_t             )
+        //) i_axi_multicut_xbar_pipeline (
+        //  .clk_i,
+        //  .rst_ni,
+        //  .slv_req_i  ( slv_reqs[i][j]         ),
+        //  .slv_resp_o ( slv_resps[i][j]        ),
+        //  .mst_req_o  ( mst_ports_req_o[j][i]  ),
+        //  .mst_resp_i ( mst_ports_resp_i[j][i] )
+        //);
         axi_multicut #(
           //.NoCuts     ( Cfg.PipelineStages ),
           .NoCuts     ( 'd0 ),
@@ -270,25 +284,26 @@ assign slv_resps[i][cfg_NoMstPorts] = '0;
           .mst_resp_i ( mst_ports_resp_i[j][i] )
         );
 
+
       end else begin : gen_no_connection
         // TODO: Handle disconnected paths
         // Tie off unused master port connections
         assign mst_ports_req_o[j][i] = '0;
 
         // Provide error response for disconnected slave lanes
-        axi_err_slv #(
-          .AxiIdWidth ( Cfg.AxiIdWidthSlvPorts  ),
-          .axi_req_t  ( req_t                   ),
-          .axi_resp_t ( resp_t                  ),
-          .Resp       ( axi_pkg::RESP_DECERR    ),
-          .ATOPs      ( ATOPs                   ),
-          .MaxTrans   ( 1                       )
+        axi_xbar_default_slave #(
+          .AxiIdWidth  ( Cfg.AxiIdWidthSlvPorts ),
+          .axi_req_t   ( req_t                  ),
+          .axi_resp_t  ( resp_t                 ),
+          .Resp        ( axi_pkg::RESP_DECERR   ),
+          .MaxTrans    ( 1                      )   // Minimize resource usage for error responses
         ) i_axi_err_slv (
-          .clk_i,
-          .rst_ni,
-          .test_i,
-          .slv_req_i  ( slv_reqs[i][j]  ),
-          .slv_resp_o ( slv_resps[i][j] )
+          .clk_i,   // Clock
+          .rst_ni,  // Asynchronous reset active low
+          .test_i,  // Testmode enable
+          // slave port
+          .slv_req_i  ( slv_reqs[i][i]   ),
+          .slv_resp_o ( slv_resps[i][j]  )
         );
       end
     end

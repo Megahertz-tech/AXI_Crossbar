@@ -40,7 +40,7 @@ module axi_xbar_wrapper
   typedef logic [Cfg.AxiDataWidth/8     -1:0] strb_t;
   typedef logic [AXI_USER_WIDTH         -1:0] user_t;
 
-  // TODO: Define AXI channel types using macros
+  //  Define AXI channel types using macros
   `AXI_TYPEDEF_AW_CHAN_T(mst_aw_chan_t, addr_t, id_mst_t, user_t)
   `AXI_TYPEDEF_AW_CHAN_T(slv_aw_chan_t, addr_t, id_slv_t, user_t)
   `AXI_TYPEDEF_W_CHAN_T(w_chan_t, data_t, strb_t, user_t)
@@ -55,46 +55,24 @@ module axi_xbar_wrapper
   `AXI_TYPEDEF_RESP_T(mst_resp_t, mst_b_chan_t, mst_r_chan_t)
   `AXI_TYPEDEF_RESP_T(slv_resp_t, slv_b_chan_t, slv_r_chan_t)
 
-  // TODO: Implement interface conversion logic
+  //  Implement interface conversion logic
   mst_req_t   [Cfg.NoMstPorts-1:0]  mst_reqs;
   mst_resp_t  [Cfg.NoMstPorts-1:0]  mst_resps;
   slv_req_t   [Cfg.NoSlvPorts-1:0]  slv_reqs;
   slv_resp_t  [Cfg.NoSlvPorts-1:0]  slv_resps; 
-    /*
-  slv_req_t   [Cfg.NoMstPorts-1:0]  mst_reqs;
-  slv_resp_t  [Cfg.NoMstPorts-1:0]  mst_resps;
-  mst_req_t   [Cfg.NoSlvPorts-1:0]  slv_reqs;
-  mst_resp_t  [Cfg.NoSlvPorts-1:0]  slv_resps;
-  */
 
   // Convert from struct-based to interface-based connections
 
   for (genvar i = 0; i < Cfg.NoMstPorts; i++) begin : gen_assign_mst
     `AXI_ASSIGN_FROM_REQ(mst_ports[i], mst_reqs[i])
-    //`AXI_ASSIGN_TO_REQ(mst_reqs[i], mst_ports[i])
     `AXI_ASSIGN_TO_RESP(mst_resps[i], mst_ports[i])
-    //`AXI_ASSIGN_FROM_RESP(mst_ports[i], mst_resps[i])
   end
   for (genvar i = 0; i < Cfg.NoSlvPorts; i++) begin : gen_assign_slv
     `AXI_ASSIGN_TO_REQ(slv_reqs[i], slv_ports[i])
-        //assign slv_ports[i].aw_ready = slv_resps[i].aw_ready;
-        //assign slv_ports[i].w_ready = slv_resps[i].w_ready;
-        //assign slv_ports[i].b_valid = slv_resps[i].b_valid;
-        //assign slv_ports[i].b_id = slv_resps[i].b.id;
-        //assign slv_ports[i].b_resp = slv_resps[i].b.resp;
-        //assign slv_ports[i].b_user = slv_resps[i].b.user;
-        //assign slv_ports[i].ar_ready = slv_resps[i].ar_ready;
-        //assign slv_ports[i].r_valid = slv_resps[i].r_valid;
-        //assign slv_ports[i].r_id = slv_resps[i].r.id;
-        //assign slv_ports[i].r_data = slv_resps[i].r.data;
-        //assign slv_ports[i].r_resp = slv_resps[i].r.resp;
-        //assign slv_ports[i].r_last = slv_resps[i].r.last;
-        //assign slv_ports[i].r_user = slv_resps[i].r.user;
     `AXI_ASSIGN_FROM_RESP(slv_ports[i], slv_resps[i])
-    //`AXI_ASSIGN_TO_RESP(slv_resps[i], slv_ports[i])
   end
 
-  // TODO: Instantiate the main crossbar
+  //  Instantiate the main crossbar
   //{{{ 
   axi_xbar #(
     .Cfg  (Cfg),

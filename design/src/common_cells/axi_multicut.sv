@@ -28,9 +28,9 @@ module axi_multicut #(
   input  logic      clk_i,        // Clock
   input  logic      rst_ni,       // Asynchronous reset, active low
   input  axi_req_t  slv_req_i,    // Slave request input
-  output axi_resp_t slv_resp_o,   // Slave response output
-  output axi_req_t  mst_req_o,    // Master request output
-  input  axi_resp_t mst_resp_i    // Master response input
+  input  axi_resp_t mst_resp_i,   // Master response input
+  output axi_req_t  mst_req_o,    // Master response output
+  output axi_resp_t slv_resp_o    // Slave request output
 );
 
   // TODO: Handle the case of no cuts (direct connection)
@@ -44,16 +44,19 @@ module axi_multicut #(
     axi_resp_t [NoCuts:0] cut_resp;
 
     // Connect endpoints
-    assign cut_req[0] = slv_req_i;
-    assign slv_resp_o = cut_resp[0];
-    assign mst_req_o = cut_req[NoCuts];
-    assign cut_resp[NoCuts] = mst_resp_i;
+    //assign cut_req[0] = slv_req_i;
+    //assign slv_resp_o = cut_resp[0];
+    //assign mst_req_o = cut_req[NoCuts];
+    //assign cut_resp[NoCuts] = mst_resp_i;
+    assign cut_req[0]   = slv_req_i;
+    assign cut_resp[0]  = mst_resp_i;
+    assign slv_resp_o   = cut_resp[NoCuts];
+    assign mst_req_o    = cut_req[NoCuts];
 
     // TODO: Generate pipeline cuts
       logic  b_ready[NoCuts];
       logic  r_ready[NoCuts];
     for (genvar i = 0; i < NoCuts; i++) begin : gen_pipeline
-        // AW channel cut
         axi_pipeline #(
             .Bypass     (       1'b0 ),
             .aw_chan_t  (  aw_chan_t ),
@@ -67,89 +70,10 @@ module axi_multicut #(
             .clk_i,
             .rst_ni,
             .slv_req_i  ( cut_req[i]    ),
-            .slv_resp_o ( cut_resp[i]   ),
+            .mst_resp_i ( cut_resp[i]   ),
             .mst_req_o  ( cut_req[i+1]  ),
-            .mst_resp_i ( cut_resp[i+1] )
+            .slv_resp_o ( cut_resp[i+1] )
         );  
-
-
-      /*
-      spill_register #(
-        .T      ( aw_chan_t ),
-        .Bypass ( 1'b0      )
-      ) i_aw_cut (
-        .clk_i,
-        .rst_ni,
-        .valid_i ( cut_req[i].aw_valid    ),
-        .ready_o ( cut_resp[i].aw_ready   ),
-        .data_i  ( cut_req[i].aw          ),
-        .valid_o ( cut_req[i+1].aw_valid  ),
-        .ready_i ( cut_resp[i+1].aw_ready ),
-        .data_o  ( cut_req[i+1].aw        )
-      );
-
-      // W channel cut
-      spill_register #(
-        .T      ( w_chan_t ),
-        .Bypass ( 1'b0     )
-      ) i_w_cut (
-        .clk_i,
-        .rst_ni,
-        .valid_i ( cut_req[i].w_valid    ),
-        .ready_o ( cut_resp[i].w_ready   ),
-        .data_i  ( cut_req[i].w          ),
-        .valid_o ( cut_req[i+1].w_valid  ),
-        .ready_i ( cut_resp[i+1].w_ready ),
-        .data_o  ( cut_req[i+1].w        )
-      );
-
-      // B channel cut (response direction)
-      spill_register #(
-        .T      ( b_chan_t ),
-        .Bypass ( 1'b0     )
-      ) i_b_cut (
-        .clk_i,
-        .rst_ni,
-        .valid_i ( cut_resp[i+1].b_valid ),
-        .ready_o ( b_ready[i] ),
-        //.ready_o ( cut_resp[i+1].b_ready ),
-        .data_i  ( cut_resp[i+1].b       ),
-        .valid_o ( cut_resp[i].b_valid   ),
-        .ready_i ( cut_req[i].b_ready    ),
-        .data_o  ( cut_resp[i].b         )
-      );
-
-      // AR channel cut
-      spill_register #(
-        .T      ( ar_chan_t ),
-        .Bypass ( 1'b0      )
-      ) i_ar_cut (
-        .clk_i,
-        .rst_ni,
-        .valid_i ( cut_req[i].ar_valid    ),
-        .ready_o ( cut_resp[i].ar_ready   ),
-        .data_i  ( cut_req[i].ar          ),
-        .valid_o ( cut_req[i+1].ar_valid  ),
-        .ready_i ( cut_resp[i+1].ar_ready ),
-        .data_o  ( cut_req[i+1].ar        )
-      );
-
-      // R channel cut (response direction)
-      spill_register #(
-        .T      ( r_chan_t ),
-        .Bypass ( 1'b0     )
-      ) i_r_cut (
-        .clk_i,
-        .rst_ni,
-        .valid_i ( cut_resp[i+1].r_valid ),
-        .ready_o ( r_ready[i] ),
-        //.ready_o ( cut_resp[i+1].r_ready ),
-        .data_i  ( cut_resp[i+1].r       ),
-        .valid_o ( cut_resp[i].r_valid   ),
-        .ready_i ( cut_req[i].r_ready    ),
-        .data_o  ( cut_resp[i].r         )
-      );
-      */
     end
   end
 

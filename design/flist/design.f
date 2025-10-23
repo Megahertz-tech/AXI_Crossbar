@@ -24,6 +24,7 @@
     $CB_PRJ_ROOT/design/src/common_cells/fifo_v4.sv  \ 
     $CB_PRJ_ROOT/design/src/common_cells/rr_arb_tree.sv  \ 
     $CB_PRJ_ROOT/design/src/common_cells/fair_round_robin_arbiter.sv  \ 
+    $CB_PRJ_ROOT/design/src/common_cells/pipeline_register.sv  \ 
 //    $CB_PRJ_ROOT/design/src/common_cells/spill_register.sv  \ 
     $CB_PRJ_ROOT/design/src/axi_spill_register.sv  \
     $CB_PRJ_ROOT/design/src/axi_pipeline.sv  \ 
@@ -33,7 +34,9 @@
     $CB_PRJ_ROOT/design/src/axi_id_in_flight_array.sv  \ 
     $CB_PRJ_ROOT/design/src/axi_demux_core.sv  \ 
     $CB_PRJ_ROOT/design/src/axi_mux.sv  \ 
-    $CB_PRJ_ROOT/design/src/axi_xbar.sv  \ 
+    $CB_PRJ_ROOT/design/src/axi_atomic_filter.sv  \ 
+    $CB_PRJ_ROOT/design/src/axi_xbar_default_slave.sv  \ 
     $CB_PRJ_ROOT/design/src/axi_xbar_unmuxed.sv  \ 
+    $CB_PRJ_ROOT/design/src/axi_xbar.sv  \ 
     $CB_PRJ_ROOT/design/src/axi_xbar_wrapper.sv  \ 
 

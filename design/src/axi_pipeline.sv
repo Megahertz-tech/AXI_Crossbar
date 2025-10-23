@@ -29,9 +29,11 @@
     input  axi_resp_t mst_resp_i
  );
     // a spill register for each channel
-  spill_register #(
+   
+    
+  pipeline_register #(
     .T       ( aw_chan_t ),
-    .Bypass  ( Bypass  )
+    .Bypass  ( Bypass    )
   ) i_reg_aw (
     .clk_i   ( clk_i               ),
     .rst_ni  ( rst_ni              ),
@@ -43,9 +45,9 @@
     .data_o  ( mst_req_o.aw        )
   );
 
-  spill_register #(
+  pipeline_register #(
     .T       ( w_chan_t ),
-    .Bypass  ( Bypass  )
+    .Bypass  ( Bypass   )
   ) i_reg_w  (
     .clk_i   ( clk_i              ),
     .rst_ni  ( rst_ni             ),
@@ -57,9 +59,9 @@
     .data_o  ( mst_req_o.w        )
   );
 
-  spill_register #(
+  pipeline_register #(
     .T       ( b_chan_t ),
-    .Bypass  ( Bypass  )
+    .Bypass  ( Bypass   )
   ) i_reg_b  (
     .clk_i   ( clk_i              ),
     .rst_ni  ( rst_ni             ),
@@ -71,9 +73,9 @@
     .data_o  ( slv_resp_o.b       )
   );
 
-  spill_register #(
+  pipeline_register #(
     .T       ( ar_chan_t ),
-    .Bypass  ( Bypass  )
+    .Bypass  ( Bypass    )
   ) i_reg_ar (
     .clk_i   ( clk_i               ),
     .rst_ni  ( rst_ni              ),
@@ -85,9 +87,9 @@
     .data_o  ( mst_req_o.ar        )
   );
 
-  spill_register #(
+  pipeline_register #(
     .T       ( r_chan_t ),
-    .Bypass  ( Bypass  )
+    .Bypass  ( Bypass   )
   ) i_reg_r  (
     .clk_i   ( clk_i              ),
     .rst_ni  ( rst_ni             ),

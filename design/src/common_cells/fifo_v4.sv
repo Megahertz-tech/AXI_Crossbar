@@ -43,17 +43,6 @@ module fifo_v4 #(
     //assign data_o  = mem[out_ptr];
     assign usage_o = status_cnt;
     
-    /*
-    logic data_i_delay;
-    always_ff @(posedge clk_i or negedge rst_ni) begin
-      if (!rst_ni) begin
-        data_i_delay <= '0;
-      end else begin
-        data_i_delay <= data_i;
-      end
-    end
-    */
-
     always_ff @(posedge clk_i or negedge rst_ni) begin
       if (!rst_ni) begin
         //initiate

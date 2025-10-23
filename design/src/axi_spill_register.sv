@@ -29,7 +29,6 @@ module spill_register #(
 
     // lock data_o when ready_i is nor asserted. 
     logic   a_fill;
-    //logic   a_fill, a_drain;
     logic   a_full_q;
     T       a_data_q;
 
@@ -43,13 +42,13 @@ module spill_register #(
     always_ff @(posedge clk_i or negedge rst_ni) begin : ps_a_full
       if (!rst_ni)
         a_full_q <= 0;
-      else //if (a_fill || a_drain)
+      else 
         a_full_q <= a_fill;
     end
     
     
 
-    assign a_fill   = valid_i; 
+    assign a_fill  = valid_i; 
 
     assign ready_o = ready_i;
     assign valid_o = valid_i && a_full_q ;

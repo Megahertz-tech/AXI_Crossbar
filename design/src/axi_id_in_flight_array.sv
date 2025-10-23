@@ -83,16 +83,17 @@ module axi_id_in_flight_array #(
             .WIDTH           (CntWidth      ),
             .STICKY_EN       ( 1'b0         )
         ) i_in_flight_cnt (
-            .clk_i      ( clk_i     ),
-            .rst_ni     ( rst_ni    ),
-            .clear_i    ( 1'b0      ),
-            .en_i       ( count_en    ),
-            .load_i     ( 1'b0      ),
-            .down_i     ( count_down  ),
-            .d_i        ( {CntWidth{1'b0}}     ),
-            .q_o        ( id_in_flight_cnts[i] ),
-            .overflow_o ( /* not use */ )
+            .clk_i      ( clk_i                 ),
+            .rst_ni     ( rst_ni                ),
+            .clear_i    ( 1'b0                  ),
+            .en_i       ( count_en              ),
+            .load_i     ( 1'b0                  ),
+            .down_i     ( count_down            ),
+            .d_i        ( {CntWidth{1'b0}}      ),
+            .q_o        ( id_in_flight_cnts[i]  ),
+            .overflow_o ( /* not use */         )
         );
+
         assign sel_taken[i] = |(id_in_flight_cnts[i]);
     end 
 
