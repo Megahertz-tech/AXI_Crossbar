@@ -36,6 +36,8 @@ sim_no_r:
 	./run_test -test ${TESTNAME} -sim rc -gui gui -en_slv_b 15 &
 sim_r: 
 	./run_test -test ${TESTNAME} -sim rc -gui gui -en_slv_b 15 -en_slv_r 15 &
+sim_atomic_no_b: 
+	./run_test -test xbar_atomic_transaction_test_case -sim rc -gui gui -en_slv_r 15 &
 sim_atomic: 
 	./run_test -test xbar_atomic_transaction_test_case -sim rc -gui gui -en_slv_b 15 -en_slv_r 15 &
 sim_err:

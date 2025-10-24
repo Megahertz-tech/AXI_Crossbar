@@ -36,7 +36,27 @@ module axi_demux_core #(
 );
     localparam int unsigned NoIds     = 2**AxiLookBits;
     localparam int unsigned CntWidth  = axi_math_pkg::is_pow2(NoIds) ? axi_math_pkg::idx_width(MaxTrans) + 1 : axi_math_pkg::idx_width(MaxTrans);
-
+/*
+  demux topology                                                        
+     ------------                                             ||                  
+ aw  | aw id    |                                             ||                  
+ --> | in-flight|  ==>     ==>     ==>   ==>       ==>  ==>   ||                  
+     | array    |                                             ||                  
+     ------------                                             ||            
+                           --------------                     ||                              
+  w                        | fifo(w)    |                     ||                               
+ -->     -->       -->     | destination| ==>       ==>  ==>  ||                               
+  b                        --------------     ---------       ||                                         
+ <--     <--       <--         <--         <--| b arb |  <==  ||      
+                                              ---------       ||      
+  r                                           ---------       ||      
+ <--     <--       <--         <--         <--| r arb |  <==  ||                                      
+     ------------                             ---------       ||                                      
+ ar  | ar id    |                                             ||                             
+ --> | in-flight|  ==>     ==>     ==>   ==>       ==>  ==>   ||                                                                      
+     | array    |                                             ||                               
+     ------------
+*/
 /* The Max number of transaction in flight is defined by MaxTrans 
    This module maintains a counter for the transaction in flight (aw + ar) 
 */
@@ -45,20 +65,21 @@ module axi_demux_core #(
     logic                tr_in_flight_full;
     assign tr_in_flight_cnt     = aw_in_flight_cnt + ar_in_flight_cnt;
     assign tr_in_flight_full    = (tr_in_flight_cnt == MaxTrans); 
-    typedef enum logic [2:0] {
-        AW_IDLE         = 3'b001, 
-        AW_APPROVE      = 3'b010, // non-atomic aw
-        AW_ATOP_APPROVE = 3'b100  // atomic aw 
+    typedef enum logic [3:0] {
+        AW_IDLE                 = 4'b0001, 
+        AW_APPROVE              = 4'b0010, // non-atomic aw
+        AW_ATOP_STORE_APPROVE   = 4'b0100, // atomic aw store
+        AW_ATOP_OTHER_APPROVE   = 4'b1000  // atomic aw load, swap, compare
     } aw_state_e;
     typedef enum logic [2:0] {
         AR_IDLE         = 3'b001,
         AR_APPROVE      = 3'b010, // ar
         AR_ATOP_APPROVE = 3'b100  // atomic aw 
     } ar_state_e;
-    enum { AW_I_BIT = 0,        AW_A_BIT = 1,        AW_AA_BIT = 2    } aw_state_bit;
-    enum { AR_I_BIT = 0,        AR_A_BIT = 1,        AR_AA_BIT = 2    } ar_state_bit_e;
+    enum { AW_I_BIT = 0, AW_A_BIT = 1, AW_ASA_BIT = 2, AW_AOA_BIT = 3   } aw_state_bit;
+    enum { AR_I_BIT = 0, AR_A_BIT = 1, AR_AA_BIT  = 2                   } ar_state_bit_e;
     aw_state_e     aw_cur_sta,          aw_nxt_sta;
-    ar_state_e              ar_cur_sta,     ar_nxt_sta;
+    ar_state_e     ar_cur_sta,          ar_nxt_sta;
 
 //{{{ AW channel
 /*  1.  When the interconnect is required to determine the destination address space or 
@@ -107,15 +128,21 @@ module axi_demux_core #(
         unique case(1'b1)
             aw_cur_sta[AW_I_BIT]: begin //AW_IDLE
                 if(slv_req_i.aw_valid && (!tr_in_flight_full)) begin
-                    if((slv_req_i.aw.atop == 6'b00_0000) || slv_req_i.aw.atop[5:4] == 2'b01) begin //non-atomic, atomic store transaction
+                    if(slv_req_i.aw.atop[5:4] == 2'b00) begin // non-atomic aw
                         if( (!lookup_aw_sel_taken) || (loopup_aw_sel == slv_aw_select_i)) begin
                             aw_nxt_sta = AW_APPROVE;
+                            aw_sel_nxt = slv_aw_select_i;
+                        end
+                    end
+                    else if(slv_req_i.aw.atop[5:4] == 2'b01) begin //atomic store transaction
+                        if( (!lookup_aw_sel_taken) || (loopup_aw_sel == slv_aw_select_i)) begin
+                            aw_nxt_sta = AW_ATOP_STORE_APPROVE;
                             aw_sel_nxt = slv_aw_select_i;
                         end
                     end else begin
                         if(tr_in_flight_cnt < (MaxTrans-1)) begin //must have two available room for atomic load, swap and compare transaction
                             if((!(lookup_aw_sel_taken | lookup_aw_sel_from_ar_taken)) && ar_cur_sta == AR_IDLE) begin
-                                aw_nxt_sta              = AW_ATOP_APPROVE;
+                                aw_nxt_sta              = AW_ATOP_OTHER_APPROVE;
                                 aw_sel_nxt              = slv_aw_select_i;
                                 ar_atomic_sel_nxt       = slv_aw_select_i;                   //  for atomic transaciton
                                 ar_atomic_push_id_nxt   = slv_req_i.aw.id[0 +: AxiLookBits]; //  for atomic transaciton
@@ -130,7 +157,13 @@ module axi_demux_core #(
                     aw_push_en      = 1'b1;
                 end
             end
-            aw_cur_sta[AW_AA_BIT]: begin // AW_ATOP_APPROVE
+            aw_cur_sta[AW_ASA_BIT]: begin // AW_ATOP_STORE_APPROVE
+                if(mst_resps_i[aw_sel_cur].aw_ready) begin
+                    aw_nxt_sta      = AW_IDLE;
+                    aw_push_en      = 1'b1;
+                end
+            end
+            aw_cur_sta[AW_AOA_BIT]: begin // AW_ATOP_OTHER_APPROVE
                 if(mst_resps_i[aw_sel_cur].aw_ready) begin
                     aw_nxt_sta      = AW_IDLE;
                     aw_push_en      = 1'b1;
@@ -224,7 +257,7 @@ module axi_demux_core #(
         endcase
     end
     logic   w_push_en; 
-    assign  w_push_en = (aw_cur_sta == AW_ATOP_APPROVE) ? 1'b0 : aw_push_en; 
+    assign  w_push_en = ((aw_cur_sta == AW_ATOP_STORE_APPROVE) || (aw_cur_sta == AW_ATOP_OTHER_APPROVE)) ? 1'b0 : aw_push_en; 
     fifo_v3 #(
         .FALL_THROUGH       (0       ),
         .DEPTH              (MaxTrans),
@@ -312,14 +345,14 @@ module axi_demux_core #(
         ar_push_id_nxt  = ar_push_id_cur;
         unique case(1'b1)
             ar_cur_sta[AR_I_BIT]: begin // AR_IDLE
-                if(slv_req_i.ar_valid && (!tr_in_flight_full) && aw_cur_sta != AW_ATOP_APPROVE) begin
+                if(slv_req_i.ar_valid && (!tr_in_flight_full) && (aw_cur_sta != AW_ATOP_OTHER_APPROVE)) begin
                     if((!lookup_ar_sel_taken) || (loopup_ar_sel == slv_ar_select_i))begin
                         ar_nxt_sta      = AR_APPROVE;
                         ar_sel_nxt      = slv_ar_select_i;
                         ar_push_id_nxt  = slv_req_i.ar.id[0 +: AxiLookBits];
                     end
                 end
-                else if(aw_cur_sta == AW_ATOP_APPROVE) begin 
+                else if(aw_cur_sta == AW_ATOP_OTHER_APPROVE) begin 
                     ar_nxt_sta          = AR_ATOP_APPROVE;
                     ar_sel_nxt          = ar_atomic_sel_cur;
                     ar_push_id_nxt      = ar_atomic_push_id_cur;
@@ -331,7 +364,7 @@ module axi_demux_core #(
                     ar_push_en      = 1'b1;
                 end
             end
-            ar_cur_sta[AR_AA_BIT]: begin // AW_ATOP_APPROVE
+            ar_cur_sta[AR_AA_BIT]: begin // AR_ATOP_APPROVE
                 if(aw_cur_sta == AW_IDLE) begin
                     ar_nxt_sta      = AR_IDLE;
                     ar_push_en      = 1'b1;

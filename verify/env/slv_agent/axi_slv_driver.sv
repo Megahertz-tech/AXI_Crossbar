@@ -22,6 +22,7 @@ typedef virtual v_axi_inf_slv #(
         .AXI_USER_WIDTH (tb_xbar_param_pkg::AXI_USER_WIDTH_IN_USE)
     )   vif;
     parameter int unsigned MaxTrans = tb_xbar_param_pkg::TB_MAX_SLAVE_TRANS;
+    //parameter int unsigned MaxTrans = 10;
     parameter int unsigned ID_WIDTH = tb_xbar_param_pkg::AXI_MASTER_ID_WIDTH_IN_USE;
 
     bit enable_b_channel = 1'b1;
@@ -67,15 +68,15 @@ typedef virtual v_axi_inf_slv #(
     //{{{ reset_if
     virtual task reset_if();
         `uvm_info("SLV driver"," reset inf", UVM_LOW)
-        //vif.Slave_cb.aw_ready  <= '0;
-        vif.Slave_cb.aw_ready  <= '1;
+        vif.Slave_cb.aw_ready  <= '0;
+        //vif.Slave_cb.aw_ready  <= '1;
         vif.Slave_cb.w_ready   <= '0;
         vif.Slave_cb.b_id      <= '0;
         vif.Slave_cb.b_resp    <= '0;
         vif.Slave_cb.b_user    <= '0;
         vif.Slave_cb.b_valid   <= '0;
-        //vif.Slave_cb.ar_ready  <= '0;
-        vif.Slave_cb.ar_ready  <= '1;
+        vif.Slave_cb.ar_ready  <= '0;
+        //vif.Slave_cb.ar_ready  <= '1;
         vif.Slave_cb.r_id      <= '0;
         vif.Slave_cb.r_data    <= '0;
         vif.Slave_cb.r_resp    <= '0;

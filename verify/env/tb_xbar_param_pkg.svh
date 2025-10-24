@@ -32,8 +32,6 @@ package tb_xbar_param_pkg;
 
     parameter bit           TB_ADDR_OVERFLOW = 'b0;
     //}}}
-    //parameter time  ; 
-    //parameter time  ; 
     //parameter int unsigned  ; 
     
 

@@ -27,6 +27,7 @@ class axi_mst_regular_sequence extends uvm_sequence #(axi_mst_seq_item);
             `uvm_create(req)
             No_slice = $urandom_range(cfg.ADDR_SLICES-1,0);
             addr_off = cfg.ADDR_OFFSET * No_slice;
+            //addr_off = cfg.ADDR_OFFSET * 0;
             if(!req.randomize() with {
                 access_type == AXI_WRITE_ACCESS;
                 aw_addr == 8 * i + addr_off;
@@ -35,14 +36,16 @@ class axi_mst_regular_sequence extends uvm_sequence #(axi_mst_seq_item);
             req.set_one_transfer_transaction_awr();
             req.set_one_transfer_transaction_w();
             rand_delay = $urandom_range(20,2);
-            #(rand_delay * 10ns);
+            if(i==0) #25ns;
+            else     #(rand_delay * 10ns);
             `uvm_send(req)
         end
-        #100ns;
+        #300ns;
         for(int i=0; i<10; i++) begin
             `uvm_create(req)
             No_slice = $urandom_range(cfg.ADDR_SLICES-1,0);
             addr_off = cfg.ADDR_OFFSET * No_slice;
+            //addr_off = cfg.ADDR_OFFSET * 1;
             if(!req.randomize() with {
                 access_type == AXI_READ_ACCESS;
                 ar_addr == 8 * i + addr_off;
@@ -50,7 +53,8 @@ class axi_mst_regular_sequence extends uvm_sequence #(axi_mst_seq_item);
             }) `uvm_error(get_type_name(), "randomization failure for req.")
             req.set_one_transfer_transaction_awr();
             rand_delay = $urandom_range(20,2);
-            #(rand_delay * 10ns);
+            if(i==0) #25ns;
+            else     #(rand_delay * 10ns);
             `uvm_send(req)
         end
         //if(p_sequencer==null) `uvm_error("MST_SEQ","p_sequencer is null !!!!!!")

@@ -19,11 +19,11 @@ module axi_atomic_filter #(
         filtered_req_o = slv_req_i;
         if(slv_req_i.aw_valid && (!(slv_req_i.aw.atop[5:4] == 2'b00))) begin
             if(!(slv_req_i.aw.atop[5:4] == 2'b01)) begin
-                filtered_req_o.ar.id = slv_req_i.ar.id;
+                filtered_req_o.ar.id = slv_req_i.aw.id;
                 if(slv_req_i.aw.atop[5:4] == 2'b11) begin
-                    filtered_req_o.ar.len = slv_req_i.ar.len >> 1;
+                    filtered_req_o.ar.len = slv_req_i.aw.len >> 1;
                 end else begin
-                    filtered_req_o.ar.len = slv_req_i.ar.len;
+                    filtered_req_o.ar.len = slv_req_i.aw.len;
                 end
             end
         end

@@ -266,6 +266,7 @@ class axi_mst_driver extends uvm_driver #(axi_mst_seq_item);
         vif.Master_cb.ar_qos    <= item.ar_qos   ;
         vif.Master_cb.ar_region <= item.ar_region;
         wait(vif.ar_ready);
+        #500ps;
         //if(vif.Master_cb.ar_ready !== 1'b1) @ (vif.Master_cb iff vif.Master_cb.ar_ready === 1'b1);
         @ (vif.Master_cb);
         vif.Master_cb.ar_id     <= '0 ;
