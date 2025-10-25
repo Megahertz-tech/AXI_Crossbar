@@ -5,7 +5,7 @@ This is a project from Professer Hao Zheng of the UCF
 ``` source bootenv.csh ```
 ## 2. run 
 ``` cd verify/run```
-``` make clear && make run ```
+``` make clear && make sim ```
 the output is in verify/run/run_result
 
 
